@@ -1,10 +1,11 @@
-package ro.andrei.ariciu
+package ro.andrei.ariciu.feature.locationpicker.geometry
 
 import kotlin.math.PI
 import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
+import ro.andrei.ariciu.feature.locationpicker.model.SelectedCoordinates
 
 private const val EARTH_RADIUS_METERS = 6_371_000.0
 private const val RADIUS_BOUNDARY_SEGMENTS = 64

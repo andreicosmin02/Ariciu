@@ -2,7 +2,7 @@
 
 ## Current milestone
 
-The MapLibre location-selection feasibility spike is complete.
+The MapLibre location-selection feasibility spike and result contract are complete.
 
 ## Implemented behavior
 
@@ -14,11 +14,14 @@ The MapLibre location-selection feasibility spike is complete.
 - Plain Kotlin builds a closed 64-segment spherical radius boundary (65 coordinates including the repeated first point).
 - A map-boundary adapter converts that ring to a SpatialK GeoJSON polygon.
 - MapLibre renders the polygon with a low-opacity fill and a 2dp outline. It updates after a radius change or settled camera-center change.
+- `SelectedLocation` is a plain application-owned result containing the selected latitude, longitude, and radius.
+- The Material 3 **Use this location** button emits that result through `LocationPickerScreen`'s required callback.
+- `MainActivity` currently supplies a no-op callback because a reminder editor and navigation flow do not exist yet.
 
 ## Important boundaries
 
 - MapLibre is the renderer; OpenFreeMap currently provides the style and tiles.
-- `SelectedCoordinates`, radius selection, and radius geometry are application-owned.
+- `SelectedCoordinates`, `SelectedLocation`, radius selection, and radius geometry are application-owned.
 - SpatialK and MapLibre types are confined to the map-integration boundary.
 - The map needs internet for uncached or new areas.
 - GPS and Android location runtime permissions are not implemented.
@@ -26,15 +29,16 @@ The MapLibre location-selection feasibility spike is complete.
 
 ## Relevant files
 
-- Screen: `app/src/main/java/ro/andrei/ariciu/LocationPickerScreen.kt`
+- Screen: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/ui/LocationPickerScreen.kt`
 - Activity entry point: `app/src/main/java/ro/andrei/ariciu/MainActivity.kt`
-- Coordinates: `app/src/main/java/ro/andrei/ariciu/SelectedCoordinates.kt`
-- Coordinate formatting: `app/src/main/java/ro/andrei/ariciu/SelectedCoordinatesFormatter.kt`
-- Radius selection: `app/src/main/java/ro/andrei/ariciu/RadiusSelection.kt`
-- Radius geometry: `app/src/main/java/ro/andrei/ariciu/RadiusGeometry.kt`
-- GeoJSON adapter: `app/src/main/java/ro/andrei/ariciu/RadiusMapGeometry.kt`
-- Unit tests: `app/src/test/java/ro/andrei/ariciu/`
-- Compose instrumentation test: `app/src/androidTest/java/ro/andrei/ariciu/ExampleInstrumentedTest.kt`
+- Coordinates: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/model/SelectedCoordinates.kt`
+- Picker result: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/model/SelectedLocation.kt`
+- Coordinate formatting: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/ui/SelectedCoordinatesFormatter.kt`
+- Radius selection: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/ui/RadiusSelection.kt`
+- Radius geometry: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/geometry/RadiusGeometry.kt`
+- GeoJSON adapter: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/map/RadiusMapGeometry.kt`
+- Unit tests: `app/src/test/java/ro/andrei/ariciu/feature/locationpicker/`
+- Compose instrumentation test: `app/src/androidTest/java/ro/andrei/ariciu/feature/locationpicker/ui/LocationPickerScreenTest.kt`
 - Manifest: `app/src/main/AndroidManifest.xml`
 - App dependencies: `app/build.gradle.kts`
 - Version catalog: `gradle/libs.versions.toml`
@@ -55,9 +59,4 @@ Re-run these before relying on this snapshot.
 
 Reminder Creation.
 
-Immediate next step:
-
-- introduce a plain `SelectedLocation` result containing `latitude`, `longitude`, and `radiusMeters`;
-- add a Material 3 **Use this location** button;
-- emit the current value through a callback;
-- do not add navigation, Room, GPS, permissions, or geofencing in that step.
+Immediate next step: create the reminder editor shell.

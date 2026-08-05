@@ -1,4 +1,4 @@
-package ro.andrei.ariciu
+package ro.andrei.ariciu.feature.locationpicker.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -26,6 +27,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import ro.andrei.ariciu.feature.locationpicker.geometry.buildRadiusBoundary
+import ro.andrei.ariciu.feature.locationpicker.map.toGeoJsonPolygon
+import ro.andrei.ariciu.feature.locationpicker.model.SelectedCoordinates
+import ro.andrei.ariciu.feature.locationpicker.model.SelectedLocation
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.const
@@ -44,7 +49,7 @@ private const val BRASOV_DEVELOPMENT_LONGITUDE = 25.6012
 private const val BRASOV_DEVELOPMENT_ZOOM = 13.0
 
 @Composable
-fun LocationPickerScreen() {
+fun LocationPickerScreen(onLocationSelected: (SelectedLocation) -> Unit) {
     val cameraState = rememberCameraState(
         firstPosition = CameraPosition(
             target = Position(
@@ -148,6 +153,20 @@ fun LocationPickerScreen() {
                     .testTag("location_picker_radius_slider")
                     .semantics { contentDescription = "Reminder radius" },
             )
+            Button(
+                onClick = {
+                    onLocationSelected(
+                        SelectedLocation(
+                            latitude = selectedCoordinates.latitude,
+                            longitude = selectedCoordinates.longitude,
+                            radiusMeters = radiusMeters,
+                        )
+                    )
+                },
+                modifier = Modifier.testTag("location_picker_confirm_button"),
+            ) {
+                Text("Use this location")
+            }
         }
     }
 }

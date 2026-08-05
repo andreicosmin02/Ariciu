@@ -1,4 +1,4 @@
-package ro.andrei.ariciu
+package ro.andrei.ariciu.feature.locationpicker.geometry
 
 import kotlin.math.asin
 import kotlin.math.cos
@@ -10,6 +10,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import ro.andrei.ariciu.feature.locationpicker.model.SelectedCoordinates
 
 class RadiusGeometryTest {
     private val brasov = SelectedCoordinates(latitude = 45.6579, longitude = 25.6012)

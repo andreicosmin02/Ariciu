@@ -1,6 +1,7 @@
-package ro.andrei.ariciu
+package ro.andrei.ariciu.feature.locationpicker.ui
 
 import java.util.Locale
+import ro.andrei.ariciu.feature.locationpicker.model.SelectedCoordinates
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

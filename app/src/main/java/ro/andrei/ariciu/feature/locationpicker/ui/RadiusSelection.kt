@@ -1,4 +1,4 @@
-package ro.andrei.ariciu
+package ro.andrei.ariciu.feature.locationpicker.ui
 
 import kotlin.math.roundToInt
 

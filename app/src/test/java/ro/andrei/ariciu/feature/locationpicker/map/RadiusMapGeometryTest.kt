@@ -1,7 +1,9 @@
-package ro.andrei.ariciu
+package ro.andrei.ariciu.feature.locationpicker.map
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import ro.andrei.ariciu.feature.locationpicker.geometry.buildRadiusBoundary
+import ro.andrei.ariciu.feature.locationpicker.model.SelectedCoordinates
 
 class RadiusMapGeometryTest {
     private val center = SelectedCoordinates(latitude = 45.6579, longitude = 25.6012)

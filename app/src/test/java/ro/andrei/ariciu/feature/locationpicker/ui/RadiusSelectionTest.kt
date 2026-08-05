@@ -1,4 +1,4 @@
-package ro.andrei.ariciu
+package ro.andrei.ariciu.feature.locationpicker.ui
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
