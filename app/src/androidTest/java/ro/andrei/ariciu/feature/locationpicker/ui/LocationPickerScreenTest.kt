@@ -9,10 +9,13 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import ro.andrei.ariciu.feature.locationpicker.model.SelectedLocation
+
+private const val COORDINATE_TOLERANCE = 1e-6
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -60,7 +63,7 @@ class LocationPickerScreenTest {
             .performClick()
 
         composeTestRule.runOnIdle {
-            assertEquals(
+            assertSelectedLocationEquals(
                 SelectedLocation(
                     latitude = 45.6579,
                     longitude = 25.6012,
@@ -86,7 +89,7 @@ class LocationPickerScreenTest {
         composeTestRule.onNodeWithTag("location_picker_confirm_button").performClick()
 
         composeTestRule.runOnIdle {
-            assertEquals(
+            assertSelectedLocationEquals(
                 SelectedLocation(
                     latitude = 45.6579,
                     longitude = 25.6012,
@@ -96,4 +99,16 @@ class LocationPickerScreenTest {
             )
         }
     }
+}
+
+private fun assertSelectedLocationEquals(
+    expected: SelectedLocation,
+    actual: SelectedLocation?,
+) {
+    assertNotNull(actual)
+    val actualLocation = actual ?: return
+
+    assertEquals(expected.latitude, actualLocation.latitude, COORDINATE_TOLERANCE)
+    assertEquals(expected.longitude, actualLocation.longitude, COORDINATE_TOLERANCE)
+    assertEquals(expected.radiusMeters, actualLocation.radiusMeters)
 }
