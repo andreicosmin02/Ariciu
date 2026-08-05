@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,6 +57,7 @@ fun LocationPickerScreen() {
             )
         )
     }
+    var radiusMeters by remember { mutableIntStateOf(DEFAULT_RADIUS_METERS) }
 
     LaunchedEffect(cameraState) {
         snapshotFlow { cameraState.isCameraMoving }.collect { isCameraMoving ->
@@ -102,6 +105,19 @@ fun LocationPickerScreen() {
             Text(
                 text = selectedCoordinates.formatLongitude(),
                 modifier = Modifier.testTag("location_picker_longitude"),
+            )
+            Text(
+                text = formatRadiusMeters(radiusMeters),
+                modifier = Modifier.testTag("location_picker_radius_value"),
+            )
+            Slider(
+                value = radiusMeters.toFloat(),
+                onValueChange = { radiusMeters = snapRadiusMeters(it) },
+                valueRange = MIN_RADIUS_METERS.toFloat()..MAX_RADIUS_METERS.toFloat(),
+                steps = RADIUS_SLIDER_STEPS,
+                modifier = Modifier
+                    .testTag("location_picker_radius_slider")
+                    .semantics { contentDescription = "Reminder radius" },
             )
         }
     }

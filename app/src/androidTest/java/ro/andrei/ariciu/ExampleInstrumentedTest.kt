@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -30,5 +32,15 @@ class ExampleInstrumentedTest {
         composeTestRule.onNodeWithTag("location_picker_center_pin").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_latitude").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_longitude").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("location_picker_radius_value").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Radius: 200 m").assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag("location_picker_radius_slider")
+            .assertIsDisplayed()
+            .performSemanticsAction(SemanticsActions.SetProgress) { setProgress ->
+                setProgress(500f)
+            }
+
+        composeTestRule.onNodeWithText("Radius: 500 m").assertIsDisplayed()
     }
 }
