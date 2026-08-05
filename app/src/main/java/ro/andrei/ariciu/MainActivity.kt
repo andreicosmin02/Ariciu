@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import ro.andrei.ariciu.feature.locationpicker.ui.LocationPickerScreen
+import ro.andrei.ariciu.feature.remindereditor.ui.ReminderEditorScreen
 import ro.andrei.ariciu.ui.theme.AriciuTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,9 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AriciuTheme {
-                LocationPickerScreen(
-                    onLocationSelected = { },
-                )
+                ReminderEditorScreen()
             }
         }
     }

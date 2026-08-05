@@ -55,8 +55,13 @@ The currently passing checks are:
 
 Re-run these before relying on this snapshot.
 
-## Next chapter
+## Reminder Creation
 
-Reminder Creation.
+- `ReminderEditorScreen` provides a title-only editor shell with a single-line Material 3 text field.
+- The title is held in local `rememberSaveable` Compose state.
+- `MainActivity` currently launches `ReminderEditorScreen` directly.
+- The completed location picker is not connected to the editor yet.
 
-Immediate next step: create the reminder editor shell.
+## Next milestone
+
+Add the ENTER/EXIT trigger choice.
