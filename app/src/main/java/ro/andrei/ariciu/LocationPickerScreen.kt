@@ -28,7 +28,12 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.layers.FillLayer
+import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.map.MaplibreMap
+import org.maplibre.compose.sources.GeoJsonData
+import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Position
 
@@ -58,6 +63,14 @@ fun LocationPickerScreen() {
         )
     }
     var radiusMeters by remember { mutableIntStateOf(DEFAULT_RADIUS_METERS) }
+    val radiusColor = MaterialTheme.colorScheme.primary
+    val radiusBoundary = remember(selectedCoordinates, radiusMeters) {
+        buildRadiusBoundary(
+            center = selectedCoordinates,
+            radiusMeters = radiusMeters,
+        )
+    }
+    val radiusPolygon = remember(radiusBoundary) { radiusBoundary.toGeoJsonPolygon() }
 
     LaunchedEffect(cameraState) {
         snapshotFlow { cameraState.isCameraMoving }.collect { isCameraMoving ->
@@ -93,7 +106,23 @@ fun LocationPickerScreen() {
                     modifier = Modifier.fillMaxSize(),
                     baseStyle = BaseStyle.Uri(OPEN_FREE_MAP_POSITRON_STYLE_URL),
                     cameraState = cameraState,
-                )
+                ) {
+                    val radiusSource = rememberGeoJsonSource(
+                        data = GeoJsonData.Features(radiusPolygon),
+                    )
+                    FillLayer(
+                        id = "reminder-radius-fill",
+                        source = radiusSource,
+                        color = const(radiusColor),
+                        opacity = const(0.2f),
+                    )
+                    LineLayer(
+                        id = "reminder-radius-outline",
+                        source = radiusSource,
+                        color = const(radiusColor),
+                        width = const(2.dp),
+                    )
+                }
                 CenterSelectionMarker(
                     modifier = Modifier.align(Alignment.Center)
                 )
