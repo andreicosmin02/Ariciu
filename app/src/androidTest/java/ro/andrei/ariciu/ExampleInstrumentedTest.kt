@@ -28,5 +28,7 @@ class ExampleInstrumentedTest {
         composeTestRule.onNodeWithText("Choose location").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_map_area").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_center_pin").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("location_picker_latitude").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("location_picker_longitude").assertIsDisplayed()
     }
 }

@@ -12,6 +12,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -41,6 +47,26 @@ fun LocationPickerScreen() {
             zoom = BRASOV_DEVELOPMENT_ZOOM,
         )
     )
+    var selectedCoordinates by remember {
+        mutableStateOf(
+            SelectedCoordinates(
+                latitude = BRASOV_DEVELOPMENT_LATITUDE,
+                longitude = BRASOV_DEVELOPMENT_LONGITUDE,
+            )
+        )
+    }
+
+    LaunchedEffect(cameraState) {
+        snapshotFlow { cameraState.isCameraMoving }.collect { isCameraMoving ->
+            if (!isCameraMoving) {
+                val target = cameraState.position.target
+                selectedCoordinates = SelectedCoordinates(
+                    latitude = target.latitude,
+                    longitude = target.longitude,
+                )
+            }
+        }
+    }
 
     Scaffold { innerPadding ->
         Column(
@@ -69,6 +95,14 @@ fun LocationPickerScreen() {
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
+            Text(
+                text = selectedCoordinates.formatLatitude(),
+                modifier = Modifier.testTag("location_picker_latitude"),
+            )
+            Text(
+                text = selectedCoordinates.formatLongitude(),
+                modifier = Modifier.testTag("location_picker_longitude"),
+            )
         }
     }
 }
