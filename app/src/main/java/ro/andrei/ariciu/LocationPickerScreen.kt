@@ -1,11 +1,13 @@
 package ro.andrei.ariciu
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -13,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
@@ -61,7 +65,26 @@ fun LocationPickerScreen() {
                     baseStyle = BaseStyle.Uri(OPEN_FREE_MAP_POSITRON_STYLE_URL),
                     cameraState = cameraState,
                 )
+                CenterSelectionMarker(
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun CenterSelectionMarker(modifier: Modifier = Modifier) {
+    val outlineColor = MaterialTheme.colorScheme.surface
+    val centerColor = MaterialTheme.colorScheme.primary
+
+    Canvas(
+        modifier = modifier
+            .size(32.dp)
+            .testTag("location_picker_center_pin")
+            .semantics { contentDescription = "Selected location" }
+    ) {
+        drawCircle(color = outlineColor, radius = size.minDimension / 2)
+        drawCircle(color = centerColor, radius = size.minDimension / 4)
     }
 }
