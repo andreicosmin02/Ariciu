@@ -2,60 +2,60 @@
 
 ## Current implementation
 
-The autonomous Codex workflow is configured. The first feature batch provides a map-first reminder creation and local management flow. Location-based delivery is implemented and ready for physical-phone validation. The runtime uses Google Play services geofences, persistent lifecycle state, WorkManager recovery, and Normal notifications.
+Feature expansion is paused. Ariciu now has a dark-first UI/UX redesign with Create / Reminders / Settings navigation, locally persisted System / Light / Dark appearance, a custom graphite map, and guided reminder editing. The next priority is product-owner design feedback and usability/accessibility review.
+
+Location-based delivery from the preceding batch remains implemented: Play services geofences, Room lifecycle state, persistent WorkManager commands/recovery, and Normal notifications. Real-phone delivery validation remains outstanding.
 
 ## User-facing behavior
 
-- The app opens on the MapLibre map around Brașov (`45.6579`, `25.6012`, zoom `13.0`). A center marker and radius polygon show the chosen area.
-- Radius selection is 100–1000 metres in 100m intervals, default 200m.
-- **Use this location** opens the Material 3 reminder editor. Users enter a title, choose **Arrive** (ENTER) or **Leave** (EXIT), and optionally repeat every visit. Defaults are ENTER and once-only.
-- Saving requires a nonblank title and valid location/radius. Titles are trimmed.
-- **Your reminders** opens locally saved reminders. Users can edit the title, place/radius, transition, and repeat choice, or delete with confirmation.
-- Cancelling a named draft or replacing it with another reminder asks before discarding changes. Android Back returns from location changes to the pending editor.
-- Draft fields, route, and save/edit identity use `SavedStateHandle`; the picker retains coordinates/radius with saveable Compose state. This supports recreation through Android saved-state restoration, not a guarantee of drafts surviving force-stop or task removal.
-- Save retries reuse the same ID and repeated save taps are ignored while saving. Load/save/delete failures show actionable errors; failed saves retain the draft.
-- **Delivery setup** explains and stages precise foreground location, background access, device Location, notification/channel access, and Play services readiness. No permission is requested automatically on first launch.
-- Reminder cards show waiting, triggered, next-visit, or completed lifecycle state alongside registered, blocked, failed, pending, or capacity-limited monitoring status. Missing capabilities have actionable setup shortcuts.
-- ENTER alerts on arrival; EXIT on departure. Once stays triggered until Done or Next time. Every visit rearms after the opposite crossing. Next time/swipe dismisses the current occurrence and waits for a new visit; Done completes either repeat choice.
-- Normal notifications show the title and crossing context, with Done and Next time actions that work through persistent work while the UI is closed. Tapping opens and highlights the relevant reminder.
-- Initial registration does not immediately alert for an already-inside location. Editing replaces its geofence generation and preserves occurrence/completion state. Duplicate broadcasts and stale generations/actions are rejected.
+- **Create** opens a large map around Brașov with a centre marker and area boundary. A persistent selection sheet offers 100m / 200m / 500m presets; More distances reveals the full 100–1000m slider. Default is 200m. Coordinates are secondary under Location details.
+- **Use this place** opens a guided editor: reminder text, a place summary, explicit Arrive/Leave cards, and Just once/Every visit choices. Save stays at the bottom; content scrolls and the choices stack with larger text.
+- **Reminders** separates Active and Completed. Cards lead with the task, crossing, repeat/area, and a short status. Setup problems have contextual help rather than raw platform diagnostics.
+- **Settings** combines appearance and staged delivery permissions, device Location, notification/channel access, Play services readiness, and retry. More detailed platform limitations are under How reminders work. No permission is automatically requested on first launch.
+- Appearance defaults to System. Light and Dark override the device explicitly and persist locally. Dynamic wallpaper color is removed. Graphite surfaces, warm white text, and a slate-blue accent define the dark palette; light uses warm paper surfaces and charcoal text.
+- Named drafts survive tab switches; Create resumes editing. Map selection uses saveable screen state across tabs. The existing SavedStateHandle draft/edit/save-identity behavior remains.
+- Editing/deletion, discard confirmation, validation, retries, notification actions, and the lifecycle semantics remain intact. Editing preserves completion and occurrence state.
+- ENTER alerts on arrival; EXIT on departure. Once waits for Done or Next time after triggering. Every visit rearms after the opposite crossing. Next time/swipe waits for a new visit; Done completes the reminder.
+- Notification taps open and highlight the relevant reminder in the list. Registration does not immediately alert merely because the device is already inside.
 
 ## Architecture and storage
 
 - Kotlin, Compose, Material 3, single activity; packages and existing picker result types are preserved.
 - Plain Kotlin `Reminder`, `ReminderDraft`, transition/repeat enums, and `ReminderRepository` remain independent of Android, Compose, Room, and MapLibre.
-- `RemindersViewModel` owns asynchronous storage, draft state, and the three-screen flow. Dependencies use constructor injection and an activity ViewModel factory.
+- `RemindersViewModel` owns asynchronous storage, draft state, and the existing route flow. Create / Reminders / Settings map onto MAP / LIST / DELIVERY; EDITOR is a focused secondary screen. Dependencies use constructor injection and an activity ViewModel factory.
 - Room stores reminders locally in `reminders.db`. Schema version 2 and version 1 are exported in `app/schemas/`. Migration 1→2 preserves reminders and adds lifecycle/outbox/registration fields and a registration ledger. Migration and concurrent edit/delete protection passed instrumentation tests.
 - The plain Kotlin delivery engine uses Room transactions, generation-conditional writes, persistent occurrence tokens, and an outbox for notification posting. Stable notification tags prevent multiple visible notifications per reminder.
 - Play services registers both ENTER/EXIT for up to 100 active areas. Reconciliation journals additions and retries obsolete removals, replaces edited registrations, and exposes failures/overflow. WorkManager persists event/action commands separately from registration retries.
 - Boot/package-update receivers and app/settings return reconcile registrations. No continuous GPS, polling loop, tracking foreground service, exact alarm, Alarm intensity, or chain-based reminder was added.
 - Android cloud backup and device transfer exclude app data; `allowBackup` is false to preserve local-only storage.
-- MapLibre uses the OpenFreeMap Positron style. SpatialK/MapLibre types remain at the map boundary. Map tiles need internet for uncached areas; local saved reminders do not.
+- MapLibre uses Positron in light mode and a bundled, licensed OpenFreeMap Dark adaptation in dark mode, with clearer roads and labels. Map tiles/fonts/sprites still come from the same free provider. Source credits/notices are retained. SpatialK/MapLibre types remain at the map boundary.
+- `ThemePreferences` uses local SharedPreferences and StateFlow. No new dependency, service, billing requirement, Room schema change, or delivery algorithm was introduced by the redesign. The map-style asset and native Compose/vector controls require no image-generation API or remote font.
+- Map tiles need internet for uncached areas; local saved reminders do not.
 - No GPS/current-location map shortcut is implemented. Staged delivery permissions are implemented; device positioning is delegated to Play services.
 
-## Verification (2026-10-15)
+## Verification (2026-10-15, redesign)
 
-Executed successfully for this delivery batch:
+Executed successfully:
 
 ```bash
-./gradlew :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:assembleDebug
+./gradlew :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:lintDebug :app:assembleDebug
 ```
 
-- `./gradlew :app:lintDebug` also passed. Its advisory findings include available dependency updates, starter unused resources, style suggestions, and standard Android Log usage; no unrelated upgrades or logging dependency were added.
-- **45 unit tests passed**: existing model/ViewModel/geometry tests plus lifecycle, ENTER/EXIT repeat semantics, stale/duplicate events and actions, permission blocking, registration/removal failures, recovery, and 100-area synchronization planning.
-- **12 instrumentation tests passed** on the Android 17 emulator: existing picker/editor/flow/storage tests; version-1→2 migration/schema validation; editing triggered/completed reminders; stale engine-write protection; staged-permission explanations; and actual Android notification posting plus receiver PendingIntents for swipe, Next time, and Done through WorkManager with injected crossing commands.
-- The emulator disconnected during an earlier test installation; restarting the same AVD without wiping restored testing. A migration test return-type issue was fixed and the full suite rerun successfully.
-- A manual emulator smoke check with delivery permissions granted saved a temporary reminder and reached **Area monitoring registered** through the actual Play services client. The temporary reminder was then deleted. This validates API registration success on that emulator, not positioning or physical delivery.
-- These checks do **not** prove actual Play services positioning, real boundary crossings, process-kill/reboot delivery, sound/heads-up presentation, or OEM background behavior. No physical-phone testing was performed.
-- [Physical-phone checklist](PHONE_VERIFICATION.md) covers background ENTER/EXIT, Once/Every visit, actions/swipe, editing/deletion, reboot/update/process recovery, permissions/channel changes, and restrictions/connectivity.
-- Android Studio may need **Sync Project with Gradle Files** after adding the catalog dependencies.
+- **52 unit tests passed**: existing delivery/lifecycle/ViewModel/geometry behavior, theme preference resolution, palette role-pair text contrast (at least 4.5:1), and honest user-facing reminder statuses.
+- **15 emulator tests passed** on Android 17: existing migration/storage/notification-action tests, updated map/editor/navigation flow, explicit theme switching, tab/draft preservation, theme persistence across store instances, permission explanations, and a 2× text editor flow with reachable choices and a visible Save action.
+- Android lint and debug assembly passed. Advisory lint findings include existing dependency-update/resource/logging suggestions and component-parameter style advice; no unrelated dependency upgrades were made.
+- The emulator disconnected during some APK-install attempts. A clean boot without wiping data restored final instrumentation verification.
+- [Design rationale, sources, accessibility limits, and actual dark/light screenshots](design/DESIGN.md).
+- These checks do not establish real Play services positioning, real boundary crossings, process-kill/reboot delivery, sound/heads-up behavior, OEM battery behavior, or usability with older adults. Physical-phone TalkBack/Switch Access and user testing remain outstanding.
+- Background-delivery verification remains covered by [the phone checklist](PHONE_VERIFICATION.md).
 
 ## Product decisions and assumptions
 
-- The product owner chose a **map-first home screen** over a list-first home screen.
-- Initial defaults: ENTER, once-only, 200m radius; every-visit repeat is optional. Registering while already inside does not create an immediate occurrence.
-- Normal notification intensity is implemented. Alarm and chain-based reminders remain outside MVP; no custom audio playback is used.
-- Zero recurring financial cost is permanent guidance. Play services location uses the royalty-free Android SDK license, WorkManager and Room test support use Apache 2.0, and no credit card, Cloud billing account, paid key, subscription, or metered API is introduced. See the dependency review for evidence and limits.
+- UI/UX redesign is the top priority; feature expansion stays paused.
+- Identity: dark-first charcoal/graphite, restrained slate blue, no green identity, no wallpaper-driven palette, no playful/flashy decoration.
+- Primary navigation: Create / Reminders / Settings. System appearance is the default; the user can override it locally.
+- Existing reminder defaults remain ENTER, once-only, and 200m. Alarm, chain-based reminders, and additional notification intensities are outside this work.
+- Zero recurring financial cost remains permanent guidance. The existing OpenFreeMap provider and style licensing/terms were reviewed before bundling a dark variant. No paid font, external design SDK, geocoder, new provider, key, billing account, or metered service was introduced.
 
 ## Remaining limitations and next work
 
@@ -64,12 +64,14 @@ Executed successfully for this delivery batch:
 - Room, WorkManager, Play services, and the notification service do not share one transaction. Persistent registration bookkeeping, outbox flags, stable IDs, and reconciliation repair interrupted operations when Android next runs the app/work. There is no absolute exactly-once or immediate-delivery guarantee.
 - Failed registration receives bounded exponential retries (up to five attempts), followed by user Retry, app resume, boot, or update recovery. More than 100 active reminders show overflow status in deterministic reminder-ID order.
 - Saving edits preserves completion. Creating a separate new reminder is currently the way to restart a completed task; Alarm, Silent/Urgent intensity, and chained reminders remain outside this batch.
-- Next priority: execute the physical-phone checklist, address reproduced device-specific failures, and refine delivery diagnostics/UX from those results before adding advanced features.
+- Next priority: incorporate product-owner feedback on the visual system and creation flow, then evaluate larger text/TalkBack and observed usability on a physical phone. Delivery validation remains necessary before treating the MVP as validated; feature expansion stays paused.
 - [Architecture, reliability boundaries, dependency licenses/costs, and official sources](DELIVERY_ARCHITECTURE.md).
 
 ## Relevant files
 
 - Workflow: `AGENTS.md`, `.agents/skills/android-milestone/SKILL.md`, `.agents/skills/android-verification/SKILL.md`
+- Design system, theme preference, and shared native components: `app/src/main/java/ro/andrei/ariciu/ui/`
+- Dark basemap and notices: `app/src/main/assets/map/`
 - Entry point: `app/src/main/java/ro/andrei/ariciu/MainActivity.kt`
 - Flow/state: `app/src/main/java/ro/andrei/ariciu/feature/reminders/ui/`
 - Domain/storage contract: `app/src/main/java/ro/andrei/ariciu/feature/reminders/model/`

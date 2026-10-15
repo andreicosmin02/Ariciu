@@ -4,6 +4,14 @@
 
 Ariciu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Prioritize reliable core behavior; Alarm intensity and chain-based reminders are outside the initial MVP.
 
+## Current product priority and visual direction
+
+- Feature expansion is paused. Focus on UI/UX quality and product-owner design feedback before adding more capabilities.
+- Ariciu uses a dark-first charcoal/graphite identity with a restrained slate-blue accent; do not use green as the identity color, wallpaper-driven colors, playful decoration, gradients, or generic demo styling.
+- Support locally persisted System / Light / Dark appearance. Keep light mode equally usable and dark mode carefully designed.
+- Primary navigation is Create / Reminders / Settings. Keep the map central to creation, choices explicit, and delivery diagnostics in Settings or contextual help.
+- Prioritize clear language, readable contrast, large labeled controls, scalable text, and predictable interactions for older or less technical users. Validate real screenshots and larger text, not only previews.
+
 ## Technical foundation
 
 - Kotlin, Jetpack Compose, Material 3, single-activity architecture.
