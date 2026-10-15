@@ -42,6 +42,9 @@ room {
 }
 
 dependencies {
+    implementation(libs.google.play.services.location)
+    implementation(libs.androidx.work.runtime.ktx)
+    androidTestImplementation(libs.androidx.room.testing)
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

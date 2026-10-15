@@ -1,6 +1,8 @@
 package ro.andrei.ariciu.feature.reminders.model
 
 import ro.andrei.ariciu.feature.locationpicker.model.SelectedLocation
+import ro.andrei.ariciu.feature.delivery.model.DeliveryState
+import ro.andrei.ariciu.feature.delivery.model.RegistrationState
 
 enum class ReminderTransition { ENTER, EXIT }
 enum class ReminderRepeat { ONCE, EVERY_VISIT }
@@ -11,6 +13,9 @@ data class Reminder(
     val location: SelectedLocation,
     val transition: ReminderTransition,
     val repeat: ReminderRepeat,
+    val delivery: DeliveryState = DeliveryState(),
+    val registration: RegistrationState = RegistrationState.PENDING,
+    val deliveryError: String? = null,
 ) {
     fun toDraft() = ReminderDraft(title, location, transition, repeat)
 }
