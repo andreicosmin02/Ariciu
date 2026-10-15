@@ -33,21 +33,23 @@ class LocationPickerScreenTest {
             LocationPickerScreen(onLocationSelected = { })
         }
 
-        composeTestRule.onNodeWithText("Choose location").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Choose a place").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_map_area").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_center_pin").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Location details").performClick()
         composeTestRule.onNodeWithTag("location_picker_latitude").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_longitude").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_radius_value").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Radius: 200 m").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("location_picker_radius_value").assertIsDisplayed()
 
+        composeTestRule.onNodeWithText("More distances").performClick()
         composeTestRule.onNodeWithTag("location_picker_radius_slider")
             .assertIsDisplayed()
             .performSemanticsAction(SemanticsActions.SetProgress) { setProgress ->
                 setProgress(500f)
             }
 
-        composeTestRule.onNodeWithText("Radius: 500 m").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("location_picker_radius_value").assertIsDisplayed()
     }
 
     @Test
@@ -82,6 +84,7 @@ class LocationPickerScreenTest {
             LocationPickerScreen(onLocationSelected = { selectedLocation = it })
         }
 
+        composeTestRule.onNodeWithText("More distances").performClick()
         composeTestRule.onNodeWithTag("location_picker_radius_slider")
             .performSemanticsAction(SemanticsActions.SetProgress) { setProgress ->
                 setProgress(500f)

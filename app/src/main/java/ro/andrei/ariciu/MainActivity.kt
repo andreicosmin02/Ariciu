@@ -16,10 +16,15 @@ import ro.andrei.ariciu.feature.reminders.data.RoomReminderRepository
 import ro.andrei.ariciu.feature.reminders.ui.AriciuApp
 import ro.andrei.ariciu.feature.reminders.ui.RemindersViewModel
 import ro.andrei.ariciu.ui.theme.AriciuTheme
+import ro.andrei.ariciu.ui.theme.ThemePreferences
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class MainActivity : ComponentActivity() {
     private val notificationReminder = mutableStateOf<Pair<Int, String?>?>(null)
     private var notificationOpenSequence = 0
+    private val themePreferences by lazy { ThemePreferences(applicationContext) }
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
@@ -35,7 +40,8 @@ class MainActivity : ComponentActivity() {
         DeliveryWork.reconcile(applicationContext, force = true)
         enableEdgeToEdge()
         setContent {
-            AriciuTheme {
+            val appearance by themePreferences.preference.collectAsStateWithLifecycle()
+            AriciuTheme(darkTheme = appearance.isDark(isSystemInDarkTheme())) {
                 val model: RemindersViewModel = viewModel(factory = viewModelFactory {
                     initializer {
                         RemindersViewModel(
@@ -49,7 +55,7 @@ class MainActivity : ComponentActivity() {
                 androidx.compose.runtime.LaunchedEffect(notificationReminder.value) {
                     notificationReminder.value?.second?.let { model.openReminder(it) }
                 }
-                AriciuApp(model)
+                AriciuApp(model, appearance, themePreferences::select)
             }
         }
     }

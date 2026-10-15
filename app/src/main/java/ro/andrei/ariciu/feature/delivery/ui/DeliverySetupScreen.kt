@@ -27,6 +27,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.common.GoogleApiAvailability
 import ro.andrei.ariciu.feature.delivery.model.DeliveryCapabilities
 import ro.andrei.ariciu.feature.delivery.platform.*
+import ro.andrei.ariciu.ui.components.*
+import ro.andrei.ariciu.ui.theme.ThemePreference
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 
 @Composable
 fun rememberDeliveryCapabilities(): DeliveryCapabilities {
@@ -54,7 +59,8 @@ fun rememberDeliveryCapabilities(): DeliveryCapabilities {
 }
 
 @Composable
-fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit) {
+fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
+    themePreference: ThemePreference = ThemePreference.SYSTEM, onThemeChange: (ThemePreference) -> Unit = {}) {
     val context = LocalContext.current
     var current by remember(capabilities) { mutableStateOf(capabilities) }
     var explanation by remember { mutableStateOf<String?>(null) }
@@ -71,27 +77,61 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit) 
     fun appSettings() {
         context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
     }
-    Scaffold { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text("Reminder delivery", style = MaterialTheme.typography.headlineMedium)
-            Text(if (current.ready) "Ready to monitor your active reminders" else "Setup needs attention",
-                style = MaterialTheme.typography.titleLarge)
-            Text("Ariciu stores reminders on this phone. Google Play services detects area crossings using the device’s location services; no Ariciu account or server is used.")
-            SetupStep("Precise location", current.preciseLocation,
-                "Needed to recognize your reminder areas.") { explanation = "foreground" }
-            SetupStep("Background location", current.backgroundLocation,
-                "Allows arrivals and departures while Ariciu is closed.", current.preciseLocation) { explanation = "background" }
-            SetupStep("Device location", current.locationEnabled,
-                "Device location must be switched on.") { explanation = "location" }
-            SetupStep("Notifications", current.notifications,
-                "Allows reminder alerts and their Done / Next time actions.") { explanation = "notifications" }
-            SetupStep("Google Play services", current.playServices,
-                "Required for low-power area monitoring.") { explanation = "play" }
-            Text("Alerts can be delayed or missed by Android, battery restrictions, weak positioning, or unavailable network-assisted location. This is not a continuous GPS tracker. Sound and pop-ups follow your notification channel settings.",
-                style = MaterialTheme.typography.bodyMedium)
-            Button(onClick = { DeliveryWork.reconcile(context, force = true) }) { Text("Retry monitoring") }
-            TextButton(onClick = onBack) { Text("Back to map") }
+    val colors = MaterialTheme.colorScheme
+    var showExplanation by rememberSaveable { mutableStateOf(false) }
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        ScreenHeading("Settings", "Appearance and reminder delivery.")
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionLabel("Appearance")
+            if (LocalDensity.current.fontScale > 1.3f) Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ThemePreference.entries.forEach { preference ->
+                    ChoiceCard(preference.label, selected = themePreference == preference,
+                        onClick = { onThemeChange(preference) }, modifier = Modifier.fillMaxWidth().testTag("theme_${preference.name}"))
+                }
+            } else Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ThemePreference.entries.forEach { preference ->
+                    FilterChip(selected = themePreference == preference, onClick = { onThemeChange(preference) },
+                        leadingIcon = if (themePreference == preference) ({ Icon(AriciuIcons.Check, null, Modifier.size(16.dp)) }) else null,
+                        label = { Text(preference.label) }, modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag("theme_${preference.name}"),
+                        shape = MaterialTheme.shapes.small)
+                }
+            }
+            Text("System follows your phone’s appearance.", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionLabel("Reminder delivery")
+            Surface(color = colors.surfaceContainer, shape = MaterialTheme.shapes.medium) {
+                Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(if (current.ready) "Ready when you are" else "A few things to set up", style = MaterialTheme.typography.titleLarge)
+                    Text(if (current.ready) "Your phone can look out for your chosen places." else "Give Ariciu permission to remind you, even when the app is closed.",
+                        style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                }
+            }
+            Surface(color = colors.surface, shape = MaterialTheme.shapes.large) {
+                Column {
+                    SetupStep("Your location", current.preciseLocation, "Recognize the places you choose.") { explanation = "foreground" }
+                    HorizontalDivider(Modifier.padding(horizontal = 20.dp), color = colors.outlineVariant)
+                    SetupStep("In the background", current.backgroundLocation,
+                        if (current.preciseLocation) "Remind you while the app is closed." else "Allow your location first.", current.preciseLocation) { explanation = "background" }
+                    HorizontalDivider(Modifier.padding(horizontal = 20.dp), color = colors.outlineVariant)
+                    SetupStep("Phone location", current.locationEnabled, "Keep location switched on.") { explanation = "location" }
+                    HorizontalDivider(Modifier.padding(horizontal = 20.dp), color = colors.outlineVariant)
+                    SetupStep("Notifications", current.notifications, "Show your reminders and their actions.") { explanation = "notifications" }
+                    HorizontalDivider(Modifier.padding(horizontal = 20.dp), color = colors.outlineVariant)
+                    SetupStep("Location service", current.playServices, "Uses Google Play services on your phone.") { explanation = "play" }
+                }
+            }
+            OutlinedButton(onClick = { DeliveryWork.reconcile(context, force = true) }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                shape = MaterialTheme.shapes.medium) { Text("Check reminders again") }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(onClick = { showExplanation = !showExplanation }, contentPadding = PaddingValues(0.dp)) { Text("How reminders work") }
+            if (showExplanation) Text("Your reminders stay on this phone. Android uses Google Play services to notice when you enter or leave an area. Alerts can take a few minutes, and battery restrictions or weak location signals can delay or prevent them. Location may need a network connection. Sound and pop-ups follow your phone’s notification settings.",
+                style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            Text("Private by design. No account. No subscription.", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+            Text("Maps © OpenFreeMap · OpenMapTiles · OpenStreetMap contributors. Basemap design © CARTO, Stamen & Paul Norman.",
+                style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
         }
     }
     explanation?.let { step ->
@@ -102,7 +142,7 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit) 
             "location" -> "Turn on Location in device settings. Wi-Fi scanning and network-assisted positioning can improve area detection."
             else -> "This feature requires Google Play services. Install, enable or update it on a supported Android device. Saved reminders remain available without it."
         }
-        AlertDialog(onDismissRequest = { explanation = null }, title = { Text("Enable reminder delivery") }, text = { Text(text) },
+        AlertDialog(onDismissRequest = { explanation = null }, title = { Text("Let Ariciu remind you") }, text = { Text(text) },
             confirmButton = { TextButton(onClick = {
                 explanation = null
                 when (step) {
@@ -130,12 +170,18 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit) 
 
 @Composable
 private fun SetupStep(title: String, ready: Boolean, description: String, enabled: Boolean = true, onClick: () -> Unit) {
-    OutlinedCard(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("$title · ${if (ready) "Enabled" else "Needed"}", style = MaterialTheme.typography.titleMedium)
-            Text(description)
-            // Enabled channels can still be configured by the user.
-            TextButton(onClick = onClick, enabled = enabled) { Text(if (ready) "Settings" else "Set up") }
+    val colors = MaterialTheme.colorScheme
+    Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(description, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            }
+            if (ready) Icon(AriciuIcons.Check, contentDescription = "Allowed", tint = colors.primary, modifier = Modifier.size(22.dp))
+        }
+        TextButton(onClick = onClick, enabled = enabled, contentPadding = PaddingValues(0.dp),
+            modifier = Modifier.testTag("setup_$title").heightIn(min = 48.dp)) {
+            Text(if (ready) "Review" else "Set up")
         }
     }
 }

@@ -1,6 +1,8 @@
 package ro.andrei.ariciu.feature.reminders.ui
 
 import androidx.compose.ui.test.*
+import androidx.compose.runtime.*
+import ro.andrei.ariciu.ui.theme.ThemePreference
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,19 +28,52 @@ class AriciuAppTest {
         compose.runOnUiThread { vm = RemindersViewModel(repo, SavedStateHandle()) }
         compose.setContent { AriciuTheme { AriciuApp(vm) } }
         compose.onNodeWithText("Ariciu").assertIsDisplayed()
-        compose.onNodeWithTag("location_picker_confirm_button").performScrollTo().performClick()
+        compose.onNodeWithTag("location_picker_confirm_button").performClick()
         compose.onNodeWithTag("reminder_editor_title_field").performTextInput("Buy bread")
         compose.onNodeWithText("Leave").performScrollTo().performClick()
-        compose.onNodeWithTag("reminder_save").performScrollTo().performClick()
+        compose.onNodeWithText("Leave").assertIsSelected()
+        compose.runOnIdle { assertEquals(ReminderTransition.EXIT, vm.draft.value.transition) }
+        compose.onNodeWithTag("reminder_save").performClick()
         compose.onNodeWithText("Your reminders").assertIsDisplayed()
         compose.onNodeWithText("Buy bread").assertIsDisplayed()
-        compose.onNodeWithText("Edit").performClick()
+        compose.onNodeWithText("Edit").performScrollTo().performClick()
+        compose.onNodeWithText("Leave").assertIsSelected()
         compose.onNodeWithTag("reminder_editor_title_field").performTextReplacement("Buy milk")
-        compose.onNodeWithTag("reminder_save").performScrollTo().performClick()
+        compose.runOnIdle { assertEquals(ReminderTransition.EXIT, vm.draft.value.transition) }
+        compose.onNodeWithTag("reminder_save").performClick()
         compose.onNodeWithText("Buy milk").assertIsDisplayed()
         compose.runOnIdle {
             assertEquals(1, repo.rows.value.size)
             assertEquals(ReminderTransition.EXIT, repo.rows.value.single().transition)
         }
+    }
+
+    @Test fun tabsPreserveDraftAndAppearanceSelectionIsExplicit() {
+        val repository = object : ReminderRepository {
+            override fun observeReminders() = MutableStateFlow(emptyList<Reminder>())
+            override suspend fun save(reminder: Reminder) = Unit
+            override suspend fun delete(id: String) = Unit
+        }
+        lateinit var vm: RemindersViewModel
+        compose.runOnUiThread { vm = RemindersViewModel(repository, SavedStateHandle()) }
+        var appearance by mutableStateOf(ThemePreference.SYSTEM)
+        compose.setContent {
+            AriciuTheme(darkTheme = appearance.isDark(false)) { AriciuApp(vm, appearance, { appearance = it }) }
+        }
+        compose.onNodeWithTag("nav_Reminders").performClick()
+        compose.onNodeWithText("Your reminders").assertIsDisplayed()
+        compose.onNodeWithTag("nav_Settings").performClick()
+        compose.onNodeWithTag("theme_DARK").performClick().assertIsSelected()
+        compose.runOnIdle { assertEquals(ThemePreference.DARK, appearance) }
+        compose.onNodeWithTag("theme_LIGHT").performClick().assertIsSelected()
+        compose.onNodeWithTag("nav_Create").performClick()
+        compose.onNodeWithText("500 m").performClick()
+        compose.onNodeWithTag("location_picker_confirm_button").performClick()
+        compose.onNodeWithTag("reminder_editor_title_field").performTextInput("Prescription")
+        compose.onNodeWithText("Change place").performScrollTo().performClick()
+        compose.onNodeWithTag("nav_Settings").performClick()
+        compose.onNodeWithTag("nav_Create").performClick()
+        compose.onNodeWithTag("reminder_editor_title_field").assertTextContains("Prescription")
+        compose.runOnIdle { assertEquals(500, vm.draft.value.location?.radiusMeters) }
     }
 }

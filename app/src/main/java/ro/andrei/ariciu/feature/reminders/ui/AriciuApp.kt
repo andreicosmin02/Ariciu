@@ -2,8 +2,6 @@ package ro.andrei.ariciu.feature.reminders.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,18 +11,16 @@ import ro.andrei.ariciu.feature.locationpicker.ui.LocationPickerScreen
 import ro.andrei.ariciu.feature.remindereditor.ui.ReminderEditorScreen
 import ro.andrei.ariciu.feature.delivery.ui.DeliverySetupScreen
 import ro.andrei.ariciu.feature.delivery.ui.rememberDeliveryCapabilities
-import ro.andrei.ariciu.feature.delivery.model.*
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.ui.platform.LocalContext
-import ro.andrei.ariciu.feature.delivery.platform.DeliveryWork
 import ro.andrei.ariciu.feature.reminders.model.Reminder
-import ro.andrei.ariciu.feature.reminders.model.ReminderRepeat
-import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
+import ro.andrei.ariciu.ui.components.AriciuIcons
+import ro.andrei.ariciu.ui.theme.ThemePreference
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
 
 @Composable
-fun AriciuApp(viewModel: RemindersViewModel) {
+fun AriciuApp(viewModel: RemindersViewModel,
+    themePreference: ThemePreference = ThemePreference.SYSTEM, onThemeChange: (ThemePreference) -> Unit = {}) {
     val capabilities = rememberDeliveryCapabilities()
-    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val draft by viewModel.draft.collectAsStateWithLifecycle()
     val routeName by viewModel.route.collectAsStateWithLifecycle()
@@ -46,70 +42,44 @@ fun AriciuApp(viewModel: RemindersViewModel) {
             }
         }
     }
-    when (route) {
-        ReminderRoute.DELIVERY -> DeliverySetupScreen(capabilities) { viewModel.navigate(ReminderRoute.MAP) }
-        ReminderRoute.MAP -> LocationPickerScreen(
-            onDeliverySetup = { viewModel.navigate(ReminderRoute.DELIVERY) },
-            deliveryStatus = if (capabilities.ready) "Delivery permissions ready · Check monitoring in Your reminders" else capabilities.reason,
-            onLocationSelected = viewModel::chooseLocation,
-            initialLocation = draft.location,
-            onShowReminders = { viewModel.navigate(ReminderRoute.LIST) },
-            onCancel = if (draft.location != null)
-                ({ viewModel.navigate(ReminderRoute.EDITOR) }) else null,
-        )
-        ReminderRoute.EDITOR -> ReminderEditorScreen(
-            draft, viewModel::updateDraft, { viewModel.navigate(ReminderRoute.MAP) },
-            viewModel::save, cancelEditor, viewModel.editing, state.busy,
-        )
-        ReminderRoute.LIST -> Scaffold { padding ->
-            Column(Modifier.fillMaxSize().padding(padding).padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Your reminders", style = MaterialTheme.typography.headlineMedium)
-                Text(capabilities.reason ?: "Background location and notifications enabled. Check each reminder’s monitoring status.", style = MaterialTheme.typography.bodyMedium)
-                TextButton(onClick = { viewModel.navigate(ReminderRoute.DELIVERY) }) { Text("Delivery setup") }
-                TextButton(onClick = { DeliveryWork.reconcile(context, force = true) }) { Text("Retry monitoring") }
-                FilledTonalButton(onClick = { viewModel.navigate(ReminderRoute.MAP) }, enabled = !state.busy) {
-                    Text("Back to map")
-                }
-                if (state.loading) CircularProgressIndicator()
-                else if (state.reminders.isEmpty()) Text("Choose a place on the map to create your first reminder.")
-                val listState = rememberLazyListState()
-                LaunchedEffect(state.reminders, viewModel.openReminderId) {
-                    val index = state.reminders.indexOfFirst { it.id == viewModel.openReminderId }
-                    if (index >= 0) listState.animateScrollToItem(index)
-                }
-                LazyColumn(state = listState, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(state.reminders, key = { it.id }) { reminder ->
-                        OutlinedCard(Modifier.fillMaxWidth()) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                if (reminder.id == viewModel.openReminderId) Text("Opened from notification", style = MaterialTheme.typography.labelMedium)
-                                Text(reminder.title, style = MaterialTheme.typography.titleLarge)
-                                Text("${if (reminder.transition == ReminderTransition.ENTER) "On arrival" else "On departure"} · " +
-                                    "${reminder.location.radiusMeters} m · " +
-                                    if (reminder.repeat == ReminderRepeat.ONCE) "Once" else "Every visit")
-                                Text(when (reminder.delivery.phase) {
-                                    DeliveryPhase.COMPLETED -> "Completed"
-                                    DeliveryPhase.TRIGGERED -> "Triggered · Choose Done or Next time in the notification"
-                                    DeliveryPhase.WAITING_NEXT_VISIT -> "Waiting for your next visit"
-                                    DeliveryPhase.WAITING -> "Active · Waiting for ${if (reminder.transition == ReminderTransition.ENTER) "arrival" else "departure"}"
-                                }, style = MaterialTheme.typography.titleSmall)
-                                Text(reminder.deliveryError ?: when (reminder.registration) {
-                                    RegistrationState.REGISTERED -> if (capabilities.ready) "Area monitoring registered · Alerts may be delayed" else "Monitoring paused · ${capabilities.reason}"
-                                    RegistrationState.PENDING -> "Monitoring registration pending"
-                                    RegistrationState.INACTIVE -> "Area monitoring disabled"
-                                    else -> "Monitoring needs attention · Retry in Delivery setup"
-                                }, style = MaterialTheme.typography.bodySmall)
-                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    TextButton(onClick = {
-                                        if (draft.title.isNotBlank() || viewModel.editing) pendingEdit = reminder
-                                        else viewModel.edit(reminder)
-                                    }, enabled = !state.busy) { Text("Edit") }
-                                    TextButton(onClick = { deleteCandidate = reminder }, enabled = !state.busy) { Text("Delete") }
-                                }
-                            }
-                        }
+    val stateHolder = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
+    val tabs = listOf(ReminderRoute.MAP to "Create", ReminderRoute.LIST to "Reminders", ReminderRoute.DELIVERY to "Settings")
+    Scaffold(contentWindowInsets = WindowInsets.safeDrawing, containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            if (route != ReminderRoute.EDITOR) {
+                NavigationBar(modifier = Modifier.heightIn(min = if (LocalDensity.current.fontScale > 1.3f) 104.dp else 80.dp), containerColor = MaterialTheme.colorScheme.background, tonalElevation = 0.dp) {
+                    tabs.forEach { (destination, label) ->
+                        NavigationBarItem(selected = route == destination, onClick = {
+                            val target = if (destination == ReminderRoute.MAP && draft.title.isNotBlank()) ReminderRoute.EDITOR else destination
+                            viewModel.navigate(target)
+                        }, enabled = !state.busy,
+                            icon = { Icon(when (destination) {
+                                ReminderRoute.MAP -> AriciuIcons.Place
+                                ReminderRoute.LIST -> AriciuIcons.Reminders
+                                else -> AriciuIcons.Settings
+                            }, null, Modifier.size(24.dp)) },
+                            label = { Text(label, style = MaterialTheme.typography.labelMedium) }, alwaysShowLabel = true,
+                            modifier = Modifier.testTag("nav_$label"),
+                            colors = NavigationBarItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primaryContainer))
                     }
                 }
+            }
+        }) { padding ->
+        Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
+            when (route) {
+                ReminderRoute.DELIVERY -> DeliverySetupScreen(capabilities, { viewModel.navigate(ReminderRoute.MAP) }, themePreference, onThemeChange)
+                ReminderRoute.MAP -> stateHolder.SaveableStateProvider("map_${draft.location}") {
+                    LocationPickerScreen(onLocationSelected = viewModel::chooseLocation, initialLocation = draft.location,
+                        onCancel = if (draft.location != null) ({ viewModel.navigate(ReminderRoute.EDITOR) }) else null)
+                }
+                ReminderRoute.EDITOR -> ReminderEditorScreen(draft, viewModel::updateDraft,
+                    { viewModel.navigate(ReminderRoute.MAP) }, viewModel::save, cancelEditor, viewModel.editing, state.busy)
+                ReminderRoute.LIST -> RemindersScreen(state, capabilities, viewModel.openReminderId,
+                    onCreate = { viewModel.navigate(if (draft.title.isNotBlank()) ReminderRoute.EDITOR else ReminderRoute.MAP) },
+                    onSettings = { viewModel.navigate(ReminderRoute.DELIVERY) },
+                    onEdit = { reminder ->
+                        if (draft.title.isNotBlank() || viewModel.editing) pendingEdit = reminder else viewModel.edit(reminder)
+                    }, onDelete = { deleteCandidate = it })
             }
         }
     }

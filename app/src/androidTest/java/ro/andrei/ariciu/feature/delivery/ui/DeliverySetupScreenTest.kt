@@ -14,11 +14,11 @@ class DeliverySetupScreenTest {
         compose.setContent {
             AriciuTheme { DeliverySetupScreen(DeliveryCapabilities(false, false, true, true, false), {}) }
         }
-        compose.onNodeWithText("Setup needs attention").assertIsDisplayed()
-        compose.onNodeWithText("Precise location · Needed").assertIsDisplayed()
-        compose.onAllNodesWithText("Set up")[0].performClick()
-        compose.onNodeWithText("Enable reminder delivery").assertIsDisplayed()
+        compose.onNodeWithText("A few things to set up").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Your location").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("setup_Your location").performScrollTo().performClick()
+        compose.onNodeWithText("Let Ariciu remind you").assertIsDisplayed()
         compose.onNodeWithText("Not now").performClick()
-        compose.onNodeWithText("Setup needs attention").assertIsDisplayed()
+        compose.onNodeWithText("A few things to set up").performScrollTo().assertIsDisplayed()
     }
 }

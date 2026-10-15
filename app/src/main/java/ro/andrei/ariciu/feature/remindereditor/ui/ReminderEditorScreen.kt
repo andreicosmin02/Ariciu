@@ -2,23 +2,26 @@ package ro.andrei.ariciu.feature.remindereditor.ui
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import ro.andrei.ariciu.feature.reminders.model.ReminderDraft
-import ro.andrei.ariciu.feature.reminders.model.ReminderRepeat
-import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
-import java.util.Locale
+import ro.andrei.ariciu.feature.reminders.model.*
+import ro.andrei.ariciu.ui.components.*
 
-// Keep the original standalone editor available for previews and existing callers.
 @Composable
 fun ReminderEditorScreen() {
     var title by rememberSaveable { mutableStateOf("") }
-    ReminderEditorScreen(ReminderDraft(title = title), { title = it.title }, {}, {}, {})
+    var transition by rememberSaveable { mutableStateOf(ReminderTransition.ENTER) }
+    var repeat by rememberSaveable { mutableStateOf(ReminderRepeat.ONCE) }
+    ReminderEditorScreen(ReminderDraft(title = title, transition = transition, repeat = repeat),
+        { title = it.title; transition = it.transition; repeat = it.repeat }, {}, {}, {})
 }
 
 @Composable
@@ -31,59 +34,72 @@ fun ReminderEditorScreen(
     editing: Boolean = false,
     busy: Boolean = false,
 ) {
-    Scaffold { innerPadding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(innerPadding)
-                .imePadding().verticalScroll(rememberScrollState()).padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(if (editing) "Edit reminder" else "Create reminder",
-                style = MaterialTheme.typography.headlineMedium)
-            Text("A little help, in the right place.", style = MaterialTheme.typography.bodyLarge)
-            OutlinedTextField(
-                value = draft.title,
-                onValueChange = { onDraftChange(draft.copy(title = it)) },
-                label = { Text("Reminder title") },
-                singleLine = true,
-                enabled = !busy,
-                modifier = Modifier.fillMaxWidth().testTag("reminder_editor_title_field"),
-            )
-            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Location", style = MaterialTheme.typography.titleMedium)
-                    Text(draft.location?.let {
-                        String.format(Locale.US, "%.5f, %.5f · %d m radius", it.latitude, it.longitude, it.radiusMeters)
-                    } ?: "Choose a place on the map")
-                    TextButton(onClick = onChooseLocation, enabled = !busy) {
-                        Text(if (draft.location == null) "Choose location" else "Change location")
+    val colors = MaterialTheme.colorScheme
+    Scaffold(modifier = Modifier.imePadding(), contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        bottomBar = {
+            Surface(color = colors.surface) {
+                Column(Modifier.padding(horizontal = 24.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PrimaryAction(if (busy) "Saving…" else "Save reminder", onSave, enabled = draft.canSave && !busy,
+                        modifier = Modifier.testTag("reminder_save"))
+                    Text("Only on this phone. No account needed.", style = MaterialTheme.typography.bodySmall,
+                        color = colors.onSurfaceVariant, modifier = Modifier.align(Alignment.CenterHorizontally))
+                }
+            }
+        }) { padding ->
+        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)) {
+            TextButton(onClick = onCancel, enabled = !busy, contentPadding = PaddingValues(0.dp)) {
+                Icon(AriciuIcons.Back, null, Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp)); Text("Cancel")
+            }
+            ScreenHeading(if (editing) "Edit reminder" else "What should you remember?",
+                if (editing) "Make it right for your next visit." else "Add a note and choose when to hear it.")
+            OutlinedTextField(value = draft.title, onValueChange = { onDraftChange(draft.copy(title = it)) },
+                label = { Text("Reminder") }, placeholder = { Text("For example, pick up a prescription") },
+                enabled = !busy, minLines = 1, maxLines = 3,
+                textStyle = MaterialTheme.typography.titleLarge, shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth().testTag("reminder_editor_title_field"))
+            Surface(shape = MaterialTheme.shapes.medium, color = colors.surfaceContainer) {
+                Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Icon(AriciuIcons.Place, null, tint = colors.primary, modifier = Modifier.size(24.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(if (draft.location == null) "Choose a place" else "Your chosen place", style = MaterialTheme.typography.titleMedium)
+                            Text(draft.location?.let { "Within ${it.radiusMeters} metres of your pin" } ?: "Set a spot on the map",
+                                style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                        }
+                    }
+                    TextButton(onClick = onChooseLocation, enabled = !busy, contentPadding = PaddingValues(horizontal = 0.dp)) {
+                        Text(if (draft.location == null) "Choose place" else "Change place")
+                        Spacer(Modifier.width(8.dp)); Icon(AriciuIcons.Arrow, null, Modifier.size(18.dp))
                     }
                 }
             }
-            Text("Remind me when I", style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                ReminderTransition.entries.forEach { transition ->
-                    FilterChip(selected = draft.transition == transition,
-                        onClick = { onDraftChange(draft.copy(transition = transition)) }, enabled = !busy,
-                        label = { Text(if (transition == ReminderTransition.ENTER) "Arrive" else "Leave") })
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SectionLabel("When should we remind you?")
+                val arrival: @Composable (Modifier) -> Unit = { modifier ->
+                    ChoiceCard("Arrive", "When I get there", draft.transition == ReminderTransition.ENTER,
+                        { onDraftChange(draft.copy(transition = ReminderTransition.ENTER)) }, modifier, !busy)
+                }
+                val departure: @Composable (Modifier) -> Unit = { modifier ->
+                    ChoiceCard("Leave", "When I head out", draft.transition == ReminderTransition.EXIT,
+                        { onDraftChange(draft.copy(transition = ReminderTransition.EXIT)) }, modifier, !busy)
+                }
+                if (LocalDensity.current.fontScale > 1.3f) Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    arrival(Modifier.fillMaxWidth()); departure(Modifier.fillMaxWidth())
+                } else Row(Modifier.selectableGroup().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    arrival(Modifier.weight(1f).fillMaxHeight()); departure(Modifier.weight(1f).fillMaxHeight())
                 }
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column(Modifier.weight(1f)) {
-                    Text("Repeat every visit", style = MaterialTheme.typography.titleMedium)
-                    Text("Off means remind me once.", style = MaterialTheme.typography.bodyMedium)
-                }
-                Switch(checked = draft.repeat == ReminderRepeat.EVERY_VISIT,
-                    onCheckedChange = { onDraftChange(draft.copy(repeat =
-                        if (it) ReminderRepeat.EVERY_VISIT else ReminderRepeat.ONCE)) },
-                    enabled = !busy, modifier = Modifier.testTag("reminder_repeat"))
+            Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                SectionLabel("How often?")
+                ChoiceCard("Just once", "One reminder for this visit", draft.repeat == ReminderRepeat.ONCE,
+                    { onDraftChange(draft.copy(repeat = ReminderRepeat.ONCE)) }, Modifier.fillMaxWidth(), !busy)
+                ChoiceCard("Every visit", "Remind me again on future visits", draft.repeat == ReminderRepeat.EVERY_VISIT,
+                    { onDraftChange(draft.copy(repeat = ReminderRepeat.EVERY_VISIT)) }, Modifier.fillMaxWidth().testTag("reminder_repeat"), !busy)
             }
-            Text("Saved on this device. Delivery needs location access and notifications. Editing keeps the reminder’s completion and visit state.",
-                style = MaterialTheme.typography.bodySmall)
-            Button(onClick = onSave, enabled = draft.canSave && !busy,
-                modifier = Modifier.fillMaxWidth().testTag("reminder_save")) {
-                Text(if (busy) "Saving…" else "Save reminder")
-            }
-            TextButton(onClick = onCancel, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Cancel") }
+            Text(if (editing) "Completed reminders stay completed when you edit them." else "Android may take a few minutes to notice an arrival or departure.",
+                style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
     }
 }
