@@ -77,7 +77,7 @@ fun ReminderEditorScreen(
                         if (it) ReminderRepeat.EVERY_VISIT else ReminderRepeat.ONCE)) },
                     enabled = !busy, modifier = Modifier.testTag("reminder_repeat"))
             }
-            Text("Saved on this device. Reminder delivery is not enabled yet.",
+            Text("Saved on this device. Delivery needs location access and notifications. Editing keeps the reminder’s completion and visit state.",
                 style = MaterialTheme.typography.bodySmall)
             Button(onClick = onSave, enabled = draft.canSave && !busy,
                 modifier = Modifier.fillMaxWidth().testTag("reminder_save")) {

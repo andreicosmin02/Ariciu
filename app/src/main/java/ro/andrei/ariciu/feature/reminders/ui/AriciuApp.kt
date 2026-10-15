@@ -11,12 +11,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ro.andrei.ariciu.feature.locationpicker.ui.LocationPickerScreen
 import ro.andrei.ariciu.feature.remindereditor.ui.ReminderEditorScreen
+import ro.andrei.ariciu.feature.delivery.ui.DeliverySetupScreen
+import ro.andrei.ariciu.feature.delivery.ui.rememberDeliveryCapabilities
+import ro.andrei.ariciu.feature.delivery.model.*
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.platform.LocalContext
+import ro.andrei.ariciu.feature.delivery.platform.DeliveryWork
 import ro.andrei.ariciu.feature.reminders.model.Reminder
 import ro.andrei.ariciu.feature.reminders.model.ReminderRepeat
 import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
 
 @Composable
 fun AriciuApp(viewModel: RemindersViewModel) {
+    val capabilities = rememberDeliveryCapabilities()
+    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val draft by viewModel.draft.collectAsStateWithLifecycle()
     val routeName by viewModel.route.collectAsStateWithLifecycle()
@@ -33,12 +41,16 @@ fun AriciuApp(viewModel: RemindersViewModel) {
             when (route) {
                 ReminderRoute.EDITOR -> cancelEditor()
                 ReminderRoute.MAP -> viewModel.navigate(ReminderRoute.EDITOR)
+                ReminderRoute.DELIVERY -> viewModel.navigate(ReminderRoute.MAP)
                 ReminderRoute.LIST -> viewModel.navigate(ReminderRoute.MAP)
             }
         }
     }
     when (route) {
+        ReminderRoute.DELIVERY -> DeliverySetupScreen(capabilities) { viewModel.navigate(ReminderRoute.MAP) }
         ReminderRoute.MAP -> LocationPickerScreen(
+            onDeliverySetup = { viewModel.navigate(ReminderRoute.DELIVERY) },
+            deliveryStatus = if (capabilities.ready) "Delivery permissions ready · Check monitoring in Your reminders" else capabilities.reason,
             onLocationSelected = viewModel::chooseLocation,
             initialLocation = draft.location,
             onShowReminders = { viewModel.navigate(ReminderRoute.LIST) },
@@ -53,20 +65,40 @@ fun AriciuApp(viewModel: RemindersViewModel) {
             Column(Modifier.fillMaxSize().padding(padding).padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Your reminders", style = MaterialTheme.typography.headlineMedium)
-                Text("Saved locally · Delivery not enabled yet", style = MaterialTheme.typography.bodyMedium)
+                Text(capabilities.reason ?: "Background location and notifications enabled. Check each reminder’s monitoring status.", style = MaterialTheme.typography.bodyMedium)
+                TextButton(onClick = { viewModel.navigate(ReminderRoute.DELIVERY) }) { Text("Delivery setup") }
+                TextButton(onClick = { DeliveryWork.reconcile(context, force = true) }) { Text("Retry monitoring") }
                 FilledTonalButton(onClick = { viewModel.navigate(ReminderRoute.MAP) }, enabled = !state.busy) {
                     Text("Back to map")
                 }
                 if (state.loading) CircularProgressIndicator()
                 else if (state.reminders.isEmpty()) Text("Choose a place on the map to create your first reminder.")
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                val listState = rememberLazyListState()
+                LaunchedEffect(state.reminders, viewModel.openReminderId) {
+                    val index = state.reminders.indexOfFirst { it.id == viewModel.openReminderId }
+                    if (index >= 0) listState.animateScrollToItem(index)
+                }
+                LazyColumn(state = listState, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(state.reminders, key = { it.id }) { reminder ->
                         OutlinedCard(Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (reminder.id == viewModel.openReminderId) Text("Opened from notification", style = MaterialTheme.typography.labelMedium)
                                 Text(reminder.title, style = MaterialTheme.typography.titleLarge)
                                 Text("${if (reminder.transition == ReminderTransition.ENTER) "On arrival" else "On departure"} · " +
                                     "${reminder.location.radiusMeters} m · " +
                                     if (reminder.repeat == ReminderRepeat.ONCE) "Once" else "Every visit")
+                                Text(when (reminder.delivery.phase) {
+                                    DeliveryPhase.COMPLETED -> "Completed"
+                                    DeliveryPhase.TRIGGERED -> "Triggered · Choose Done or Next time in the notification"
+                                    DeliveryPhase.WAITING_NEXT_VISIT -> "Waiting for your next visit"
+                                    DeliveryPhase.WAITING -> "Active · Waiting for ${if (reminder.transition == ReminderTransition.ENTER) "arrival" else "departure"}"
+                                }, style = MaterialTheme.typography.titleSmall)
+                                Text(reminder.deliveryError ?: when (reminder.registration) {
+                                    RegistrationState.REGISTERED -> if (capabilities.ready) "Area monitoring registered · Alerts may be delayed" else "Monitoring paused · ${capabilities.reason}"
+                                    RegistrationState.PENDING -> "Monitoring registration pending"
+                                    RegistrationState.INACTIVE -> "Area monitoring disabled"
+                                    else -> "Monitoring needs attention · Retry in Delivery setup"
+                                }, style = MaterialTheme.typography.bodySmall)
                                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                     TextButton(onClick = {
                                         if (draft.title.isNotBlank() || viewModel.editing) pendingEdit = reminder

@@ -15,7 +15,7 @@ import ro.andrei.ariciu.feature.reminders.model.ReminderRepeat
 import ro.andrei.ariciu.feature.reminders.model.ReminderRepository
 import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
 
-enum class ReminderRoute { MAP, EDITOR, LIST }
+enum class ReminderRoute { MAP, EDITOR, LIST, DELIVERY }
 
 data class RemindersUiState(
     val reminders: List<Reminder> = emptyList(),
@@ -80,6 +80,14 @@ class RemindersViewModel(
         updateDraft(reminder.toDraft())
         navigate(ReminderRoute.EDITOR)
     }
+
+    fun openReminder(id: String) {
+        savedState["openReminderId"] = id
+        navigate(ReminderRoute.LIST)
+        // Listing keeps any existing draft intact; the matching reminder is highlighted in the UI.
+    }
+
+    val openReminderId get() = savedState.get<String>("openReminderId")
 
     fun navigate(destination: ReminderRoute) {
         if (!state.value.busy) savedState["route"] = destination.name

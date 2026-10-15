@@ -15,7 +15,8 @@ Ariciu is an offline-first Android app for location-based reminders. Reminders c
 ## Hard constraints
 
 - No backend, Firebase, subscriptions, mandatory account, or cloud storage.
-- Do not add paid or usage-billed APIs without explicit approval.
+- Zero recurring financial cost is non-negotiable. Before introducing any library, SDK, API, map provider, or service, verify pricing, licensing, usage limits, and billing requirements; record the evidence.
+- Do not introduce a credit-card requirement, billing account, paid API key, subscription, or usage-based charge without explicit approval. A service’s free tier is not a permanent zero-cost guarantee. Prefer open-source libraries, Android system APIs, and local processing; propose a genuinely free alternative if a paid service would otherwise be required.
 - Core behavior must work locally.
 - Support Google Play Services devices initially.
 - Respect Android's 100-active-geofence limit; never claim events are perfectly immediate or exact.

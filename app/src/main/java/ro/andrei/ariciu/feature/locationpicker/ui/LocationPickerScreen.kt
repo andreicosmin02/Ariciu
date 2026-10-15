@@ -60,6 +60,8 @@ fun LocationPickerScreen(
     initialLocation: SelectedLocation? = null,
     onShowReminders: (() -> Unit)? = null,
     onCancel: (() -> Unit)? = null,
+    onDeliverySetup: (() -> Unit)? = null,
+    deliveryStatus: String? = null,
 ) {
     var selectedCoordinates by rememberSaveable(stateSaver = listSaver(
         save = { listOf(it.latitude, it.longitude) },
@@ -120,6 +122,10 @@ fun LocationPickerScreen(
                 Text("Map tiles need internet; saved reminders stay on this device.",
                     style = MaterialTheme.typography.bodySmall)
                 FilledTonalButton(onClick = onShowReminders) { Text("Your reminders") }
+            }
+            if (onDeliverySetup != null) {
+                Text(deliveryStatus ?: "Reminder delivery setup needed", style = MaterialTheme.typography.bodyMedium)
+                TextButton(onClick = onDeliverySetup) { Text("Delivery setup") }
             }
             Box(
                 modifier = Modifier
