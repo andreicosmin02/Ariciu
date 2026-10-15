@@ -4,7 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import ro.andrei.ariciu.feature.remindereditor.ui.ReminderEditorScreen
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import ro.andrei.ariciu.feature.reminders.data.ReminderDatabase
+import ro.andrei.ariciu.feature.reminders.data.RoomReminderRepository
+import ro.andrei.ariciu.feature.reminders.ui.AriciuApp
+import ro.andrei.ariciu.feature.reminders.ui.RemindersViewModel
 import ro.andrei.ariciu.ui.theme.AriciuTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +20,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AriciuTheme {
-                ReminderEditorScreen()
+                val model: RemindersViewModel = viewModel(factory = viewModelFactory {
+                    initializer {
+                        RemindersViewModel(
+                            RoomReminderRepository(ReminderDatabase.getInstance(applicationContext).reminderDao()),
+                            createSavedStateHandle(),
+                        )
+                    }
+                })
+                AriciuApp(model)
             }
         }
     }

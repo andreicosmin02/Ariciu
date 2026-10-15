@@ -3,6 +3,12 @@ package ro.andrei.ariciu.feature.locationpicker.ui
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,25 +55,33 @@ private const val BRASOV_DEVELOPMENT_LONGITUDE = 25.6012
 private const val BRASOV_DEVELOPMENT_ZOOM = 13.0
 
 @Composable
-fun LocationPickerScreen(onLocationSelected: (SelectedLocation) -> Unit) {
+fun LocationPickerScreen(
+    onLocationSelected: (SelectedLocation) -> Unit,
+    initialLocation: SelectedLocation? = null,
+    onShowReminders: (() -> Unit)? = null,
+    onCancel: (() -> Unit)? = null,
+) {
+    var selectedCoordinates by rememberSaveable(stateSaver = listSaver(
+        save = { listOf(it.latitude, it.longitude) },
+        restore = { SelectedCoordinates(it[0], it[1]) },
+    )) {
+        mutableStateOf(SelectedCoordinates(
+            initialLocation?.latitude ?: BRASOV_DEVELOPMENT_LATITUDE,
+            initialLocation?.longitude ?: BRASOV_DEVELOPMENT_LONGITUDE,
+        ))
+    }
+    var radiusMeters by rememberSaveable {
+        mutableIntStateOf(initialLocation?.radiusMeters ?: DEFAULT_RADIUS_METERS)
+    }
     val cameraState = rememberCameraState(
         firstPosition = CameraPosition(
             target = Position(
-                latitude = BRASOV_DEVELOPMENT_LATITUDE,
-                longitude = BRASOV_DEVELOPMENT_LONGITUDE,
+                latitude = selectedCoordinates.latitude,
+                longitude = selectedCoordinates.longitude,
             ),
             zoom = BRASOV_DEVELOPMENT_ZOOM,
         )
     )
-    var selectedCoordinates by remember {
-        mutableStateOf(
-            SelectedCoordinates(
-                latitude = BRASOV_DEVELOPMENT_LATITUDE,
-                longitude = BRASOV_DEVELOPMENT_LONGITUDE,
-            )
-        )
-    }
-    var radiusMeters by remember { mutableIntStateOf(DEFAULT_RADIUS_METERS) }
     val radiusColor = MaterialTheme.colorScheme.primary
     val radiusBoundary = remember(selectedCoordinates, radiusMeters) {
         buildRadiusBoundary(
@@ -94,16 +108,23 @@ fun LocationPickerScreen(onLocationSelected: (SelectedLocation) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
             Text(
-                text = "Choose location",
+                text = if (onShowReminders == null) "Choose location" else "Ariciu",
                 style = MaterialTheme.typography.headlineSmall
             )
+            if (onShowReminders != null) {
+                Text("Choose a place. We’ll help you remember.")
+                Text("Map tiles need internet; saved reminders stay on this device.",
+                    style = MaterialTheme.typography.bodySmall)
+                FilledTonalButton(onClick = onShowReminders) { Text("Your reminders") }
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp)
+                    .height(if (onShowReminders == null) 240.dp else 360.dp)
                     .testTag("location_picker_map_area"),
                 contentAlignment = Alignment.Center
             ) {
@@ -154,6 +175,7 @@ fun LocationPickerScreen(onLocationSelected: (SelectedLocation) -> Unit) {
                     .semantics { contentDescription = "Reminder radius" },
             )
             Button(
+                enabled = !cameraState.isCameraMoving,
                 onClick = {
                     onLocationSelected(
                         SelectedLocation(
@@ -166,6 +188,9 @@ fun LocationPickerScreen(onLocationSelected: (SelectedLocation) -> Unit) {
                 modifier = Modifier.testTag("location_picker_confirm_button"),
             ) {
                 Text("Use this location")
+            }
+            if (onCancel != null) {
+                TextButton(onClick = onCancel) { Text("Back to reminder") }
             }
         }
     }
