@@ -2,7 +2,7 @@
 
 ## Current milestone
 
-The MapLibre location-selection feasibility spike and result contract are complete.
+The MapLibre location-selection spike and result contract are complete. A title-only reminder editor is the current app entry point. The autonomous Codex workflow and repository skills are installed.
 
 ## Implemented behavior
 
@@ -16,7 +16,7 @@ The MapLibre location-selection feasibility spike and result contract are comple
 - MapLibre renders the polygon with a low-opacity fill and a 2dp outline. It updates after a radius change or settled camera-center change.
 - `SelectedLocation` is a plain application-owned result containing the selected latitude, longitude, and radius.
 - The Material 3 **Use this location** button emits that result through `LocationPickerScreen`'s required callback.
-- `MainActivity` currently supplies a no-op callback because a reminder editor and navigation flow do not exist yet.
+- `MainActivity` launches the title-only `ReminderEditorScreen`; the picker is not connected yet.
 
 ## Important boundaries
 
@@ -25,7 +25,7 @@ The MapLibre location-selection feasibility spike and result contract are comple
 - SpatialK and MapLibre types are confined to the map-integration boundary.
 - The map needs internet for uncached or new areas.
 - GPS and Android location runtime permissions are not implemented.
-- Room, a reminder editor, geofencing, and notifications are not implemented.
+- Room, a complete reminder editor, geofencing, and notifications are not implemented.
 
 ## Relevant files
 
@@ -45,7 +45,7 @@ The MapLibre location-selection feasibility spike and result contract are comple
 
 ## Verification
 
-The currently passing checks are:
+Previous checks were recorded as passing; this is historical evidence, not a claim that setup changes reran them:
 
 ```bash
 ./gradlew :app:testDebugUnitTest
@@ -62,6 +62,11 @@ Re-run these before relying on this snapshot.
 - `MainActivity` currently launches `ReminderEditorScreen` directly.
 - The completed location picker is not connected to the editor yet.
 
-## Next milestone
+## Development workflow and next feature batch
 
-Add the ENTER/EXIT trigger choice.
+- `AGENTS.md` and `.agents/skills/` now define autonomous feature-batch development with product-owner input for material decisions.
+- The setup ZIP was adapted to remove its mandatory small-milestone stops; repository skills follow the official Codex repository-local `.agents/skills/` convention.
+- Product direction: map-first home screen. Choose a place, then enter reminder details; provide access to saved reminders from the map.
+- Next batch: connect location selection and reminder editing, add ENTER/EXIT choices, and persist/manage reminders locally with Room.
+- Initial defaults: ENTER and once-only. Alarm intensity and chained reminders remain outside MVP.
+- Subsequent batch: staged permissions, supported notifications, geofence registration/recovery, and duplicate-event handling. Saved reminders must not be presented as actively monitored before this is implemented.
