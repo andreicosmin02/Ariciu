@@ -6,6 +6,8 @@ Feature expansion is paused. Ariciu now has a dark-first UI/UX redesign with Cre
 
 Location-based delivery from the preceding batch remains implemented: Play services geofences, Room lifecycle state, persistent WorkManager commands/recovery, and Normal notifications. Real-phone delivery validation remains outstanding.
 
+For session continuity, read [the Codex handoff](CODEX_HANDOFF.md). Current work is on `feat/considered-ui-redesign`, based on the delivery and creation feature branches; it has not been merged into `master`. Latest application change: `3a2f5a7`; design documentation/screenshots: `4fa643e`.
+
 ## User-facing behavior
 
 - **Create** opens a large map around Brașov with a centre marker and area boundary. A persistent selection sheet offers 100m / 200m / 500m presets; More distances reveals the full 100–1000m slider. Default is 200m. Coordinates are secondary under Location details.
@@ -31,11 +33,11 @@ Location-based delivery from the preceding batch remains implemented: Play servi
 - MapLibre uses Positron in light mode and a bundled, licensed OpenFreeMap Dark adaptation in dark mode, with clearer roads and labels. Map tiles/fonts/sprites still come from the same free provider. Source credits/notices are retained. SpatialK/MapLibre types remain at the map boundary.
 - `ThemePreferences` uses local SharedPreferences and StateFlow. No new dependency, service, billing requirement, Room schema change, or delivery algorithm was introduced by the redesign. The map-style asset and native Compose/vector controls require no image-generation API or remote font.
 - Map tiles need internet for uncached areas; local saved reminders do not.
-- No GPS/current-location map shortcut is implemented. Staged delivery permissions are implemented; device positioning is delegated to Play services.
+- No address/place search, reverse-geocoded place names, or GPS/current-location map shortcut is implemented. Selection is by moving the map. Staged delivery permissions are implemented; device positioning is delegated to Play services.
 
 ## Verification (2026-10-15, redesign)
 
-Executed successfully:
+Last executed successfully for the redesign implementation (`3a2f5a7`):
 
 ```bash
 ./gradlew :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:lintDebug :app:assembleDebug
@@ -49,6 +51,8 @@ Executed successfully:
 - These checks do not establish real Play services positioning, real boundary crossings, process-kill/reboot delivery, sound/heads-up behavior, OEM battery behavior, or usability with older adults. Physical-phone TalkBack/Switch Access and user testing remain outstanding.
 - Background-delivery verification remains covered by [the phone checklist](PHONE_VERIFICATION.md).
 
+During the documentation-only handoff, source and stored XML reports were reviewed again: 52 unit tests and 15 emulator tests, zero failures/errors/skips; lint reports 36 warnings and no errors. Gradle checks were not rerun and no application behavior changed. Build outputs are disposable; regenerate the debug APK before installing on a phone.
+
 ## Product decisions and assumptions
 
 - UI/UX redesign is the top priority; feature expansion stays paused.
@@ -59,6 +63,7 @@ Executed successfully:
 
 ## Remaining limitations and next work
 
+- No failing automated test or unresolved reproducible application bug is recorded at handoff. This is not a claim that the app is bug-free; device behavior and broader usability remain unverified.
 - Real geofence delivery and reboot recovery need phone verification before treating the MVP as validated. Android/OEM restrictions, positioning, network-assisted location, and WorkManager quotas may delay or suppress work. Force-stopped apps need reopening. Heads-up alerts are user/OS controlled.
 - Crossings missed while permissions or location services were unavailable cannot be reconstructed; visit gating is deliberately conservative to avoid duplicate occurrences.
 - Room, WorkManager, Play services, and the notification service do not share one transaction. Persistent registration bookkeeping, outbox flags, stable IDs, and reconciliation repair interrupted operations when Android next runs the app/work. There is no absolute exactly-once or immediate-delivery guarantee.

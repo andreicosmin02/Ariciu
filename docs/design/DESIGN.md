@@ -2,12 +2,19 @@
 
 Feature expansion is paused while the product owner evaluates this redesign. The aim is a calm, readable app that tells people what to do next, without looking like a component catalogue.
 
+## Design principles
+
+- Aim for a premium, quiet identity through hierarchy, typography, spacing, and consistent surfaces. Avoid gradients, playful decoration, visual clutter, and generic demo styling.
+- Make the next action explicit. Prefer labeled navigation and visible choices over hidden gestures; keep coordinates and platform diagnostics secondary.
+- Design for older or less technical users: plain language, scalable text, large controls, and status conveyed in words as well as color. Usability with these users is a goal still awaiting observation.
+- Preserve honest delivery status and existing reminder behavior. Visual polish must not imply that a saved reminder is registered or that Android guarantees immediate alerts.
+
 ## Visual system
 
 - **Graphite first:** near-black `#111214`, raised surfaces `#191B1E` / `#1D1F23`, warm white `#F2F0EC`. Dark surfaces are separated by tone and spacing rather than heavy shadows.
 - **Slate blue:** `#B4C9EC` in dark mode, `#355B8D` in light mode. Used for the primary action, selected choices, and the area boundary. Amber is reserved for an actionable setup warning; green is not part of the identity.
 - **Light mode:** warm paper `#F5F4F0`, near-white surfaces `#FCFBF8`, charcoal text `#202329`. It has its own contrast relationships rather than an inverted dark palette.
-- **Typography:** Android’s local sans-serif, with custom sizes, weights, line heights, and restrained tracking. Body text is 15–17sp; headings are 24–32sp. No downloaded font, font service, decorative lettering, or new dependency.
+- **Typography:** Android’s local sans-serif, with custom sizes, weights, line heights, and restrained tracking. Main body text is 15–17sp, secondary small text is 13sp, and headings are 24–32sp. No downloaded font, font service, decorative lettering, or new dependency.
 - **Spacing:** 24dp page edges, 20dp card interiors, 12–24dp group separation, and smaller 4–8dp spacing within a related group. Reading order comes before decoration.
 - **App icon:** a native vector place/check mark on graphite replaces the green Android starter artwork. The adaptive/monochrome resource routes are retained.
 - **Shape:** 12dp small controls, 18dp choice cards and primary actions, 24dp larger cards, 28dp sheet corners. Elevation is limited to the map guidance/sheet; forms and lists use tonal surfaces.
@@ -17,7 +24,7 @@ Feature expansion is paused while the product owner evaluates this redesign. The
 
 The three primary destinations are **Create**, **Reminders**, and **Settings**, always labeled. Existing internal route names remain MAP, LIST, and DELIVERY to preserve state compatibility. EDITOR is a focused secondary screen with Cancel and a fixed Save action. Switching tabs preserves a named draft; Create resumes it. Map position/radius are retained across tab switches through saveable screen state.
 
-**Create:** a large map, a clear centre marker, and a persistent place-selection sheet. The common 100m/200m/500m distances are directly selectable. More distances reveals the existing 100–1000m slider; Location details reveals coordinates and the map-network note. The primary action is Use this place. The map is not hidden behind a search field that cannot actually search.
+**Create:** a large map, a clear centre marker, and a persistent place-selection sheet. The common 100m/200m/500m distances are directly selectable. More distances reveals the existing 100–1000m slider; Location details reveals coordinates and the map-network note. The primary action is Use this place. There is no place search, address lookup, or current-location shortcut yet. Short screens and larger text use a scrolling layout with a fixed-height map so the controls remain reachable.
 
 **Editor:** a readable reminder field, a human place summary, explicit Arrive/Leave choice cards, and explicit Just once/Every visit choices. Save stays available at the bottom while the content scrolls or the keyboard is open. Larger text switches the side-by-side trigger cards into a vertical group.
 
@@ -58,3 +65,5 @@ Screenshots below are actual Android emulator captures. Delivery permissions wer
 - [Larger-text editor](screenshots/large-text-editor.png)
 
 The most useful next design feedback is about the slate-blue accent, map-to-sheet balance, and whether the path from choosing a place to saving a reminder feels clear. Feature expansion stays paused while that feedback is incorporated.
+
+Implementation baseline: `3a2f5a7`. See [the session handoff](../CODEX_HANDOFF.md) for branch, verification, and continuation guidance.
