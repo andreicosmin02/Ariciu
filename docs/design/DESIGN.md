@@ -1,6 +1,6 @@
 # Ariciu design direction
 
-Feature expansion is paused while the product owner evaluates this redesign. The aim is a calm, readable app that tells people what to do next, without looking like a component catalogue.
+Feature completion and a phone-testable release candidate are the current priorities; preserve the established redesign. The aim is a calm, readable app that tells people what to do next, without looking like a component catalogue.
 
 ## Design principles
 
@@ -24,7 +24,7 @@ Feature expansion is paused while the product owner evaluates this redesign. The
 
 The three primary destinations are **Create**, **Reminders**, and **Settings**, always labeled. Existing internal route names remain MAP, LIST, and DELIVERY to preserve state compatibility. EDITOR is a focused secondary screen with Cancel and a fixed Save action. Switching tabs preserves a named draft; Create resumes it. Map position/radius are retained across tab switches through saveable screen state.
 
-**Create:** a large map, a clear centre marker, and a persistent place-selection sheet. The common 100m/200m/500m distances are directly selectable. More distances reveals the existing 100–1000m slider; Location details reveals coordinates and the map-network note. The primary action is Use this place. There is no place search, address lookup, or current-location shortcut yet. Short screens and larger text use a scrolling layout with a fixed-height map so the controls remain reachable.
+**Create:** a large map, a clear centre marker, and a persistent place-selection sheet. The common 100m/200m/500m distances are directly selectable. More distances reveals the existing 100–1000m slider; Location details reveals coordinates and the map-network note. The primary action is Use this place. Romania-first local town/shop-address search and a user-initiated current-location button are now available; full address coverage is not claimed. Short screens and larger text use a scrolling layout with a fixed-height map so the controls remain reachable.
 
 **Editor:** a readable reminder field, a human place summary, explicit Arrive/Leave choice cards, and explicit Just once/Every visit choices. Save stays available at the bottom while the content scrolls or the keyboard is open. Larger text switches the side-by-side trigger cards into a vertical group.
 
@@ -64,6 +64,24 @@ Screenshots below are actual Android emulator captures. Delivery permissions wer
 - [Light Settings](screenshots/light-settings.png)
 - [Larger-text editor](screenshots/large-text-editor.png)
 
-The most useful next design feedback is about the slate-blue accent, map-to-sheet balance, and whether the path from choosing a place to saving a reminder feels clear. Feature expansion stays paused while that feedback is incorporated.
+The most useful next design feedback is about the slate-blue accent, map-to-sheet balance, and whether the path from choosing a place to saving a reminder feels clear. Feature completion proceeds alongside visual refinement and owner feedback.
 
 Implementation baseline: `3a2f5a7`. See [the session handoff](../CODEX_HANDOFF.md) for branch, verification, and continuation guidance.
+
+## Release candidate (2026-10-16)
+
+Feature completion is authorized. Current source/status and supported fallbacks are described in [project status](../PROJECT_STATUS.md) and [implementation evidence](../FEATURE_COMPLETION.md). The original screenshots above document the redesign baseline; the following captures document the candidate.
+
+Settings now uses inline setup actions at ordinary text sizes and stacked controls for large text. Sound/channel settings are collapsed. The editor has tighter group spacing, explicit alert selection, contextual chain explanations, selected-store review and a fixed Save action. Chain and intensity dialogs clear text focus. Shared headings expose accessibility heading semantics. No new brand color, gradient, decorative asset or external design service was introduced.
+
+The search UI states Romania coverage, catalogue date and missing-address limitations. Chain summaries say selected stores rather than implying every branch is monitored. Offline packs state their theme/detail limits and resource size; failed/incomplete packs have actionable controls. Android-specific details remain contextual.
+
+Actual Android 17 emulator review captures (sample data; not golden tests):
+
+- [Dark Create](screenshots/rc/rc-dark-create.png), [Light Create](screenshots/rc/rc-light-create.png)
+- [Light chain editor](screenshots/rc/rc-light-editor.png)
+- [2× text alert selection](screenshots/rc/rc-large-alerts.png), [2× text reminders](screenshots/rc/rc-large-reminders.png)
+- [Dark Settings](screenshots/rc/rc-dark-settings.png), [Light Settings](screenshots/rc/rc-light-settings.png)
+- [Real downloaded light area with emulator Wi-Fi/mobile data disabled](screenshots/rc/rc-offline-light.png)
+
+Reviewed text/controls remained readable and reachable; native map rendering was separately inspected after resources loaded. Physical-phone TalkBack/Switch Access, Android font/display scaling, different screen sizes, audible/vibration behavior and observed usability remain on the phone checklist. Offline testing covers one actual area, not provider-wide availability or positioning.

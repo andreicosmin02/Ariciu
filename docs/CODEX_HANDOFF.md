@@ -1,62 +1,35 @@
 # Codex handoff
 
-Prepared 2026-10-15. Start with `AGENTS.md`, [project status](PROJECT_STATUS.md), and [design direction/screenshots](design/DESIGN.md); verify them against Git and source. This handoff changes documentation only.
+Updated 2026-10-16 for the phone release candidate. Read AGENTS.md, PROJECT_STATUS.md, design/DESIGN.md, FEATURE_COMPLETION.md and PHONE_VERIFICATION.md before changing behavior.
 
-## Branch and local work
+## Branch and authorization
 
-- Continue on **`feat/considered-ui-redesign`**, tracking `origin/feat/considered-ui-redesign`. Do not start from `master`: this branch includes creation, delivery, and redesign work that has not been merged there.
-- Latest application commit: **`3a2f5a7`** (redesign/navigation/theme/tests). Previous documentation/screenshots: **`4fa643e`**. This handoff is a subsequent documentation commit; use `git log -4 --oneline` for its hash.
-- Delivery baseline: `ad0290d` (lifecycle/registration), `a170154` (notifications/recovery), `e334adf` (setup/status). Creation: `9e91f09`; autonomous workflow: `dd0649f`.
-- At preparation, three unrelated files were already staged: `.idea/codeStyles/Project.xml`, `.idea/codeStyles/codeStyleConfig.xml`, `.idea/deviceManager.xml`. Preserve them; do not unstage, discard, or include them in task commits without authorization. Recheck `git status` for later user changes.
-- Commit/push completed authorized work to a feature branch. No merging into `master`, force-pushing, branch deletion, or release publishing without authorization.
+Continue on `feat/phone-release-candidate`, created from the complete redesign branch at `de9644e`, not master. Use `git status --short --branch` and `git log -5 --oneline` for current commits. User authorized autonomous feature completion, tests, focused commits and pushes. No merge, force push, branch deletion or release publication is authorized.
 
-## Implemented
+Feature expansion is authorized. Preserve graphite/slate blue, warm light theme, locally persisted System/Light/Dark and Create/Reminders/Settings. Preserve local-only core behavior and zero recurring cost. Romania-first offline town/shop catalogue scope was explicitly approved. Ask only for meaningful product/coverage/privacy/architecture decisions or genuine blockers.
 
-- Map-first selection, local Room reminders, creation/editing/deletion, saved-state draft restoration, validation/error handling.
-- Persistent ENTER/EXIT and ONCE/EVERY_VISIT lifecycle; Play services geofences, registration reconciliation/failures/100-area overflow, WorkManager commands/retries, boot/update recovery.
-- Normal notifications with Done, Next time, swipe-as-Next-time, and a tap destination that highlights the reminder. Staged permission explanations/settings shortcuts and actionable delivery status.
-- Create / Reminders / Settings tabs; focused editor with explicit arrival/repeat cards and fixed Save action; radius presets plus slider; Active/Completed lists; combined appearance/delivery Settings.
-- Locally persisted System / Light / Dark, custom palettes/type/shapes/icons, dark map style and license notices, actual emulator screenshots. No new dependency or service was added for the redesign.
+The former three staged .idea files were explicitly requested ignored by the owner: .idea/codeStyles/Project.xml, codeStyleConfig.xml and deviceManager.xml remain on disk and are ignored. Their ignore rules and the new priority are committed in `92ba3e9`. Recheck for subsequent user changes before staging anything.
 
-## Decisions to preserve
+## Implemented boundaries
 
-- **Feature expansion is paused.** Continue design refinement and usability/accessibility validation; no owner feedback on the finished redesign is recorded yet. Work autonomously on routine engineering, asking only for meaningful product/design preferences or necessary authorization.
-- Identity: premium graphite/near-black, restrained slate blue, warm paper light theme. System is the default. No green identity, wallpaper-driven palette, gradients, playful decoration, or generic component-demo styling. Keep the UX simple, calm, and understandable to older/non-technical people.
-- Zero recurring financial cost is mandatory. No backend, Firebase, mandatory account, or cloud storage. Before any new library/provider/service, verify licensing, pricing, limits, and billing requirements; paid keys, credit cards, subscriptions, or metered services require explicit approval. Existing provider evidence/notices are in the design and delivery docs; recheck terms before future changes. A free tier is not a permanent zero-cost guarantee.
-- Defaults remain ENTER / ONCE / 200m. ONCE does not recur without Next time; EVERY_VISIT needs an opposite crossing before another occurrence. EXIT needs a return then another departure. Done completes; Next time/swipe waits for a distinct visit. Editing preserves completion/occurrence state. Registration itself does not trigger an initial alert.
-- Core data stays local; uncached map areas need internet and Play services positioning can depend on network assistance. Do not promise immediate/exact/guaranteed geofence delivery or heads-up notifications. Alarm, chains, Silent/Urgent, continuous GPS, polling, and tracking services remain outside this work.
+- Four intensities with preserved Normal channel; channel-specific blocking; generation/occurrence-safe actions; persisted ten-minute inexact Snooze; quiet restoration of already-delivered alarms. Alarm uses Android notification `FLAG_INSISTENT`, not an app playback service. Receiver requests immediate matching-alert silence before scheduling the persisted action.
+- No full-screen, exact-alarm, FGS or DND-bypass workaround. The supported fallback is an actionable prominent notification; opening the panel can stop its repeat audio. Ongoing notifications may be dismissible on modern Android. VIBRATE is a normal manifest permission, with no new runtime prompt.
+- Foreground current-location button with bounded age/timeout/cancellation and denial/errors. Search stays local. No Nominatim, Overpass, Geocoder, Google Maps Platform or paid API is called.
+- ODbL Romania catalogue in assets/places, source timestamp 2026-10-15T20:21:00Z, 25,834 rows; seven chains. NOTICE.md provides source/hash/licence/limitations. tools/build_place_catalog.py regenerates it from a free Geofabrik extract using development-only PyOsmium. Keep dates, attribution and UI catalogue wording synchronized when updating it.
+- Chains persist up to 40 nearest selected stores around the pin, union-of-areas visit state and independent duplicate guards. Explicit store review/refresh handles travel/data updates without continuous GPS. One parent reminder/notification identity; Done completes all stores. Fair allocation caps actual registered areas at 100 and exposes partial monitoring. Missed exits remain conservative.
+- MapLibre native offline packs are explicitly requested, small, theme-specific and bounded. Native download definitions must use the matching hosted OpenFreeMap style; `asset://` definitions stalled at zero resources in real verification. Display styles stay bundled/custom graphite and share the downloaded tile/font/sprite URLs. Four HTTP requests maximum, unique User-Agent, byte/tile budgets. Resume/pause/delete/resource size and a 90-second pause are explicit. Do not use the native Mapbox-only tile limiter as protection for OpenFreeMap.
+- Room schemas 1–4 and additive migrations remain. Do not weaken generation conditions, occurrence tokens, outbox flags, registration journal or transaction/mutex boundaries. Title edits preserve delivery/store/snooze state; area/chain changes reset positioning while preserving completion.
 
-## Boundaries and important files
+## Important paths
 
-Paths below are relative to `app/src/main/java/ro/andrei/ariciu/` unless stated otherwise.
+App wiring and existing routes: MainActivity.kt, feature/reminders/ui/AriciuApp.kt and RemindersViewModel.kt. New fields flow through existing draft/SavedStateHandle boundaries; internal MAP/LIST/DELIVERY/EDITOR names are preserved.
 
-| Area | Boundary / entry points |
-| --- | --- |
-| App wiring | `MainActivity.kt`: constructor injection, theme collection, notification intents. Package/application ID remains `ro.andrei.ariciu`; min SDK 26, compile/target SDK 37. |
-| Flow | `feature/reminders/ui/AriciuApp.kt`, `RemindersViewModel.kt`: routes MAP/LIST/DELIVERY/EDITOR, SavedStateHandle draft/save identity. Preserve internal route names and draft guards. |
-| Domain/storage | `feature/reminders/model/`; `feature/reminders/data/ReminderDatabase.kt`: Room v2, exported v1/v2 schemas in `app/schemas/`, explicit 1→2 migration. No destructive migration. |
-| Delivery | `feature/delivery/model/ReminderLifecycle.kt`, `DeliveryEngine.kt`: plain Kotlin state machine/ports. Android adapters/receivers/work in `feature/delivery/platform/`; permission UI in `feature/delivery/ui/`. |
-| Design | `ui/theme/`, `ui/components/`; picker/editor/reminder screens in their existing feature packages. `ThemePreferences` uses local SharedPreferences/StateFlow. |
-| Map | MapLibre/SpatialK stay at map boundaries; `app/src/main/assets/map/` contains the adapted dark style and licenses. Keep attribution. Light uses existing OpenFreeMap Positron. |
+Domain/engine/chain logic: feature/reminders/model and feature/delivery/model. Room adapter: feature/reminders/data/ReminderDatabase.kt. Android notifications/work: feature/delivery/platform. Search: feature/places. Native download policy/controller: feature/offlinemap. Picker/editor/Settings remain in their existing feature packages.
 
-Protect generation-conditional Room writes, registration ledger, occurrence tokens, notification outbox/stable tags, and separate event/reconciliation queues. They prevent stale edits/actions, duplicate notifications, and orphan registrations. Room/platform calls cannot be one transaction; recovery is best-effort, not exactly-once. See [delivery architecture](DELIVERY_ARCHITECTURE.md). Use the repository Android implementation/verification skills when changing application code; avoid unrelated upgrades or added architecture.
+## Verification and next work
 
-## Verification and remaining work
+See PROJECT_STATUS.md for final executed counts and artifact; FEATURE_COMPLETION.md for official provider/Android sources. No failing reproducible critical bug is knowingly left. Emulator tests do not establish physical positioning, sound, vibration, reboot delivery, OEM restrictions or accessibility usability.
 
-Last successful redesign command:
+Next: install the debug APK over the existing physical-phone build (same signing key), use PHONE_VERIFICATION.md for several weeks, and repair observed issues. Nothing has been merged or published. Build outputs are disposable; regenerate them if missing. After the direct OkHttp catalogue addition, Android Studio may need a normal Gradle sync.
 
-```bash
-./gradlew :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:lintDebug :app:assembleDebug
-```
-
-- **52 unit tests + 15 Android 17 emulator tests passed**, zero failures/errors/skips. Covers lifecycle/duplicate events/registration, Room migration/concurrent edits, notification actions, ViewModel, theme persistence, tested palette contrast, navigation/drafts, and a 2× text editor flow.
-- Lint/build passed; lint has 36 advisory warnings. Stored reports were rechecked for this handoff; tests/build were not rerun for documentation-only changes. Regenerate build artifacts as needed.
-- No failing test or unresolved reproducible app bug is recorded. This does not establish bug-free or physical-device behavior. Emulator install disconnects occurred; a clean boot without wiping data restored the successful run.
-- Physical-phone delivery, reboot/process recovery, OEM restrictions, sound/heads-up behavior, TalkBack/Switch Access, other screen sizes/display scaling, and observed usability with older users remain unverified. Follow [the phone checklist](PHONE_VERIFICATION.md); its “Delivery setup” now lives in Settings. Screenshots are review artifacts, not golden tests or proof of accessibility.
-- No place search/address lookup/current-location shortcut. Completed reminders have no restart control; creating another reminder is the current workaround. Missed crossings cannot be reconstructed. Registration retries are bounded; OS restrictions/force stop can prevent work until reopening.
-
-## Next priorities
-
-1. Incorporate owner feedback on slate blue, map/sheet balance, editor density, and creation-flow clarity; retain the agreed identity and navigation.
-2. Validate and fix accessibility/layout issues on a phone, especially large text, TalkBack order/actions, and readable maps. Record observed results without overstating emulator coverage.
-3. Complete real-phone delivery verification and repair reproducible failures while preserving lifecycle semantics. Resume feature expansion only when the owner changes the current priority.
+Verified application commits: `4e959b9` (delivery/storage) and `011746c` (map/search/offline/UI). Current debug version: `1.1-rc1`, version code 2.

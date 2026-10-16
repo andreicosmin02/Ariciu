@@ -2,7 +2,7 @@
 
 ## Lifecycle and identity
 
-The existing Reminder table remains the source of truth. Schema 2 adds lifecycle, position, occurrence, notification-outbox, registration, and error fields. Migration 1→2 retains every version-1 reminder and assigns a monitoring generation. Exported schemas are versioned; there is no destructive fallback.
+The existing Reminder table remains the source of truth. Current schema is 4 (see [feature-completion evidence](FEATURE_COMPLETION.md)). Schema 2 added lifecycle, position, occurrence, notification-outbox, registration, and error fields. Migration 1→2 retains every version-1 reminder and assigns a monitoring generation. Exported schemas are versioned; there is no destructive fallback.
 
 - WAITING: eligible for the chosen crossing.
 - TRIGGERED: a current occurrence exists. ONCE stays here until Done or Next time; EVERY_VISIT becomes eligible after the opposite crossing.
@@ -19,7 +19,7 @@ Initial geofence triggers are disabled: registration/reconciliation is not a new
 
 `DeliveryEngine` is plain Kotlin behind store, geofence, and notification boundaries. `RoomDeliveryStore` uses Room transactions for lifecycle mutations. The Android runtime serializes delivery operations with one process mutex; Room serializes concurrent UI edits.
 
-A persistent registration ledger records planned request IDs **before** adding them. Reconciliation removes obsolete IDs before adding eligible IDs. Stable IDs replace existing Play services registrations instead of multiplying them. The ledger survives deletion and interrupted platform calls until cleanup succeeds. At most 100 active areas are selected in deterministic reminder-ID order; overflow reminders show an actionable limit status and become eligible when capacity is freed.
+A persistent registration ledger records planned request IDs **before** adding them. Reconciliation removes obsolete IDs before adding eligible IDs. Stable IDs replace existing Play services registrations instead of multiplying them. The ledger survives deletion and interrupted platform calls until cleanup succeeds. At most 100 actual areas are selected in deterministic rounds across reminder IDs, sharing capacity with chain store areas. Overflow and partial chain monitoring have distinct statuses and promote when capacity is freed.
 
 Geofence and notification-action receivers persist commands into a unique WorkManager event chain. Lifecycle commands and registration reconciliation have separate queues, so a backoff for failed registration does not block Done/Next time. Registration calls have a 20-second timeout; failed reconciliation receives up to five attempts with exponential backoff starting at 30 seconds, then waits for a user retry, app resume, boot, or package update. This is event-driven work, not location polling or a recurring job.
 
@@ -35,9 +35,9 @@ Lifecycle updates first commit a pending-notification outbox flag. The flag is c
 
 ## Permissions and platform limits
 
-Setup is user initiated, with explanations and a Not now option. Fine/coarse foreground location are requested together; background access is a separate step (Android 10 runtime request; Android 11+ Settings with the localized all-the-time label). Notifications use POST_NOTIFICATIONS on Android 13+. Device Location, Google Play services availability, app-level notification access, and the Normal channel are checked before registration. Missing capabilities mark active reminders blocked and prevent new registrations. Permissions/settings are checked on resume and on every delivery job; platform failures remain visible and retryable.
+Setup is user initiated, with explanations and a Not now option. Fine/coarse foreground location are requested together; background access is a separate step (Android 10 runtime request; Android 11+ Settings with the localized all-the-time label). Notifications use POST_NOTIFICATIONS on Android 13+. Device Location, Google Play services availability, app-level notification access, and the selected intensity channel are checked before registration. Missing capabilities mark active reminders blocked and prevent new registrations. Permissions/settings are checked on resume and on every delivery job; platform failures remain visible and retryable.
 
-Android 16 job runtime quotas also affect WorkManager. Android 17 background audio restrictions reinforce using standard notification-channel sound rather than custom playback. No continuous GPS, foreground tracking service, exact alarm, full-screen intent, custom audio loop, backend, or network API key is used. Play services may use network-assisted positioning, so entirely disconnected detection and perfectly immediate/exact boundary delivery are not guaranteed.
+Android 16 job runtime quotas also affect WorkManager. Android 17 background audio restrictions reinforce using standard notification-channel sound rather than custom playback. No continuous GPS, foreground tracking service, exact alarm, full-screen intent, app audio loop, backend, or network API key is used. Alarm requests repeating audio from the Android notification service. Play services may use network-assisted positioning, so entirely disconnected detection and perfectly immediate/exact boundary delivery are not guaranteed.
 
 ## Dependencies, licensing, and cost review (2026-10-15)
 
@@ -61,3 +61,11 @@ License metadata was checked from the official Google Maven POMs before adding P
 - [Android 16 all-app behavior](https://developer.android.com/about/versions/16/behavior-changes-all) and [targeted changes](https://developer.android.com/about/versions/16/behavior-changes-16)
 - [Android 17 all-app behavior](https://developer.android.com/about/versions/17/behavior-changes-all) and [targeted changes](https://developer.android.com/about/versions/17/behavior-changes-17)
 - [Implicit broadcast exceptions](https://developer.android.com/develop/background-work/background-tasks/broadcasts/broadcast-exceptions): location-mode changes are observed dynamically while the UI is active; background recovery does not rely on a manifest-only location-mode broadcast.
+
+## Release-candidate extensions (2026-10-16)
+
+See [feature-completion evidence](FEATURE_COMPLETION.md) for the current intensity, snooze, chain, map, licensing and platform decisions. Actions now include Alarm Stop and Snooze; per-store request IDs append a stable OSM identity to the parent generation. Action IDs continue to address the parent reminder and occurrence. Per-store positions/timestamps and a parent union-of-areas lifecycle persist in Room; Done completes the whole reminder. Unknown/missed crossings remain conservative. Chain snapshots refresh explicitly around the user's chosen pin; there is no background GPS tracking or worldwide store claim.
+
+Snooze deadlines are local wall-clock timestamps backed by persistent inexact WorkManager jobs. Wake processing increments the occurrence token and resets alerting state; old buttons cannot affect the new alert. Reboot/app reconciliation repairs interrupted scheduling. Restored already-delivered alarms are quiet. The action receiver immediately requests silencing of the matching platform notification (generation and occurrence checked) before persisting its command, so Stop does not depend solely on delayed worker execution. Channel/DND/OS behavior still governs audio.
+
+Schema 2→3 and 3→4 use additive migrations with exported schemas. Completed/triggered states, generations and registration ledger entries survive upgrades. Title edits preserve store positions and snooze state. Changes to the selected area/chain reset area positioning while retaining completion and occurrence semantics.
