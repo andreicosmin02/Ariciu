@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Ariciu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Prioritize reliable core behavior; Alarm intensity and chain-based reminders are outside the initial MVP.
+Ariciu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Complete the planned functionality and prepare a reliable release candidate for extended physical-phone testing, including supported notification intensities, location/search, limited offline maps, and chain reminders.
 
 ## Current product priority and visual direction
 
-- Feature expansion is paused. Focus on UI/UX quality and product-owner design feedback before adding more capabilities.
+- Feature completion is authorized (2026-10-16). Implement coherent, verified feature batches while preserving UI/UX quality, accessibility, reliability, offline-first operation, and zero recurring cost.
 - Ariciu uses a dark-first charcoal/graphite identity with a restrained slate-blue accent; do not use green as the identity color, wallpaper-driven colors, playful decoration, gradients, or generic demo styling.
 - Support locally persisted System / Light / Dark appearance. Keep light mode equally usable and dark mode carefully designed.
 - Primary navigation is Create / Reminders / Settings. Keep the map central to creation, choices explicit, and delivery diagnostics in Settings or contextual help.
