@@ -58,10 +58,15 @@ fun rememberDeliveryCapabilities(): DeliveryCapabilities {
     return capabilities
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
     themePreference: ThemePreference = ThemePreference.SYSTEM, onThemeChange: (ThemePreference) -> Unit = {}) {
     val context = LocalContext.current
+    val offline = remember(context) { ro.andrei.ariciu.feature.offlinemap.OfflineMaps.get(context) }
+    val offlineAreas by offline.areas.collectAsState()
+    val offlineError by offline.error.collectAsState()
+    ro.andrei.ariciu.feature.offlinemap.PauseOfflineMapsWhenBackgrounded(offline)
     var current by remember(capabilities) { mutableStateOf(capabilities) }
     var explanation by remember { mutableStateOf<String?>(null) }
     var requestedForeground by rememberSaveable { mutableStateOf(false) }
@@ -80,7 +85,7 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
     val colors = MaterialTheme.colorScheme
     var showExplanation by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        verticalArrangement = Arrangement.spacedBy(18.dp)) {
         ScreenHeading("Settings", "Appearance and reminder delivery.")
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             SectionLabel("Appearance")
@@ -103,7 +108,7 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
             SectionLabel("Reminder delivery")
             Surface(color = colors.surfaceContainer, shape = MaterialTheme.shapes.medium) {
                 Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(if (current.ready) "Ready when you are" else "A few things to set up", style = MaterialTheme.typography.titleLarge)
+                    Text(if (!current.ready) "A few things to set up" else if (current.blockedIntensities.isNotEmpty()) "Some alerts are turned off" else "Ready when you are", style = MaterialTheme.typography.titleLarge)
                     Text(if (current.ready) "Your phone can look out for your chosen places." else "Give Ariciu permission to remind you, even when the app is closed.",
                         style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                 }
@@ -122,8 +127,40 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
                     SetupStep("Location service", current.playServices, "Uses Google Play services on your phone.") { explanation = "play" }
                 }
             }
+            if (current.blockedIntensities.isNotEmpty()) Text("Alerts turned off: ${current.blockedIntensities.joinToString { it.label }}. Review notification channels below.", color = colors.error)
+            var showChannels by rememberSaveable { mutableStateOf(false) }
+            TextButton(onClick = { showChannels = !showChannels }) { Text(if (showChannels) "Hide alert settings" else "Sound and alert settings") }
+            if (showChannels) ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.entries.forEach { intensity ->
+                TextButton(onClick = { context.startActivity(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    .putExtra(Settings.EXTRA_CHANNEL_ID, AndroidReminderNotifications.channelId(intensity))) }) {
+                    Text("${intensity.label} alert settings")
+                }
+            }
             OutlinedButton(onClick = { DeliveryWork.reconcile(context, force = true) }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 shape = MaterialTheme.shapes.medium) { Text("Check reminders again") }
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionLabel("Offline maps")
+            Text("Download a small area from Create → Location details. Packs include the theme used when downloaded. Downloads pause when leaving this screen or Create.", style = MaterialTheme.typography.bodyMedium)
+            if (offlineAreas.isEmpty()) Text("No downloaded areas yet.", color = colors.onSurfaceVariant)
+            offlineError?.let { Text(it, color = colors.error) }
+            offlineAreas.forEach { area ->
+                Surface(color = colors.surfaceContainer, shape = MaterialTheme.shapes.medium) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(area.name, style = MaterialTheme.typography.titleMedium)
+                        Text("${"%.1f".format(java.util.Locale.ROOT, area.bytes / 1_000_000.0)} MB · ${if (area.complete) "Ready offline" else if (area.active) "Downloading ${(area.progress * 100).toInt()}%" else "Incomplete · paused"}")
+                        area.error?.let { Text(it, color = colors.error) }
+                        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (!area.complete) TextButton(onClick = { if (area.active) offline.pause(area.id) else offline.resume(area.id) }) { Text(if (area.active) "Pause" else "Resume") }
+                            TextButton(onClick = { offline.delete(area.id) }) { Text("Delete area") }
+                        }
+                    }
+                }
+            }
+            Text("Sizes show map resources; shared cache and database overhead are additional. Android app storage shows the total.", style = MaterialTheme.typography.bodySmall)
+            TextButton(onClick = { appSettings() }) { Text("Phone storage settings") }
+            Text("Place search: Romania catalogue © OpenStreetMap contributors, ODbL 1.0. Geofabrik extract, 16 Oct 2026. Shops and addresses may be missing or outdated. Searches stay on this phone.", style = MaterialTheme.typography.bodySmall)
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = { showExplanation = !showExplanation }, contentPadding = PaddingValues(0.dp)) { Text("How reminders work") }
@@ -138,7 +175,7 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
         val text = when (step) {
             "foreground" -> "Allow location while using Ariciu and enable Precise location. You can keep creating reminders if you decline. If Android no longer shows a prompt, open app settings and choose Permissions → Location."
             "background" -> "To detect arrivals and departures while Ariciu is closed, open Permissions → Location and choose “${if (Build.VERSION.SDK_INT >= 30) context.packageManager.backgroundPermissionOptionLabel else "Allow all the time"}”. Keep Precise location enabled. You can decline and still manage saved reminders."
-            "notifications" -> "Allow notifications for reminder alerts. In Android Settings, enable Ariciu notifications and the Normal reminders channel. Android decides whether alerts pop up or make sound."
+            "notifications" -> "Allow notifications for reminder alerts. In Android Settings, enable Ariciu notifications and the channel for your chosen alert intensity. Android decides whether alerts pop up or make sound."
             "location" -> "Turn on Location in device settings. Wi-Fi scanning and network-assisted positioning can improve area detection."
             else -> "This feature requires Google Play services. Install, enable or update it on a supported Android device. Saved reminders remain available without it."
         }
@@ -171,17 +208,23 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
 @Composable
 private fun SetupStep(title: String, ready: Boolean, description: String, enabled: Boolean = true, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
-    Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(title, style = MaterialTheme.typography.titleMedium)
-                Text(description, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+    val action: @Composable () -> Unit = {
+        TextButton(onClick = onClick, enabled = enabled,
+            modifier = Modifier.testTag("setup_$title").heightIn(min = 48.dp)) { Text(if (ready) "Review" else "Set up") }
+    }
+    val descriptionContent: @Composable (Modifier) -> Unit = { modifier ->
+        Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                if (ready) Icon(AriciuIcons.Check, "Allowed", tint = colors.primary, modifier = Modifier.size(20.dp))
             }
-            if (ready) Icon(AriciuIcons.Check, contentDescription = "Allowed", tint = colors.primary, modifier = Modifier.size(22.dp))
+            Text(description, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
-        TextButton(onClick = onClick, enabled = enabled, contentPadding = PaddingValues(0.dp),
-            modifier = Modifier.testTag("setup_$title").heightIn(min = 48.dp)) {
-            Text(if (ready) "Review" else "Set up")
-        }
+    }
+    if (LocalDensity.current.fontScale > 1.3f) Column(Modifier.fillMaxWidth().padding(16.dp)) {
+        descriptionContent(Modifier.fillMaxWidth()); action()
+    } else Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        descriptionContent(Modifier.weight(1f)); action()
     }
 }

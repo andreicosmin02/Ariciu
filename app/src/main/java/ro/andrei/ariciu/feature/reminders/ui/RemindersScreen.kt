@@ -68,7 +68,7 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
             Surface(shape = MaterialTheme.shapes.large, color = colors.surface,
                 border = if (reminder.id == openedId) BorderStroke(1.dp, colors.primary) else null) {
                 Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(if (reminder.transition == ReminderTransition.ENTER) "ON ARRIVAL" else "ON DEPARTURE",
                             style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
                         Surface(shape = MaterialTheme.shapes.small, color = if (status.needsAttention) colors.tertiaryContainer else colors.primaryContainer) {
@@ -79,9 +79,10 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
                     Text(reminder.title, style = MaterialTheme.typography.titleLarge)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(AriciuIcons.Place, null, Modifier.size(18.dp), tint = colors.onSurfaceVariant)
-                        Text("${reminder.location.radiusMeters} m area · ${if (reminder.repeat == ReminderRepeat.ONCE) "Just once" else "Every visit"}",
+                        Text("${reminder.location.radiusMeters} m area · ${if (reminder.repeat == ReminderRepeat.ONCE) "Just once" else "Every visit"} · ${reminder.intensity.label}",
                             style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                     }
+                    reminder.chainName?.let { Text("$it · ${reminder.chainAreas.size} selected stores around your pin", style = MaterialTheme.typography.bodyMedium) }
                     Text(status.description, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                     HorizontalDivider(color = colors.outlineVariant)
                     Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {

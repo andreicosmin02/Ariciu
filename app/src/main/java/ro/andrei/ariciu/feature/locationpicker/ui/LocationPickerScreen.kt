@@ -1,5 +1,17 @@
 package ro.andrei.ariciu.feature.locationpicker.ui
 
+import android.Manifest
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
+import ro.andrei.ariciu.feature.places.*
+import ro.andrei.ariciu.feature.offlinemap.OfflineMaps
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -55,10 +67,35 @@ fun LocationPickerScreen(
     val boundary = remember(selectedCoordinates, radiusMeters) { buildRadiusBoundary(selectedCoordinates, radiusMeters).toGeoJsonPolygon() }
     val dark = isAriciuDarkTheme()
     val context = LocalContext.current
-    val baseStyle = remember(dark, context) {
-        if (dark) BaseStyle.Json(context.assets.open("map/ariciu-graphite.json").bufferedReader().use { it.readText() })
-        else BaseStyle.Uri("https://tiles.openfreemap.org/styles/positron")
+    val baseStyle = remember(dark) { BaseStyle.Uri(OfflineMaps.styleUri(dark)) }
+    val scope = rememberCoroutineScope()
+    val offlineMaps = remember(context) { OfflineMaps.get(context) }
+    val offlineError by offlineMaps.error.collectAsState()
+    val downloadedAreas by offlineMaps.areas.collectAsState()
+    var mapFailed by remember { mutableStateOf(false) }
+    var locating by remember { mutableStateOf(false) }
+    var message by remember { mutableStateOf<String?>(null) }
+    var showSearch by rememberSaveable { mutableStateOf(false) }
+    var downloadConfirm by remember { mutableStateOf(false) }
+    var locationExplanation by remember { mutableStateOf(false) }
+    var permissionAsked by rememberSaveable { mutableStateOf(false) }
+    fun locate() {
+        if (locating) return
+        scope.launch {
+            locating = true
+            try {
+                val result = context.currentMapPosition()
+                if (result == null) message = "We couldn’t find your position. Try again outdoors, or search for a place."
+                else cameraState.animateTo(CameraPosition(target = Position(latitude = result.latitude, longitude = result.longitude), zoom = 15.0))
+            } catch (e: CancellationException) { throw e
+            } catch (_: Exception) { message = "Position unavailable. Check phone Location and permissions, or use search." }
+            finally { locating = false }
+        }
     }
+    val locationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        if (context.hasMapLocationPermission()) locate() else message = "Location wasn’t allowed. Search or move the map, or allow it in app settings."
+    }
+    ro.andrei.ariciu.feature.offlinemap.PauseOfflineMapsWhenBackgrounded(offlineMaps)
     LaunchedEffect(cameraState) {
         snapshotFlow { cameraState.isCameraMoving }.collect { moving ->
             if (!moving) selectedCoordinates = SelectedCoordinates(cameraState.position.target.latitude, cameraState.position.target.longitude)
@@ -75,10 +112,15 @@ fun LocationPickerScreen(
                 }
                 if (onCancel != null) TextButton(onClick = onCancel) { Text("Back") }
             }
+            FlowRow(Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(onClick = { showSearch = true }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Search places") }
+                TextButton(onClick = { if (context.hasMapLocationPermission()) locate() else locationExplanation = true },
+                    enabled = !locating, modifier = Modifier.heightIn(min = 48.dp)) { Text(if (locating) "Finding you…" else "My location") }
+            }
             Box(Modifier.fillMaxWidth().then(if (compact) Modifier.height(280.dp) else Modifier.weight(1f))
                 .testTag("location_picker_map_area"), contentAlignment = Alignment.Center) {
                 MaplibreMap(Modifier.fillMaxSize(), baseStyle = baseStyle,
-                    cameraState = cameraState,
+                    cameraState = cameraState, onMapLoadFailed = { mapFailed = true }, onMapLoadFinished = { mapFailed = false },
                     options = MapOptions(ornamentOptions = OrnamentOptions(isLogoEnabled = false, isScaleBarEnabled = false))) {
                     val source = rememberGeoJsonSource(data = GeoJsonData.Features(boundary))
                     FillLayer(id = "reminder-radius-fill", source = source, color = const(colors.primary), opacity = const(0.14f))
@@ -92,7 +134,7 @@ fun LocationPickerScreen(
                 }
                 Surface(Modifier.align(Alignment.TopCenter).padding(16.dp), shape = MaterialTheme.shapes.small,
                     color = colors.surface, shadowElevation = 2.dp) {
-                    Text("Move the map to choose your spot", Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    Text(if (mapFailed) "Map unavailable here. Check internet or use a downloaded area." else "Move the map to choose your spot", Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         style = MaterialTheme.typography.bodyMedium)
                 }
             }
@@ -125,7 +167,9 @@ fun LocationPickerScreen(
                     if (details) {
                         Text(selectedCoordinates.formatLatitude(), Modifier.testTag("location_picker_latitude"), style = MaterialTheme.typography.bodyMedium)
                         Text(selectedCoordinates.formatLongitude(), Modifier.testTag("location_picker_longitude"), style = MaterialTheme.typography.bodyMedium)
-                        Text("Maps need internet for new areas.", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                        downloadedAreas.lastOrNull()?.let { area -> Text(if (area.complete) "Offline ${area.name.substringAfter(" · ").lowercase(java.util.Locale.ROOT)} area saved. Manage in Settings." else if (area.active) "Downloading ${(area.progress * 100).toInt()}%" else "Download paused. Resume in Settings.", style = MaterialTheme.typography.bodySmall) }
+                        TextButton(onClick = { downloadConfirm = true }) { Text("Download this area") }
+                        Text("Download a small area for this theme; new areas need internet. Offline packs are in Settings.", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     }
                     PrimaryAction("Use this place", onClick = { onLocationSelected(SelectedLocation(
                         selectedCoordinates.latitude, selectedCoordinates.longitude, radiusMeters)) },
@@ -134,6 +178,27 @@ fun LocationPickerScreen(
             }
         }
     }
+    if (showSearch) PlaceSearchDialog(selectedCoordinates, onDismiss = { showSearch = false }, onSelect = { place ->
+        showSearch = false
+        scope.launch { cameraState.animateTo(CameraPosition(target = Position(latitude = place.latitude, longitude = place.longitude), zoom = 15.0)) }
+    })
+    if (locationExplanation) AlertDialog(onDismissRequest = { locationExplanation = false }, title = { Text("Find your location") },
+        text = { Text("Allow location while using Ariciu to centre the map. Approximate location also works for the map. Background access is a separate step for reminders.") },
+        confirmButton = { TextButton(onClick = {
+            locationExplanation = false
+            if (permissionAsked) context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}")))
+            else { permissionAsked = true; locationPermission.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)) }
+        }) { Text(if (permissionAsked) "Open settings" else "Allow location") } },
+        dismissButton = { TextButton(onClick = { locationExplanation = false }) { Text("Not now") } })
+    if (downloadConfirm) AlertDialog(onDismissRequest = { downloadConfirm = false }, title = { Text("Keep this area offline?") },
+        text = { Text("Download about 4 × 4 km around your pin, for the ${if (dark) "dark" else "light"} map, at neighbourhood detail. Uses internet and up to 45 MB; up to three areas. Keep Create open while downloading. Manage or delete areas in Settings. Offline maps don’t guarantee offline location detection. Map requests are sent to OpenFreeMap and its CDN.") },
+        confirmButton = { TextButton(onClick = { downloadConfirm = false; offlineMaps.download(selectedCoordinates.latitude, selectedCoordinates.longitude, dark); message = "Preparing the area. View progress or resume it in Settings → Offline maps." }) { Text("Download area") } },
+        dismissButton = { TextButton(onClick = { downloadConfirm = false }) { Text("Cancel") } })
+    offlineError?.let { error -> AlertDialog(onDismissRequest = { offlineMaps.error.value = null }, title = { Text("Offline maps") }, text = { Text(error) },
+        confirmButton = { TextButton(onClick = { offlineMaps.error.value = null }) { Text("OK") } }) }
+    message?.let { text -> AlertDialog(onDismissRequest = { message = null }, title = { Text("Map") }, text = { Text(text) },
+        confirmButton = { TextButton(onClick = { message = null }) { Text("OK") } }) }
+
 }
 
 @Composable
@@ -144,4 +209,36 @@ private fun CenterSelectionMarker() {
         drawCircle(color = colors.primary, radius = size.minDimension / 3)
         drawCircle(color = colors.onPrimary, radius = size.minDimension / 9)
     }
+}
+
+@Composable
+private fun PlaceSearchDialog(centre: SelectedCoordinates, onDismiss: () -> Unit, onSelect: (CatalogPlace) -> Unit) {
+    val context = LocalContext.current
+    var query by rememberSaveable { mutableStateOf("") }
+    var places by remember { mutableStateOf<List<CatalogPlace>?>(null) }
+    var failed by remember { mutableStateOf(false) }
+    LaunchedEffect(context) { try { places = LocalPlaces.load(context) } catch (e: CancellationException) { throw e } catch (_: Exception) { failed = true } }
+    val matches by produceState(emptyList<CatalogPlace>(), query, places) {
+        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { searchPlaces(places.orEmpty(), query, centre.latitude, centre.longitude) }
+    }
+    AlertDialog(onDismissRequest = onDismiss, title = { Text("Find a place") }, text = {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedTextField(query, { query = it }, label = { Text("Town, store or store address") }, singleLine = true, modifier = Modifier.fillMaxWidth().testTag("place_search"))
+            Text("Romania · offline · OpenStreetMap. Selected shops and towns, not every address. Dataset: 16 Oct 2026.", style = MaterialTheme.typography.bodySmall)
+            when {
+                failed -> Text("Could not open the local catalogue. You can still choose a pin on the map.")
+                places == null -> Text("Opening local places…")
+                query.isBlank() -> Text("Try Brașov or Kaufland Brașov.")
+                matches.isEmpty() -> Text("No matches in this catalogue. Try a nearby town, then move the map.")
+                else -> LazyColumn(Modifier.heightIn(max = 300.dp)) { items(matches, key = { it.id }) { place ->
+                    TextButton(onClick = { onSelect(place) }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                        Column(Modifier.fillMaxWidth()) {
+                            Text(place.name, style = MaterialTheme.typography.titleMedium)
+                            Text(place.address.ifBlank { "Town or village in Romania" }, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                } }
+            }
+        }
+    }, confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } })
 }
