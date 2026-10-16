@@ -3,8 +3,11 @@ package ro.andrei.ariciu.feature.delivery.model
 import ro.andrei.ariciu.feature.reminders.model.Reminder
 import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
 
-data class DeliveryRecord(val reminder: Reminder, val generation: String) {
-    val requestId: String get() = "${reminder.id}:$generation"
+data class DeliveryRecord(val reminder: Reminder, val generation: String, val area: ChainArea? = null) {
+    val requestId: String get() = "${reminder.id}:$generation" + (area?.let { ":${it.id}" } ?: "")
+    val monitoringAreas: List<DeliveryRecord> get() = if (reminder.chainName == null) listOf(this)
+        else reminder.chainAreas.map { copy(area = it) }
+    val location get() = area?.let { ro.andrei.ariciu.feature.locationpicker.model.SelectedLocation(it.latitude, it.longitude, reminder.location.radiusMeters) } ?: reminder.location
 }
 
 interface DeliveryStore {
@@ -34,20 +37,38 @@ class DeliveryEngine(
 ) {
     suspend fun transition(requestIds: Set<String>, transition: ReminderTransition, elapsedMs: Long, boot: Int) {
         store.transaction {
-            store.all().filter { it.requestId in requestIds }.forEach { record ->
-                val reminder = record.reminder
-                val next = reminder.delivery.onTransition(transition, reminder.transition, reminder.repeat, elapsedMs, boot)
-                if (next != reminder.delivery) store.put(record.copy(reminder = reminder.copy(delivery = next)))
+            store.all().forEach { record ->
+                var reminder = record.reminder
+                if (reminder.chainName == null) {
+                    if (record.requestId in requestIds) reminder = reminder.copy(delivery = reminder.delivery.onTransition(
+                        transition, reminder.transition, reminder.repeat, elapsedMs, boot))
+                } else {
+                    record.monitoringAreas.filter { it.requestId in requestIds }.sortedBy { it.requestId }.forEach {
+                        reminder = reminder.crossChain(requireNotNull(it.area).id, transition, elapsedMs, boot)
+                    }
+                }
+                if (reminder != record.reminder) store.put(record.copy(reminder = reminder))
             }
         }
     }
 
-    suspend fun action(requestId: String, occurrence: Int, action: OccurrenceAction) {
+    suspend fun action(requestId: String, occurrence: Int, action: OccurrenceAction, nowMs: Long = 0) {
         store.transaction {
             store.all().firstOrNull { it.requestId == requestId }?.let { record ->
                 val r = record.reminder
-                val next = r.delivery.onAction(action, occurrence, r.transition)
+                if (action in setOf(OccurrenceAction.STOP, OccurrenceAction.SNOOZE) &&
+                    r.intensity != ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.ALARM) return@let
+                val next = r.delivery.onAction(action, occurrence, r.transition, nowMs)
                 if (next != r.delivery) store.put(record.copy(reminder = r.copy(delivery = next)))
+            }
+        }
+    }
+
+    suspend fun wakeSnoozed(nowMs: Long) {
+        store.transaction {
+            store.all().forEach { record ->
+                val next = record.reminder.delivery.onSnoozeDue(nowMs)
+                if (next != record.reminder.delivery) store.put(record.copy(reminder = record.reminder.copy(delivery = next)))
             }
         }
     }
@@ -62,42 +83,49 @@ class DeliveryEngine(
 
     suspend fun reconcile(capabilities: DeliveryCapabilities, force: Boolean = false) {
         val all = store.all()
-        val selected = if (capabilities.ready) all.filter { it.reminder.delivery.active }
-            .sortedBy { it.reminder.id }.take(100) else emptyList()
+        val eligible = if (capabilities.ready) all.filter { it.reminder.delivery.active && it.reminder.intensity !in capabilities.blockedIntensities } else emptyList()
+        val selected = allocateAreas(eligible)
         val desiredIds = selected.map { it.requestId }.toSet()
-        all.forEach { record ->
+        val states = all.associate { record ->
             val r = record.reminder
-            val state = when {
+            val count = record.monitoringAreas.count { it.requestId in desiredIds }
+            r.id to when {
                 !r.delivery.active -> RegistrationState.INACTIVE
-                !capabilities.ready -> RegistrationState.BLOCKED
-                record.requestId !in desiredIds -> RegistrationState.LIMIT_REACHED
+                !capabilities.ready || r.intensity in capabilities.blockedIntensities -> RegistrationState.BLOCKED
+                count == 0 -> RegistrationState.LIMIT_REACHED
+                count < record.monitoringAreas.size -> RegistrationState.PARTIAL
                 force -> RegistrationState.PENDING
                 else -> r.registration
             }
+        }
+        all.forEach { record ->
+            val state = states.getValue(record.reminder.id)
             val error = when (state) {
-                RegistrationState.BLOCKED -> capabilities.reason
-                RegistrationState.LIMIT_REACHED -> "100 areas are already monitored. Complete or delete another reminder."
-                RegistrationState.FAILED -> r.deliveryError
+                RegistrationState.BLOCKED -> capabilities.reason ?: "Enable the ${record.reminder.intensity.label} reminders channel in Android settings."
+                RegistrationState.LIMIT_REACHED -> "No monitoring capacity available, or no stores selected. Complete another reminder or change the chain area."
+                RegistrationState.PARTIAL -> "Only some selected stores fit Android’s 100-area limit."
+                RegistrationState.FAILED -> record.reminder.deliveryError
                 else -> null
             }
-            store.put(record.copy(reminder = r.copy(registration = state, deliveryError = error)))
+            store.put(record.copy(reminder = record.reminder.copy(registration = state, deliveryError = error)))
         }
         val obsolete = store.registeredIds() - desiredIds
         try {
             if (obsolete.isNotEmpty()) { backend.remove(obsolete); store.untrack(obsolete) }
-            val current = store.all().filter { it.requestId in desiredIds }
             val known = store.registeredIds()
-            val additions = current.filter { force || it.reminder.registration != RegistrationState.REGISTERED || it.requestId !in known }
+            val current = store.all().filter { it.reminder.id in selected.map { s -> s.reminder.id } }
+            val additions = current.flatMap { it.monitoringAreas }.filter { it.requestId in desiredIds &&
+                (force || it.reminder.registration !in setOf(RegistrationState.REGISTERED, RegistrationState.PARTIAL) || it.requestId !in known) }
             if (additions.isNotEmpty()) {
-                // Journal before calling Play services: a crash during add remains safe to retry/remove.
                 store.track(additions.map { it.requestId }.toSet())
                 backend.add(additions)
-                additions.forEach { store.put(it.copy(reminder = it.reminder.copy(
-                    registration = RegistrationState.REGISTERED, deliveryError = null))) }
             }
+            current.forEach { record -> store.put(record.copy(reminder = record.reminder.copy(
+                registration = if (record.monitoringAreas.any { it.requestId !in desiredIds }) RegistrationState.PARTIAL else RegistrationState.REGISTERED,
+                deliveryError = null))) }
         } catch (e: Exception) {
             if (e is kotlinx.coroutines.CancellationException) throw e
-            selected.forEach { record ->
+            store.all().filter { it.reminder.id in selected.map { s -> s.reminder.id } }.forEach { record ->
                 store.put(record.copy(reminder = record.reminder.copy(registration = RegistrationState.FAILED,
                     deliveryError = "Monitoring could not be synchronized. Check location and Play services, then Retry.")))
             }
@@ -111,8 +139,11 @@ class DeliveryEngine(
         if (!allowed) return
         all.filter { it.reminder.delivery.notificationVisible &&
             (it.reminder.delivery.notificationPending || restoreVisible) }.forEach { record ->
-            if (notifications.post(record)) store.put(record.copy(reminder = record.reminder.copy(
-                delivery = record.reminder.delivery.copy(notificationPending = false))))
+            val presentation = if (restoreVisible && !record.reminder.delivery.notificationPending)
+                record.copy(reminder = record.reminder.copy(delivery = record.reminder.delivery.copy(quiet = true))) else record
+            val persisted = if (record.reminder.intensity == ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.ALARM) presentation else record
+            if (notifications.post(presentation)) store.put(persisted.copy(reminder = persisted.reminder.copy(
+                delivery = persisted.reminder.delivery.copy(notificationPending = false))))
         }
     }
 }

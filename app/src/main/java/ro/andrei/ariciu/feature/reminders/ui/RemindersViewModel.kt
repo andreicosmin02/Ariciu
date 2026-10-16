@@ -67,10 +67,13 @@ class RemindersViewModel(
         savedState["radius"] = value.location?.radiusMeters
         savedState["transition"] = value.transition.name
         savedState["repeat"] = value.repeat.name
+        savedState["intensity"] = value.intensity.name
+        savedState["chainName"] = value.chainName
+        savedState["chainAreas"] = ro.andrei.ariciu.feature.delivery.model.encodeChainAreas(value.chainAreas)
     }
 
     fun chooseLocation(location: SelectedLocation) {
-        updateDraft(draft.value.copy(location = location))
+        updateDraft(draft.value.copy(location = location, chainAreas = if (draft.value.chainName != null) emptyList() else draft.value.chainAreas))
         navigate(ReminderRoute.EDITOR)
     }
 
@@ -143,6 +146,9 @@ class RemindersViewModel(
                 SelectedLocation(latitude, longitude, radius) else null,
             transition = ReminderTransition.valueOf(savedState["transition"] ?: ReminderTransition.ENTER.name),
             repeat = ReminderRepeat.valueOf(savedState["repeat"] ?: ReminderRepeat.ONCE.name),
+            intensity = ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.valueOf(savedState["intensity"] ?: "NORMAL"),
+            chainName = savedState["chainName"],
+            chainAreas = ro.andrei.ariciu.feature.delivery.model.decodeChainAreas(savedState["chainAreas"] ?: ""),
         )
     }
 }

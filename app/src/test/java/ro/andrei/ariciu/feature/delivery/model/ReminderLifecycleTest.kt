@@ -5,6 +5,24 @@ import org.junit.Test
 import ro.andrei.ariciu.feature.reminders.model.*
 
 class ReminderLifecycleTest {
+    @Test fun alarmStopSnoozeAndDueArePersistentAndRejectStaleTokens() {
+        val triggered = DeliveryState().onTransition(ReminderTransition.ENTER, ReminderTransition.ENTER, ReminderRepeat.ONCE, 10, 1)
+        assertEquals(triggered, triggered.onAction(OccurrenceAction.SNOOZE, 99, ReminderTransition.ENTER, 1000))
+        val stopped = triggered.onAction(OccurrenceAction.STOP, 1, ReminderTransition.ENTER, 1000)
+        assertTrue(stopped.notificationVisible)
+        assertTrue(stopped.quiet)
+        val snoozed = triggered.onAction(OccurrenceAction.SNOOZE, 1, ReminderTransition.ENTER, 1000)
+        assertFalse(snoozed.notificationVisible)
+        assertEquals(601000L, snoozed.snoozeUntilMs)
+        assertEquals(snoozed, snoozed.onSnoozeDue(600999))
+        val due = snoozed.onSnoozeDue(601000)
+        assertTrue(due.notificationVisible)
+        assertTrue(due.notificationPending)
+        assertEquals(2, due.occurrence)
+        assertEquals(due, due.onAction(OccurrenceAction.DONE, 1, ReminderTransition.ENTER))
+        assertEquals(DeliveryPhase.COMPLETED, due.onAction(OccurrenceAction.DONE, 2, ReminderTransition.ENTER).phase)
+    }
+
     private fun event(s: DeliveryState, t: ReminderTransition, wanted: ReminderTransition = ReminderTransition.ENTER,
         repeat: ReminderRepeat = ReminderRepeat.ONCE, time: Long = s.lastEventElapsedMs + 1) =
         s.onTransition(t, wanted, repeat, time, 1)

@@ -5,6 +5,17 @@ import org.junit.Test
 import ro.andrei.ariciu.feature.locationpicker.model.SelectedLocation
 
 class ReminderDraftTest {
+    @org.junit.Test fun chainDraftRequiresUniqueValidStoreAreasAndKeepsIntensity() {
+        val area = ro.andrei.ariciu.feature.delivery.model.ChainArea("n1",45.0,25.0)
+        val draft = ReminderDraft("Bread", ro.andrei.ariciu.feature.locationpicker.model.SelectedLocation(45.0,25.0,200),
+            intensity = NotificationIntensity.ALARM, chainName = "Kaufland", chainAreas = listOf(area))
+        org.junit.Assert.assertTrue(draft.canSave)
+        org.junit.Assert.assertFalse(draft.copy(chainAreas = emptyList()).canSave)
+        org.junit.Assert.assertFalse(draft.copy(chainAreas = listOf(area,area)).canSave)
+        org.junit.Assert.assertFalse(draft.copy(chainAreas = listOf(area.copy(latitude = Double.NaN))).canSave)
+        org.junit.Assert.assertEquals(draft, draft.toReminder("id").toDraft())
+    }
+
     private val location = SelectedLocation(45.6579, 25.6012, 200)
 
     @Test fun titleAndLocationAreRequired() {

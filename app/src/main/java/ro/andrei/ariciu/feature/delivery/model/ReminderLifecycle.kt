@@ -5,8 +5,8 @@ import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
 
 enum class DeliveryPhase { WAITING, TRIGGERED, WAITING_NEXT_VISIT, COMPLETED }
 enum class AreaPosition { UNKNOWN, INSIDE, OUTSIDE }
-enum class RegistrationState { PENDING, REGISTERED, BLOCKED, FAILED, LIMIT_REACHED, INACTIVE }
-enum class OccurrenceAction { DONE, NEXT_TIME }
+enum class RegistrationState { PENDING, REGISTERED, BLOCKED, FAILED, PARTIAL, LIMIT_REACHED, INACTIVE }
+enum class OccurrenceAction { DONE, NEXT_TIME, STOP, SNOOZE }
 
 data class DeliveryState(
     val phase: DeliveryPhase = DeliveryPhase.WAITING,
@@ -16,6 +16,8 @@ data class DeliveryState(
     val notificationPending: Boolean = false,
     val lastEventElapsedMs: Long = -1,
     val lastEventBoot: Int = -1,
+    val quiet: Boolean = false,
+    val snoozeUntilMs: Long = 0,
 ) {
     val active: Boolean get() = phase != DeliveryPhase.COMPLETED
 
@@ -33,18 +35,25 @@ data class DeliveryState(
         }
         if (phase != DeliveryPhase.WAITING) return updated
         return updated.copy(phase = DeliveryPhase.TRIGGERED, occurrence = occurrence + 1,
-            notificationVisible = true, notificationPending = true)
+            notificationVisible = true, notificationPending = true, quiet = false, snoozeUntilMs = 0)
     }
 
-    fun onAction(action: OccurrenceAction, token: Int, wanted: ReminderTransition): DeliveryState {
+    fun onAction(action: OccurrenceAction, token: Int, wanted: ReminderTransition, nowMs: Long = 0): DeliveryState {
         if (!active || !notificationVisible || occurrence != token) return this
+        if (action == OccurrenceAction.STOP) return if (quiet) this else copy(quiet = true, notificationPending = true)
+        if (action == OccurrenceAction.SNOOZE) return copy(notificationVisible = false, notificationPending = false,
+            quiet = false, snoozeUntilMs = nowMs + 10 * 60_000)
         if (action == OccurrenceAction.DONE) return copy(phase = DeliveryPhase.COMPLETED,
-            notificationVisible = false, notificationPending = false)
+            notificationVisible = false, notificationPending = false, snoozeUntilMs = 0)
         val triggeringPosition = if (wanted == ReminderTransition.ENTER) AreaPosition.INSIDE else AreaPosition.OUTSIDE
         return copy(phase = if (position == triggeringPosition || position == AreaPosition.UNKNOWN)
             DeliveryPhase.WAITING_NEXT_VISIT else DeliveryPhase.WAITING,
-            notificationVisible = false, notificationPending = false)
+            notificationVisible = false, notificationPending = false, snoozeUntilMs = 0)
     }
+
+    fun onSnoozeDue(nowMs: Long): DeliveryState = if (active && snoozeUntilMs > 0 && nowMs >= snoozeUntilMs)
+        copy(snoozeUntilMs = 0, occurrence = occurrence + 1, quiet = false,
+            notificationVisible = true, notificationPending = true) else this
 }
 
 data class DeliveryCapabilities(
@@ -53,6 +62,7 @@ data class DeliveryCapabilities(
     val locationEnabled: Boolean,
     val playServices: Boolean,
     val notifications: Boolean,
+    val blockedIntensities: Set<ro.andrei.ariciu.feature.reminders.model.NotificationIntensity> = emptySet(),
 ) {
     val ready: Boolean get() = preciseLocation && backgroundLocation && locationEnabled && playServices && notifications
     val reason: String? get() = when {

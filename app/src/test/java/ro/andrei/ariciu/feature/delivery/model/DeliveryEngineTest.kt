@@ -11,6 +11,40 @@ class DeliveryEngineTest {
     private fun record(id: String = "id", generation: String = "v1", transition: ReminderTransition = ReminderTransition.ENTER,
         repeat: ReminderRepeat = ReminderRepeat.ONCE) = DeliveryRecord(Reminder(id, "Bread", SelectedLocation(45.0, 25.0, 200), transition, repeat), generation)
 
+    @Test fun chainEventsKeepOneNotificationAndDoneRemovesEveryStore() = runBlocking {
+        val chain = record().copy(reminder = record().reminder.copy(chainName = "Kaufland",
+            chainAreas = listOf(ChainArea("n1",45.0,25.0), ChainArea("n2",45.1,25.1)), repeat = ReminderRepeat.EVERY_VISIT))
+        val f = Fixture(chain)
+        f.engine.reconcile(ready)
+        assertEquals(setOf("id:v1:n1", "id:v1:n2"), f.backend.registered)
+        f.engine.transition(setOf("id:v1:n1", "id:v1:n2"), ReminderTransition.ENTER, 10, 1)
+        f.engine.dispatchNotifications(true)
+        assertEquals(1, f.notifications.posts)
+        f.engine.action("id:v1",1,OccurrenceAction.DONE)
+        f.engine.reconcile(ready); f.engine.dispatchNotifications(true)
+        assertTrue(f.backend.registered.isEmpty())
+        assertTrue(f.notifications.visible.isEmpty())
+    }
+
+    @Test fun chainCapacityIsPartialAndPromotesWhenCapacityReturns() = runBlocking {
+        val chain = record("zchain").copy(reminder = record("zchain").reminder.copy(chainName = "Kaufland",
+            chainAreas = listOf(ChainArea("n1",45.0,25.0), ChainArea("n2",45.1,25.1))))
+        val f = Fixture(*((0..98).map { record("r$it") } + chain).toTypedArray())
+        f.engine.reconcile(ready)
+        assertEquals(100, f.backend.registered.size)
+        assertEquals(RegistrationState.PARTIAL, f.store.records.getValue("zchain").reminder.registration)
+        f.store.records.remove("r0"); f.engine.reconcile(ready)
+        assertEquals(100, f.backend.registered.size)
+        assertEquals(RegistrationState.REGISTERED, f.store.records.getValue("zchain").reminder.registration)
+    }
+
+    @Test fun blockedIntensityDoesNotBlockOtherReminderChannels() = runBlocking {
+        val f = Fixture(record("normal"), record("silent").let { it.copy(reminder = it.reminder.copy(intensity = NotificationIntensity.SILENT)) })
+        f.engine.reconcile(ready.copy(blockedIntensities = setOf(NotificationIntensity.NORMAL)))
+        assertEquals(setOf("silent:v1"), f.backend.registered)
+        assertEquals(RegistrationState.BLOCKED, f.store.records.getValue("normal").reminder.registration)
+    }
+
     @Test fun repeatedReconciliationRegistersOnceAndEditingRemovesOldGeneration() = runBlocking {
         val f = Fixture(record())
         f.engine.reconcile(ready); f.engine.reconcile(ready)

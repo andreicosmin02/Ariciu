@@ -55,7 +55,8 @@ class RemindersViewModelTest {
         val repo = FakeRepository()
         val savedState = SavedStateHandle()
         val vm = RemindersViewModel(repo, savedState)
-        vm.edit(Reminder("existing", "Bread", location, ReminderTransition.EXIT, ReminderRepeat.EVERY_VISIT))
+        vm.edit(Reminder("existing", "Bread", location, ReminderTransition.EXIT, ReminderRepeat.EVERY_VISIT, intensity = NotificationIntensity.ALARM, chainName = "Kaufland",
+            chainAreas = listOf(ro.andrei.ariciu.feature.delivery.model.ChainArea("n1",45.0,25.0))))
         val restored = RemindersViewModel(repo, SavedStateHandle(savedState.keys().associateWith { savedState.get<Any?>(it) }))
         assertEquals(vm.draft.value, restored.draft.value)
         assertEquals(ReminderRoute.EDITOR.name, restored.route.value)

@@ -17,6 +17,53 @@ import java.util.UUID
 
 /** Injects a crossing at the worker boundary; does not simulate Play services positioning. */
 class NotificationDeliveryTest {
+    @Test fun intensityChannelsAndAlarmStopSnoozeUsePersistedTokens() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        if (android.os.Build.VERSION.SDK_INT >= 33) InstrumentationRegistry.getInstrumentation().uiAutomation
+            .grantRuntimePermission(context.packageName, Manifest.permission.POST_NOTIFICATIONS)
+        val notifications = AndroidReminderNotifications(context)
+        val manager = context.getSystemService(NotificationManager::class.java)
+        val repository = RoomReminderRepository(ReminderDatabase.getInstance(context).reminderDao())
+        val store = RoomDeliveryStore(ReminderDatabase.getInstance(context))
+        val id = "intensity-${UUID.randomUUID()}"
+        try {
+            NotificationIntensity.entries.forEach { intensity ->
+                val state = DeliveryState().onTransition(ReminderTransition.ENTER, ReminderTransition.ENTER, ReminderRepeat.ONCE, 1, 1)
+                repository.save(Reminder(id, "Intensity test", SelectedLocation(45.0,25.0,200), ReminderTransition.ENTER,
+                    ReminderRepeat.ONCE, intensity = intensity))
+                val record = store.all().single { it.reminder.id == id }
+                store.put(record.copy(reminder = record.reminder.copy(delivery = state)))
+                assertTrue(notifications.post(record.copy(reminder = record.reminder.copy(delivery = state))))
+                withTimeout(20_000) { while (manager.activeNotifications.firstOrNull { it.tag == "reminder:$id" }?.notification?.let {
+                    it.channelId == AndroidReminderNotifications.channelId(intensity) &&
+                        it.extras.getString("ariciu_occurrence") == "${record.generation}:1" } != true) delay(100) }
+                val n = manager.activeNotifications.single { it.tag == "reminder:$id" }.notification
+                assertEquals(AndroidReminderNotifications.channelId(intensity), n.channelId)
+                assertEquals(intensity in setOf(NotificationIntensity.URGENT, NotificationIntensity.ALARM),
+                    n.flags and android.app.Notification.FLAG_ONGOING_EVENT != 0)
+                if (intensity == NotificationIntensity.SILENT) {
+                    val channel = manager.getNotificationChannel(n.channelId)
+                    assertEquals(NotificationManager.IMPORTANCE_LOW, channel.importance)
+                    assertNull(channel.sound)
+                    assertFalse(channel.shouldVibrate())
+                }
+                if (intensity == NotificationIntensity.ALARM) {
+                    assertTrue(n.flags and android.app.Notification.FLAG_INSISTENT != 0)
+                    assertEquals(listOf("Stop", "Done", "Snooze 10 min"), n.actions.map { it.title.toString() })
+                    n.actions[0].actionIntent.send()
+                    withTimeout(20_000) { while (!store.all().single { it.reminder.id == id }.reminder.delivery.quiet) delay(100) }
+                    withTimeout(20_000) { while (manager.activeNotifications.single { it.tag == "reminder:$id" }.notification.actions.size != 2) delay(100) }
+                    val quiet = manager.activeNotifications.single { it.tag == "reminder:$id" }.notification
+                    assertEquals(0, quiet.flags and android.app.Notification.FLAG_INSISTENT)
+                    quiet.actions.last().actionIntent.send()
+                    withTimeout(20_000) { while (store.all().single { it.reminder.id == id }.reminder.delivery.snoozeUntilMs == 0L) delay(100) }
+                    assertFalse(store.all().single { it.reminder.id == id }.reminder.delivery.notificationVisible)
+                }
+                manager.cancel("reminder:$id", 1)
+            }
+        } finally { repository.delete(id); manager.cancel("reminder:$id", 1) }
+    }
+
     @Test fun persistentWorkerPostsNotificationAndReceiverHandlesSwipeNextTimeAndDone() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         if (android.os.Build.VERSION.SDK_INT >= 33) {

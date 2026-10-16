@@ -28,6 +28,11 @@ object DeliveryWork {
         "delivery-reconcile", ExistingWorkPolicy.APPEND_OR_REPLACE,
         request(workDataOf("command" to "reconcile", "force" to force, "restore_notifications" to restoreNotifications)))
 
+    fun snoozeWake(context: Context, requestId: String, occurrence: Int, dueMs: Long) = WorkManager.getInstance(context).enqueueUniqueWork(
+        "snooze:$requestId:$occurrence", ExistingWorkPolicy.KEEP,
+        OneTimeWorkRequestBuilder<DeliveryWorker>().setInputData(workDataOf("command" to "snooze"))
+            .setInitialDelay((dueMs - System.currentTimeMillis()).coerceAtLeast(0), TimeUnit.MILLISECONDS).build())
+
     fun command(context: Context, data: Data) = WorkManager.getInstance(context).enqueueUniqueWork(
         "delivery-events", ExistingWorkPolicy.APPEND_OR_REPLACE, request(data))
 }
@@ -44,8 +49,14 @@ class DeliveryWorker(context: Context, parameters: WorkerParameters) : Coroutine
                         ReminderTransition.valueOf(requireNotNull(inputData.getString("transition"))),
                         inputData.getLong("elapsed", -1), inputData.getInt("boot", -1))
                     "action" -> engine.action(requireNotNull(inputData.getString("request_id")),
-                        inputData.getInt("occurrence", -1), OccurrenceAction.valueOf(requireNotNull(inputData.getString("action"))))
+                        inputData.getInt("occurrence", -1), OccurrenceAction.valueOf(requireNotNull(inputData.getString("action"))), System.currentTimeMillis())
                     "unavailable" -> engine.invalidateRegistrations("Location monitoring became unavailable. Check location settings, then Retry.")
+                }
+                if (command == "snooze" && store.all().any { it.reminder.delivery.snoozeUntilMs > System.currentTimeMillis() } &&
+                    store.all().none { it.reminder.delivery.snoozeUntilMs in 1..System.currentTimeMillis() }) return Result.retry()
+                engine.wakeSnoozed(System.currentTimeMillis())
+                store.all().filter { it.reminder.delivery.snoozeUntilMs > 0 }.forEach {
+                    DeliveryWork.snoozeWake(applicationContext, it.requestId, it.reminder.delivery.occurrence, it.reminder.delivery.snoozeUntilMs)
                 }
                 val capabilities = applicationContext.deliveryCapabilities()
                 // Actions/notifications never wait behind a long backoff for geofence registration.
@@ -105,6 +116,7 @@ class NotificationActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action?.let { name -> OccurrenceAction.entries.firstOrNull { it.name == name } } ?: return
         val requestId = intent.getStringExtra("request_id") ?: return
+        context.quietNotificationAction(requestId, intent.getIntExtra("occurrence", -1))
         val pending = goAsync()
         try { finishAfter(DeliveryWork.command(context, workDataOf("command" to "action", "action" to action.name,
             "request_id" to requestId, "occurrence" to intent.getIntExtra("occurrence", -1))), pending) }
