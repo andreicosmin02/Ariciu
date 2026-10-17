@@ -167,13 +167,16 @@ fun ReminderEditorScreen(
                 title = { Text("How should we alert you?") },
                 text = {
                     Column(Modifier.verticalScroll(rememberScrollState()).selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        NotificationIntensity.entries.forEach { intensity ->
+                        NotificationIntensity.available.forEach { intensity ->
                             ChoiceCard(intensity.label, intensity.explanation, draft.intensity == intensity,
                                 { onDraftChange(draft.copy(intensity = intensity)); choosingIntensity = false }, Modifier.fillMaxWidth())
                         }
                     }
                 }, confirmButton = { TextButton(onClick = { choosingIntensity = false }) { Text("Close") } })
-            if (draft.intensity == NotificationIntensity.ALARM || draft.intensity == NotificationIntensity.URGENT)
+            if (draft.intensity == NotificationIntensity.ALARM) Text(
+                "Alarm is temporarily unavailable for new reminders. This existing reminder still works. Choose Urgent in Alert to switch; any current snooze is kept.",
+                style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            if (draft.intensity == NotificationIntensity.URGENT)
                 Text(draft.intensity.explanation + " Android notification settings can limit alerts; newer Android versions may allow dismissal.",
                     style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
             Text(if (editing) "Completed reminders stay completed when you edit them." else "Android may take a few minutes to notice an arrival or departure.",

@@ -33,7 +33,7 @@ import ro.andrei.ariciu.ui.components.*
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities, openedId: String?,
-    onCreate: () -> Unit, onSettings: () -> Unit, onEdit: (Reminder) -> Unit, onDelete: (Reminder) -> Unit, onDone: (Reminder) -> Unit = {}) {
+    onCreate: () -> Unit, onSettings: () -> Unit, onEdit: (Reminder) -> Unit, onDelete: (Reminder) -> Unit, onDone: (Reminder) -> Unit = {}, onNextTime: (Reminder) -> Unit = {}) {
     val colors = MaterialTheme.colorScheme
     var completed by rememberSaveable { mutableStateOf(false) }
     val active = state.reminders.filter { it.delivery.active }
@@ -106,6 +106,8 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         if (reminder.delivery.active) OutlinedButton(onClick = { onDone(reminder) }, enabled = !state.busy,
                             modifier = Modifier.heightIn(min = 48.dp).testTag("done_${reminder.id}")) { Text("Mark done") }
+                        if (reminder.unresolvedUrgent) OutlinedButton(onClick = { onNextTime(reminder) }, enabled = !state.busy,
+                            modifier = Modifier.heightIn(min = 48.dp).testTag("next_time_${reminder.id}")) { Text("Next time") }
                         TextButton(onClick = { onEdit(reminder) }, enabled = !state.busy, contentPadding = PaddingValues(0.dp)) { Text("Edit") }
                         TextButton(onClick = { onDelete(reminder) }, enabled = !state.busy, contentPadding = PaddingValues(0.dp),
                             colors = ButtonDefaults.textButtonColors(contentColor = colors.onSurfaceVariant)) { Text("Delete") }

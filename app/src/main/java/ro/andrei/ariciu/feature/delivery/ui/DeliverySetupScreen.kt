@@ -134,7 +134,7 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
             if (current.blockedIntensities.isNotEmpty()) Text("Alerts turned off: ${current.blockedIntensities.joinToString { it.label }}. Review notification channels below.", color = colors.error)
             var showChannels by rememberSaveable { mutableStateOf(false) }
             ExpandableSection("Sound and alert settings", showChannels, { showChannels = !showChannels }) {
-                ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.entries.forEach { intensity ->
+                ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.available.forEach { intensity ->
                     TextButton(onClick = { context.startActivity(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
                         .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
                         .putExtra(Settings.EXTRA_CHANNEL_ID, AndroidReminderNotifications.channelId(intensity))) }, modifier = Modifier.fillMaxWidth()) {

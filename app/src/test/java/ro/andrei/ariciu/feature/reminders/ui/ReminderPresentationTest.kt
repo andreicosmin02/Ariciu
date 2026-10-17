@@ -27,4 +27,16 @@ class ReminderPresentationTest {
         val departure = reminder.copy(transition = ReminderTransition.EXIT, delivery = DeliveryState(phase = DeliveryPhase.WAITING_NEXT_VISIT))
         assertTrue(departure.presentStatus(ready).description.contains("return and leave"))
     }
+
+    @Test fun pendingUrgentRetryIsVisibleEvenWithoutBackgroundPermissionAndExplainsDisabledChannels() {
+        val pending = reminder.copy(intensity = NotificationIntensity.URGENT,delivery = DeliveryState(phase = DeliveryPhase.TRIGGERED,occurrence = 1,urgentRetryAtMs = 301_000))
+        assertEquals("Re-alert scheduled",pending.presentStatus(ready.copy(backgroundLocation = false)).label)
+        assertTrue(pending.presentStatus(ready).description.contains("Android may delay"))
+        assertEquals("Re-alert waiting",pending.presentStatus(ready.copy(blockedIntensities = setOf(NotificationIntensity.URGENT))).label)
+        assertTrue(pending.presentStatus(ready.copy(notifications = false)).needsAttention)
+        val due = pending.copy(delivery = pending.delivery.onUrgentRetryDue(900_000))
+        assertEquals("Re-alert waiting",due.presentStatus(ready).label)
+        assertEquals("Re-alert waiting",due.presentStatus(ready.copy(notifications = false)).label)
+    }
+
 }
