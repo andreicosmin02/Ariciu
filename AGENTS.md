@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Ariciu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Ariciu 1.1-rc3 includes both physical-phone-review stabilization batches on the 1.1 release-candidate baseline. The current priority is debugging and stabilization from real physical-phone use: reproduce reported problems, fix root causes, improve confusing UX, and prevent regressions while preserving working functionality.
+Ariciu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Ariciu 1.1-rc4 adds owner-requested delayed Urgent re-alerts and temporarily retires Alarm from new choices, retaining legacy Alarm compatibility. The current priority is debugging and stabilization from real physical-phone use: reproduce reported problems, fix root causes, improve confusing UX, and prevent regressions while preserving working functionality.
 
 ## Current product priority and visual direction
 
-- Current priority (2026-10-17): stabilize Ariciu 1.1-rc3 from physical-phone feedback; see docs/PHONE_REVIEW_2.md. Feature completion was authorized on 2026-10-16 and produced the candidate; do not resume broad feature expansion by default. Prioritize reported bugs, notification/geofence reliability, confusing UX and focused regressions while preserving accessibility, offline-first operation and zero recurring cost.
+- Current priority (2026-10-17): stabilize Ariciu 1.1-rc4 from physical-phone feedback; see docs/URGENT_RE_ALERTS.md and the historical docs/PHONE_REVIEW_2.md. Feature completion was authorized on 2026-10-16 and produced the candidate; do not resume broad feature expansion by default. Prioritize reported bugs, notification/geofence reliability, confusing UX and focused regressions while preserving accessibility, offline-first operation and zero recurring cost.
 - Ariciu uses a dark-first charcoal/graphite identity with a restrained slate-blue accent; do not use green as the identity color, wallpaper-driven colors, playful decoration, gradients, or generic demo styling.
 - Support locally persisted System / Light / Dark appearance. Keep light mode equally usable and dark mode carefully designed.
 - Primary navigation is Create / Reminders / Settings. Keep the map central to creation, choices explicit, and delivery diagnostics in Settings or contextual help.

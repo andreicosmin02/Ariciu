@@ -2,10 +2,10 @@
 
 Feature-completion owner direction: 2026-10-16. Current phase (2026-10-17): [real-phone debugging and stabilization](STABILIZATION.md); the implemented scope below is the baseline, not a request for continued broad expansion. Romania-first local catalogue approved. No backend, account, paid API, billing key or recurring service.
 
-## Supported behavior
+## Supported behavior — current rc4 policy
 
-- Normal retains its existing channel and lifecycle actions. Silent defaults to low importance with no audio/vibration and uses Done / Next time; dismissal is Next time. Urgent uses a distinct high-importance channel and requests ongoing presentation; it does not configure a stronger custom tone/vibration than Normal. Timed Snooze is Alarm-only. Android 14+ may still allow dismissal; dismissal advances to the next visit rather than fighting the user.
-- Alarm is explicitly selected. Android notification service receives an alarm-audio channel, strong vibration pattern and `FLAG_INSISTENT`. Stop silences the occurrence while retaining Done/Snooze; Done completes; Snooze persists a ten-minute deadline, schedules WorkManager and increments the occurrence token when due. Retries, duplicates and stale actions preserve generation/occurrence guards. Reboot restores already-delivered alerts quietly. Snooze is inexact and can be delayed by Android.
+- Normal retains its existing channel and lifecycle actions. Silent defaults to low importance with no audio/vibration and uses Done / Next time; dismissal is Next time. Urgent uses a distinct high-importance channel and requests ongoing presentation; it does not configure a stronger custom tone/vibration than Normal. Legacy timed Snooze is Alarm-only. Android 14+ permits dismissal; Urgent now schedules one inexact five-minute re-alert per swipe until explicit Done/Next time. Other intensities retain swipe-to-Next-time.
+- Alarm is temporarily hidden from new choices; only existing Alarm reminders retain this implementation. Explicit conversion to Urgent is offered without silently changing saved rows. Android notification service receives an alarm-audio channel, strong vibration pattern and `FLAG_INSISTENT`. Stop silences the occurrence while retaining Done/Snooze; Done completes; Snooze persists a ten-minute deadline, schedules WorkManager and increments the occurrence token when due. Retries, duplicates and stale actions preserve generation/occurrence guards. Reboot restores already-delivered alerts quietly. Snooze is inexact and can be delayed by Android.
 - Supported Alarm fallback: prominent notification with actions. Sound, vibration, DND, channel settings and OEM/OS behavior control alerting. Opening the notification panel can end repeating audio. The normal VIBRATE permission is declared for alert vibration; there is no extra runtime prompt. No background audio service, exact alarm permission or full-screen permission is requested. Full-screen auto-grant is reserved for core alarm/call apps; Ariciu is a location-reminder app. It does not promise or attempt full-screen background launch.
 - My location requests only foreground permission on explicit use, accepts approximate positioning for the map, bounds cached fixes to 30 seconds, times out in 20 seconds and cancels requests with the screen coroutine. Background precise location remains a separate delivery setup step. Permission denial, disabled location and unavailable positioning explain alternatives.
 - Search uses the bundled OSM derivative only. Accent-insensitive town, shop and known shop-address search runs locally. No street/house address completeness or worldwide coverage is claimed. Catalogue source timestamp: 2026-10-15T20:21:00Z; rebuilt 2026-10-17 from the same source. Includes 26,065 rows (231 malls added on 17 October; original 25,834 rows unchanged) and seven chains. The ODbL derivative, licence URI, provenance and regeneration script are shipped; no OSM user metadata is included.
@@ -29,7 +29,7 @@ OpenFreeMap terms (dated 2026-10-14) were rechecked on 2026-10-17 and retain the
 
 ## Storage upgrades
 
-Room 1→2 remains intact. 2→3 adds Normal-default intensity, quiet state and snooze deadline. 3→4 adds chain name and encoded store state. Exported schemas 1–4 are retained. No destructive migration. Generation-conditional writes and registration/outbox identity remain.
+Room 1→2 remains intact. 2→3 adds Normal-default intensity, quiet state and snooze deadline. 3→4 adds chain name and encoded store state. 4→5 adds urgentRetryAtMs and notificationAttempt, retaining every row and correcting rearmed-but-visible Urgent state. Exported schemas 1–5 are retained. No destructive migration. Generation-conditional writes and registration/outbox identity remain.
 
 ## Validation
 
@@ -41,3 +41,5 @@ First physical-phone-review stabilization: [1.1-rc2 dispositions, implementation
 ## Second phone-review stabilization (rc3)
 
 See [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md): explicit search progress, joined reminder tabs/Mark done, focused spacing/status alignment, dedicated small fox icon and an optional first single-place foreground arrival check through the real lifecycle/outbox. Initial geofence registration remains 0, schema 4 and cost boundaries unchanged. Actual rc2 Samsung swipe-to-Next-time is confirmed for one observation; rc3 physical retest is pending. Do not reuse historical 64/19 or 68/23 test results for rc3.
+
+Current rc4 policy/evidence supersedes prior Urgent swipe and new-Alarm-selection descriptions: [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md).

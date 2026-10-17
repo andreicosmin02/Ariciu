@@ -1,15 +1,17 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-2
-version: 1.1-rc3
+implementation_baseline: fix/urgent-realerts
+version: 1.1-rc4
 ---
 
 # Ariciu
 
-Ariciu is a local Android app that reminds you when a place becomes relevant. This knowledge base describes **1.1-rc3, version code 4**, checked against source on 17 October 2026. The current phase is **debugging and stabilization from real-phone use**.
+Ariciu is a local Android app that reminds you when a place becomes relevant. This knowledge base describes **1.1-rc4, version code 5**, checked against source on 17 October 2026. The current phase is **debugging and stabilization from real-phone use**.
 
 ## Start here
+
+- [[Ariciu - Urgent Re-alerts]] — current rc4 behavior, Alarm retirement, migration, verification and retest.
 
 - [[Ariciu - Phone Review 2]] — rc3 dispositions, actual rc2 Samsung swipe evidence and retest.
 - [[Ariciu - Phone Review 1]] — dispositions, verification and phone retest checklist.

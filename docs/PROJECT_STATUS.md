@@ -2,9 +2,15 @@
 
 ## Current direction — 2026-10-17
 
-**Ariciu 1.1-rc3 / version code 4**, branch **fix/phone-review-2**, based on the completed first-review branch at `1b2eb13`. All second-review items and limits are in [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md). No master merge or release publication. Source is authoritative; final evidence belongs to the review record.
+**Ariciu 1.1-rc4 / version code 5**, branch **fix/urgent-realerts**, based on clean rc3 `fix/phone-review-2` at `8f11976`. Current behavior, migration, evidence and retest are in [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md); [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md) records historical rc3 behavior. No master merge or release publication. Source is authoritative; final evidence belongs to the review record.
 
-## Second-review implementation
+## Current owner-directed stabilization
+
+Silent, Normal and Urgent are the three available levels. An Urgent swipe retains its unresolved occurrence and schedules one delayed re-alert after about five minutes. Explicit Done/Next time resolves it, including from the card while waiting. Separate persisted deadline/attempt fields, generation/occurrence guards and unique one-time WorkManager jobs protect against duplicates and stale retries. Unresolved Urgent holds across Every visit/chain crossings. No periodic job, exact alarm, foreground service, continuous sound or GPS polling.
+
+Alarm is hidden from new choices; legacy ALARM data/actions/snooze remain supported. Existing Alarm edits keep their intensity until explicit conversion; a current snooze retains its deadline when converted to Urgent. Room **5**, additive 4→5 migration/export, keeps every reminder and earlier migration history. No permission/dependency/channel identity or recurring-cost change.
+
+## Preserved rc3 implementation
 
 - Search now has explicit catalogue-loading, idle, searching, current-results and failure states; inline progress, retry, cancellation/revision guards and recreation-safe query. Local ranking/catalogue remain unchanged.
 - Active/Completed are horizontal accessible tabs joined directly to the scrolling bordered panel, with counts and fixed selection. Redundant headings/empty spacing removed; notification targeting uses corrected offsets. Mark done is an outlined action without a checkmark; completion lifecycle is unchanged.
@@ -20,12 +26,12 @@ Connection dropped, and the owner explicitly requested emulator-only continuatio
 
 ## Preserved architecture and boundaries
 
-Kotlin/Compose/Material 3, constructor injection, Room 4/additive migrations 1–4, Play-services geofencing, WorkManager and MapLibre remain. No dependency/permission/schema/backend/account/paid API/recurring cost change. Existing reminders, generations/actions, registration journal/outbox, conservative rearming, saved chain snapshots and 100-area limit remain. No full-screen/FGS/exact-alarm workaround, continuous GPS or guaranteed immediate/exactly-once delivery.
+Kotlin/Compose/Material 3, constructor injection, Room 5/additive migrations 1–5, Play-services geofencing, WorkManager and MapLibre remain. No dependency/permission/backend/account/paid API/recurring cost change; schema 5 is an additive migration. Existing reminders, generations/actions, registration journal/outbox, conservative rearming, saved chain snapshots and 100-area limit remain. No full-screen/FGS/exact-alarm workaround, continuous GPS or guaranteed immediate/exactly-once delivery.
 
 Romania catalogue remains 26,065 rows from 15 October source (231 malls added in rc2). New/refreshed chain selections stay within 25km/max 40; old selections stay intact until explicit refresh. Theme-specific small offline basemap packs retain their existing limits and do not add search or guaranteed disconnected positioning. Graphite/slate identity, System/Light/Dark and Create/Reminders/Settings remain.
 
 ## Verification and next work
 
-Current executed gate: **82 unit / 35 emulator instrumentation tests passed**, lint **0 errors / 39 warnings**, debug assembly/signature verified. [Executed checks, screenshots, commits and targeted phone retest](PHONE_REVIEW_2.md). Historical rc2 gate: 68 unit/23 connected tests; rc1:64/19. Those results are not reused to validate rc3.
+Current gate: **97 unit / 44 emulator tests**, lint **0 errors / 39 warnings**, debug assembly/install/signature passed. An extra native system-font 2.0 UI test passed; actual emulator reboot/update/process-death/permission-denial recovery was observed for the shipping five-minute retry. [Executed checks, screenshots and phone retest](URGENT_RE_ALERTS.md). Historical rc3 gate: 82 unit/35 connected tests; rc2: 68/23; rc1: 64/19. Those results are not reused to validate rc4.
 
-Install the [current candidate](RELEASE_CANDIDATE.md) over rc2 with the same signing key, never uninstall/clear storage. Continue the focused phone checklist, then background ENTER/EXIT, rearming, reboot/update/OEM battery and TalkBack checks. No speculative feature expansion, merge, force-push or release publication.
+Install the [current candidate](RELEASE_CANDIDATE.md) over the existing app with the same signing key, never uninstall/clear storage. Prioritize the new Urgent swipe/re-alert/resolve checklist and legacy Alarm conversion, then real crossings, idle/reboot/OEM behavior and TalkBack. No speculative expansion, merge, force-push or release publication.

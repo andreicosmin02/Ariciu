@@ -1,11 +1,16 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/urgent-realerts
+version: 1.1-rc4
 ---
 
 # Architecture
+
+## Current rc4 update
+
+Room 5 adds two retry fields with an additive migration; application-owned Urgent lifecycle/delayed one-time work remains in the established engine/outbox architecture. No new dependency, permission or backend. See [[Ariciu - Urgent Re-alerts]].
+
 
 Related: [[Ariciu - Code Map]], [[Ariciu - Data and Migrations]], [[Ariciu - Background Work and Recovery]].
 

@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-2
-version: 1.1-rc3
+implementation_baseline: fix/urgent-realerts
+version: 1.1-rc4
 ---
 
 # Development environment and builds
@@ -11,7 +11,7 @@ Related: [[Ariciu - Tests and Evidence]], [[Ariciu - Maintenance and Extension]]
 
 ## Reproducible configuration
 
-One Android application module `:app`, namespace/application ID `ro.andrei.ariciu`, Kotlin/Compose/Material 3. Minimum SDK 26 (Android 8); compile/target SDK 37; version `1.1-rc2`, code 3. Android SDK/platform/build tools and a compatible Android Studio installation are required.
+One Android application module `:app`, namespace/application ID `ro.andrei.ariciu`, Kotlin/Compose/Material 3. Minimum SDK 26 (Android 8); compile/target SDK 37; version `1.1-rc4`, code 5. Android SDK/platform/build tools and a compatible Android Studio installation are required.
 
 Use the checked-in wrapper: Gradle **9.5.0**, with distribution SHA configured. `gradle/gradle-daemon-jvm.properties` requests **JDK 25**. Java source/target compatibility is **11**; that is not the Gradle daemon JDK. Follow the existing toolchain rather than changing versions to resolve a local IDE mismatch. Android Gradle Plugin **9.3.1** uses built-in Kotlin; there is no separate kotlin-android plugin.
 
@@ -47,10 +47,10 @@ When no device is available, run unit/lint/assembly and explicitly report connec
 
 ## APK and installation
 
-Output: `app/build/outputs/apk/debug/app-debug.apk`. A convenience copy `Ariciu-1.1-rc2-debug.apk` currently exists alongside it; it is generated/local, not committed. Check [[Ariciu - Current Status]] for the recorded rebuilt artifact hash.
+Output: `app/build/outputs/apk/debug/app-debug.apk`. A convenience copy `Ariciu-1.1-rc4-debug.apk` currently exists alongside it; it is generated/local, not committed. Check [[Ariciu - Current Status]] for the recorded rebuilt artifact hash.
 
 ```bash
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb -s emulator-5554 install -r app/build/outputs/apk/debug/app-debug.apk
 sha256sum app/build/outputs/apk/debug/app-debug.apk
 ```
 
@@ -61,6 +61,8 @@ Release optimization is disabled in the current Gradle release type. This is an 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
 
-## Second phone review — rc3
+## Historical second phone review — rc3
 
-Current debug retest candidate is1.1-rc3/code 4 on fix/phone-review-2, not a published release. Build with the existing Gradle/dependencies; convenience filename Ariciu-1.1-rc3-debug.apk. Installation must update the existing package with the same key; never uninstall/clear storage. Target emulator-5554 explicitly for instrumentation/installation. User requested emulator-only continuation after Samsung disconnected. See [[Ariciu - Phone Review 2]].
+The historical rc3 retest candidate was 1.1-rc3/code 4 on fix/phone-review-2, not a published release. Build with the existing Gradle/dependencies; convenience filename Ariciu-1.1-rc3-debug.apk. Installation must update the existing package with the same key; never uninstall/clear storage. Target emulator-5554 explicitly for instrumentation/installation. User requested emulator-only continuation after Samsung disconnected. See [[Ariciu - Phone Review 2]].
+
+Current verification uses only the explicitly selected emulator. `-Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true` retains its app/data after Gradle connected tests; the option is present in the installed AGP 9.3.1. Never use this as authorization to run tests on the daily phone. See [[Ariciu - Urgent Re-alerts]] for actual executed commands/results.

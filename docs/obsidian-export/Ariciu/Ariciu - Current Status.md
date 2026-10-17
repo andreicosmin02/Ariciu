@@ -1,16 +1,16 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-2
-version: 1.1-rc3
+implementation_baseline: fix/urgent-realerts
+version: 1.1-rc4
 ---
 
-# Current status — second phone review
+# Current status — Urgent stabilization
 
-Candidate **1.1-rc3/code 4**, branch **fix/phone-review-2**, based on first-review fix/phone-review-1 at `1b2eb13`. No master merge or publication. [[Ariciu - Phone Review 2]] owns dispositions, exact evidence and retest; repository docs/RELEASE_CANDIDATE.md owns artifact checksum.
+Candidate **1.1-rc4/code 5**, branch **fix/urgent-realerts**, based on clean rc3 `8f11976`. [[Ariciu - Urgent Re-alerts]] owns current policy, tests and phone retest. No master merge/publication.
 
-Implemented: explicit cancellation-safe search progress/retry/restored query; horizontal tabs joined to content; outlined Mark done; small Create gap; Settings status beside Review; dedicated monochrome notification fox; optional new-single-ENTER foreground first occurrence through the real lifecycle/outbox. Existing Room 4/data/migrations, initialTrigger0, identities/recovery, 100-area limit, themes/offline/cost boundaries preserved.
+Silent/Normal/Urgent are the three choices. Urgent swipe schedules a durable, inexact five-minute re-alert within the same unresolved occurrence. Done/Next time resolve from notification or card; Every visit/chain crossings cannot clear or duplicate it. Room 5 adds deadline/attempt with a data-preserving migration; unique one-time workers reject obsolete identities and cancel resolved waits. Alarm remains internally compatible for existing reminders, with explicit conversion retaining current snooze timing. No permission/dependency/service/cost change.
 
-Read-only actual Samsung S26 Ultra/Android 16/One UI 8.5 rc2 inspection confirmed HIGH/ongoing Urgent and correct Next time after owner swipe. No private text/coordinates/IDs/logs are retained in project docs. Phone disconnected and owner requested emulator-only continuation. No phone upgrade/settings/data/process/instrumentation action occurred. rc3 physical retest, locked/Clear all and real crossings/audio/TalkBack remain pending.
+Prior rc3 search progress, joined tabs/Mark done, Create/Settings layout, fox icon and opt-in foreground first arrival are retained. Real Samsung rc2 swipe handling was inspected read-only; this historical swipe-to-Next-time evidence does not verify the new policy. Samsung is disconnected for this batch; all current implementation checks target the emulator. No phone settings/data/process/permission/instrumentation actions occurred.
 
-Use [[Ariciu - Tests and Evidence]]/[[Ariciu - Phone Review 2]] for current executed checks; earlier 68/23 and 64/19 are historical. Install rc3 over the current app with the same signing key, never clear storage. Repository handoff remains independent of vault access. Preserve original planning/review/phone captures and compare managed notes before future sync.
+Install over the existing app with the same signing key; never uninstall/clear storage. Repository RELEASE_CANDIDATE.md owns artifact metadata. Vault originals/private reviews/screenshots remain unchanged. Current verification and remaining actual GPS/OEM/audio/locked/TalkBack work: [[Ariciu - Urgent Re-alerts]].

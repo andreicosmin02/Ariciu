@@ -2,11 +2,11 @@
 
 ## Lifecycle and identity
 
-The existing Reminder table remains the source of truth. Current schema is 4 (see [feature-completion evidence](FEATURE_COMPLETION.md)). Schema 2 added lifecycle, position, occurrence, notification-outbox, registration, and error fields. Migration 1→2 retains every version-1 reminder and assigns a monitoring generation. Exported schemas are versioned; there is no destructive fallback.
+The existing Reminder table remains the source of truth. Current schema is 5 (see [feature-completion evidence](FEATURE_COMPLETION.md)). Schema 2 added lifecycle, position, occurrence, notification-outbox, registration, and error fields. Migration 1→2 retains every version-1 reminder and assigns a monitoring generation. Exported schemas are versioned; there is no destructive fallback.
 
 - WAITING: eligible for the chosen crossing.
-- TRIGGERED: a current occurrence exists. ONCE stays here until Done or Next time; EVERY_VISIT becomes eligible after the opposite crossing.
-- WAITING_NEXT_VISIT: Next time/swipe was selected while still on the triggering side. An opposite crossing rearms WAITING.
+- TRIGGERED: a current occurrence exists. Urgent stays unresolved until explicit Done or Next time, across Every visit/opposite crossings. For other intensities, ONCE stays here until handled; EVERY_VISIT becomes eligible after the opposite crossing.
+- WAITING_NEXT_VISIT: Next time (or a legacy non-Urgent swipe) was selected while still on the triggering side. An opposite crossing rearms WAITING.
 - COMPLETED: Done disables the reminder and removes its geofence.
 
 Both ENTER and EXIT are monitored for every active reminder. EXIT repeat therefore observes a return before another departure. The most recent position and monotonic event timestamp/boot count reject duplicate and older crossings. A notification occurrence has a persistent incrementing token. Old action tokens cannot dismiss or complete newer occurrences.
@@ -29,7 +29,7 @@ Boot and package replacement enqueue reconciliation. App startup/resume, setting
 
 Normal notifications use a user-controlled high-importance channel, NotificationCompat, a private lock-screen presentation, immutable action/activity PendingIntents, and a small monochrome icon. The geofence PendingIntent is explicitly targeted and mutable because Play services supplies event extras. Internal receivers are not exported. Tapping a notification opens the reminder list and scrolls to/highlights the matching reminder without discarding an existing editor draft.
 
-Done completes the reminder. Next time and the notification delete intent share the same idempotent action. Each reminder uses one stable Android notification tag; a new visit replaces any unanswered older occurrence. An update/retry of the same occurrence suppresses another alert; a new occurrence can alert again, subject to channel, DND, and OS behavior.
+Done completes the reminder. Urgent delete intents use DISMISS with an attempt token and persist a five-minute retry deadline. Explicit Next time resolves the occurrence; other intensities retain their existing delete-to-Next-time behavior. Each reminder uses one stable Android notification tag; a new visit replaces any unanswered older occurrence. An update/retry of the same occurrence suppresses another alert; a new occurrence can alert again, subject to channel, DND, and OS behavior.
 
 Lifecycle updates first commit a pending-notification outbox flag. The flag is cleared only after posting succeeds. The OS notification service and Room cannot share a transaction: an interrupted post may be retried, using the same tag and occurrence identity. This provides recoverable, idempotent notification identity, not an absolute exactly-once guarantee across all system failures. WorkManager persists a receiver command before finishing `goAsync`; an unrecoverable failure to enqueue is logged rather than falsely marked delivered. Saving to Room and scheduling WorkManager are also separate commits; startup/boot reconciliation repairs an interrupted scheduling window.
 
@@ -88,3 +88,9 @@ New/explicitly refreshed chain snapshots are limited to 40 listed stores within 
 ## Second phone review (rc3)
 
 The new explicit foreground arrival check is separate from registration; initialTrigger0 remains. Save returns its exact generation. ForegroundArrivalCheck checks a bounded precise fix and DeliveryWork.immediateArrival shares the worker mutex; DeliveryEngine.immediateArrival transaction accepts only a fresh/accurate first single ENTER and writes the normal occurrence/outbox. No raw location history/option column is added. Duplicate attempts, old generation, completed/edited/deleted row, chain/EXIT and subsequent occurrences are rejected. Next time/Every visit still require an opposite crossing. Initial checks never replay on reconcile; persisted outbox recovery remains. See PHONE_REVIEW_2.md for limits, actual Samsung swipe evidence and tests.
+
+## Urgent re-alerts and Alarm retirement (rc4)
+
+[Current policy, fields, tests and phone checklist](URGENT_RE_ALERTS.md). Room4→5 adds separate urgentRetryAtMs/notificationAttempt fields, keeping Alarm snooze independent and every earlier migration/schema intact. Due work advances the alert attempt, not occurrence, through the existing outbox. Unique delayed one-time WorkManager requests are deduplicated/cancelled against persisted state and recovered on startup/boot/update. An unresolved Urgent cannot rearm through Every visit or chain exits. Card Next time transaction rotates generation; final Urgent post revalidates inside a transaction. Notification permission/channel failures retain one pending outbox attempt, without a periodic access poll.
+
+Existing visible rc3 Urgent alerts are quietly rebound to the new delete intent when their marker is absent. New DISMISS URIs append attempt; explicit action identities and all channel IDs remain. ALARM implementation/data/actions remain supported internally, but pickers offer only Silent/Normal/Urgent. Explicit legacy conversion preserves any current snooze deadline. WorkManager timing is inexact; no FGS, exact alarm, continuous sound, full-screen or GPS loop.

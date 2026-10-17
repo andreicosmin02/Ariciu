@@ -1,11 +1,16 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-2
-version: 1.1-rc3
+implementation_baseline: fix/urgent-realerts
+version: 1.1-rc4
 ---
 
 # Risks, limitations and technical debt
+
+## Current rc4 update
+
+Urgent re-alert deadlines are durable and inexact; Android/Doze/OEM/channel/DND can delay or suppress them. Room/WorkManager/platform commits remain separate. The final Urgent post now revalidates within a transaction; this fixes the controlled completion-between-snapshot-and-post case, not every previously hypothesized race. See [[Ariciu - Urgent Re-alerts]].
+
 
 Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Current Status]]. Essential repository record: `docs/STABILIZATION_AUDIT.md`. Reviewed source on 2026-10-17; **no field bug report has yet been supplied**. The recorded automated suite is green. Items below distinguish established boundaries from hypotheses.
 
@@ -42,6 +47,6 @@ These are **audit hypotheses, not reproduced critical bugs**. The documentation 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
 
-## Second phone review — rc3
+## Historical second phone review — rc3
 
 Actual Samsung unlocked swipe/Next time was observed for rc2; it is an Android limitation rather than a missing ongoing flag. Locked/Clear all/new fox/immediate precise-fix behavior still need rc3 phone retest. Location accuracy is estimated; conservative margins are not a physical-boundary guarantee. Initial check may be skipped when backgrounded/timed out; saved reminder/outbox/recovery remain. Earlier unrelated source hypotheses remain unclaimed. [[Ariciu - Phone Review 2]].

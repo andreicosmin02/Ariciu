@@ -1,11 +1,16 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-2
-version: 1.1-rc3
+implementation_baseline: fix/urgent-realerts
+version: 1.1-rc4
 ---
 
 # Features and user journeys
+
+## Current rc4 update
+
+New levels are Silent, Normal and Urgent. Urgent swipes re-alert after about five minutes until explicit Done/Next time, including after crossing again; card actions work while waiting. Existing Alarm stays supported and can be explicitly converted, retaining current snooze timing. See [[Ariciu - Urgent Re-alerts]].
+
 
 Related: [[Ariciu - Reminder Lifecycle]], [[Ariciu - Notifications and Alarm]], [[Ariciu - Design and Accessibility]].
 
@@ -15,7 +20,7 @@ Related: [[Ariciu - Reminder Lifecycle]], [[Ariciu - Notifications and Alarm]], 
 2. Search Romanian towns/shops/store addresses, use My location, or move the map. Search results centre the map; they do not save a named address into the reminder.
 3. Expand the draggable place sheet and choose 100/200/500m, or More distances for 100–1000m in 100m increments. The centre pin is the selected point; the boundary is approximate visual geometry.
 4. Use this place opens the editor. It is disabled during native camera movement.
-5. Enter text, choose Arrive/Leave and Just once/Every visit; Alert opens explicit Silent/Normal/Urgent/Alarm choices. Save requires valid nonblank text/location and a valid selected chain if applicable.
+5. Enter text, choose Arrive/Leave and Just once/Every visit; Alert opens explicit Silent/Normal/Urgent choices (Alarm remains editable only on existing reminders). Save requires valid nonblank text/location and a valid selected chain if applicable.
 6. Save persists locally, clears the draft and opens Reminders. Monitoring is synchronized separately; read the card status and Settings.
 
 My location accepts approximate foreground access for centring. Actual reminders require precise/background access. Declining does not disable manual creation or local search.
@@ -36,9 +41,9 @@ Create resumes a named draft after tab changes. Back/Cancel may require discard 
 | --- | --- |
 | Done | Completes the whole reminder, including every selected store; synchronization removes monitoring. |
 | Next time | Hides this occurrence and waits for a distinct visit; it is not a timed snooze. |
-| Swipe | Uses the same Next time action, including dismissible ongoing alerts. |
-| Alarm Stop | Requests immediate platform silence, then persists quiet state; Done/Snooze remain. |
-| Alarm Snooze | Hides the occurrence and stores a ten-minute deadline; the later alert can be delayed by Android. |
+| Swipe | Urgent schedules a delayed five-minute re-alert until explicit resolution; other intensities retain Next time. |
+| Legacy Alarm Stop | Requests immediate platform silence, then persists quiet state; Done/Snooze remain. |
+| Legacy Alarm Snooze | Hides the occurrence and stores a ten-minute deadline; the later alert can be delayed by Android. |
 | Tap | Opens the matching reminder in the list; does not itself complete the task. |
 
 ## Settings and offline viewing
@@ -54,6 +59,6 @@ The app presents initial empty lists, loading reminders, save/load/delete errors
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
 
-## Second phone review — rc3
+## Historical second phone review — rc3
 
 New single-place arrival reminders optionally check “Notify me now if I’m already here”, initially off. Save always commits before one bounded foreground precise location attempt. Clearly inside may request the chosen real alert; skipped/failed checks explain that saving succeeded. No chain/departure/edit support. Connected tabs/Mark done and search progress refine existing journeys. See [[Ariciu - Phone Review 2]].

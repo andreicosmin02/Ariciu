@@ -7,6 +7,8 @@ version: 1.1-rc3
 
 # Phone Review 2 — rc2 observations and rc3 retest
 
+Historical rc3 record. [[Ariciu - Urgent Re-alerts]] supersedes Urgent swipe-to-Next-time and new Alarm selection; the observations below remain unchanged.
+
 Received 2026-10-17 from Samsung Galaxy S26 Ultra (SM-S948B), Android 16/API 36, One UI 8.5. Development is on `fix/phone-review-2`, based on clean `fix/phone-review-1` at `1b2eb13`. Candidate: **1.1-rc3 / code 4**. No master merge or publication. Source remains authoritative; the written tab structure guided implementation. No private image, log, location or notification text is committed.
 
 ## Every review item

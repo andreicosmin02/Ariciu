@@ -1,11 +1,16 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-2
-version: 1.1-rc3
+implementation_baseline: fix/urgent-realerts
+version: 1.1-rc4
 ---
 
 # Tests and evidence
+
+## Current rc4 update
+
+Current rc4 gate: **97 unit / 44 emulator tests passed**, lint **0 errors/39 warnings**, assembly/install/signature passed. Native system-font 2.0 UI passed 1/1 separately; actual shipping five-minute retry survived process death/reboot/APK replacement, queued safely with denied permission, and posted once on restore. Actual blocked Urgent channel/card resolution also checked. Failure diagnosis and phone limits are in the current record. Earlier counts below remain dated historical results. See [[Ariciu - Urgent Re-alerts]].
+
 
 Related: [[Ariciu - Development and Builds]], [[Ariciu - Current Status]], [[Ariciu - Debugging Playbook]].
 

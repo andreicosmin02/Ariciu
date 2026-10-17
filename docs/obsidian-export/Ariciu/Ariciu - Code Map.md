@@ -1,11 +1,16 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-2
-version: 1.1-rc3
+implementation_baseline: fix/urgent-realerts
+version: 1.1-rc4
 ---
 
 # Code map
+
+## Current rc4 update
+
+UrgentRetryWork.kt owns unique delayed-job synchronization/cancellation. DeliveryState.onUrgentDismiss/onUrgentRetryDue and DeliveryEngine.wakeUrgentRetries preserve occurrence and check attempt; Room 5 stores deadlines/attempts. ReminderDao.nextTime/Repository/ViewModel own safe card resolution. See [[Ariciu - Urgent Re-alerts]].
+
 
 Related: [[Ariciu - Architecture]], [[Ariciu - Tests and Evidence]], [[Ariciu - Debugging Playbook]].
 
@@ -54,10 +59,10 @@ One Gradle module: `:app`. Main package root: `app/src/main/java/ro/andrei/arici
 Tests mirror these packages in `app/src/test/java/` and `app/src/androidTest/java/`; release-flow instrumentation also lives in `feature/release/`. Generated KSP classes, build outputs and native caches are not source to edit. See [[Ariciu - Maintenance and Extension]] for extension boundaries.
 
 
-## Phone review update (17 October)
+## Historical first phone review (rc2)
 
 `feature/places/StorePreviewScreen.kt` renders persisted chain areas on MapLibre with a List alternative. `ReminderRepository.complete`, `ReminderDao.complete` and `RemindersViewModel.complete` own card completion; shared `ExpandableSection` contains expanded help. See [[Ariciu - Phone Review 1]].
 
-## Second phone review — rc3
+## Historical second phone review — rc3
 
 PlaceSearchController.kt and PlaceSearchDialog.kt own current-query states. ForegroundArrivalCheck.kt bounds/cancels one foreground fix; ImmediateArrival.kt owns pure evidence/rules/results; DeliveryEngine.immediateArrival and DeliveryWork.runtimeMutex/dispatch persist the normal occurrence/outbox. ReminderRepository.save returns the committed generation. Draft notifyOnSave/newSave marker are SavedState-only. [[Ariciu - Phone Review 2]] has mechanism/tests/limits.

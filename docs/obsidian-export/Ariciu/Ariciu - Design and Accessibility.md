@@ -1,11 +1,16 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-2
-version: 1.1-rc3
+implementation_baseline: fix/urgent-realerts
+version: 1.1-rc4
 ---
 
 # Design and accessibility
+
+## Current rc4 update
+
+Only Silent/Normal/Urgent are offered, with the five-minute swipe explanation before selection. Pending cards retain due/waiting status and outlined Mark done/Next time; legacy Alarm editors explain explicit conversion. Both themes/larger text remain supported. See [[Ariciu - Urgent Re-alerts]].
+
 
 Related: [[Ariciu - Features and Journeys]], [[Ariciu - Risks and Technical Debt]]. Canonical repository design record: `docs/design/DESIGN.md`. Sources: `ui/theme/`, `ui/components/`, and feature UI files in [[Ariciu - Code Map]].
 
@@ -64,6 +69,6 @@ Prioritize reported confusion, clipped/unreachable controls and accessibility ba
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
 
-## Second phone review — rc3
+## Historical second phone review — rc3
 
 rc3 uses horizontal traditional tabs joined to the bordered reminder panel, with counts, Tab/selection semantics and fixed visibility while content scrolls. Redundant headings/empty spacing removed. Mark done is outlined and has no checkmark. Settings status belongs beside Review, with stacked larger text; Create map gap: 8dp. Search has inline progress/polite announcements; new single arrivals have an off-by-default notify-on-save choice. Actual emulator evidence: [[Ariciu - Phone Review 2]].

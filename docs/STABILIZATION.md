@@ -1,6 +1,6 @@
 # Real-phone debugging and stabilization
 
-Updated 2026-10-17 for Ariciu 1.1-rc3. Start with [handoff](CODEX_HANDOFF.md), [status](PROJECT_STATUS.md) and [audit/limits](STABILIZATION_AUDIT.md). The first owner phone review and its implemented rc2 fixes are recorded in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md). The second review and limited actual rc2 Samsung swipe verification are in [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md); rc3 phone retest is pending. Do not manufacture a bug list from hypotheses.
+Updated 2026-10-17 for Ariciu 1.1-rc4. Current owner-directed Urgent re-alert policy and Alarm retirement: [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md). Start with [handoff](CODEX_HANDOFF.md), [status](PROJECT_STATUS.md) and [audit/limits](STABILIZATION_AUDIT.md). The first owner phone review and its implemented rc2 fixes are recorded in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md). The second review and limited actual rc2 Samsung swipe verification are in [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md); rc3 phone retest is pending. Do not manufacture a bug list from hypotheses.
 
 ## Workflow
 
