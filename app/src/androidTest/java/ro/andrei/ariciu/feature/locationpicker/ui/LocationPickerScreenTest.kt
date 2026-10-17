@@ -1,5 +1,7 @@
 package ro.andrei.ariciu.feature.locationpicker.ui
 
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -113,6 +115,24 @@ class LocationPickerScreenTest {
             )
         }
     }
+    @Test fun narrowShortScreenWithLargeTextKeepsMapOptionsAndPrimaryActionReachable() {
+        composeTestRule.setContent {
+            val density = androidx.compose.ui.platform.LocalDensity.current
+            androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides androidx.compose.ui.unit.Density(density.density,2f)) {
+                ro.andrei.ariciu.ui.theme.AriciuTheme {
+                    androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.size(320.dp,360.dp)) {
+                        LocationPickerScreen(onLocationSelected = {})
+                    }
+                }
+            }
+        }
+        composeTestRule.onNodeWithTag("location_picker_confirm_button").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Supermarket chain").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("place_sheet_toggle").performScrollTo().performClick()
+        composeTestRule.onNodeWithText("500 m").performScrollTo().assertIsDisplayed().performClick()
+        composeTestRule.onNodeWithTag("location_picker_confirm_button").assertIsDisplayed()
+    }
+
 }
 
 private fun assertSelectedLocationEquals(

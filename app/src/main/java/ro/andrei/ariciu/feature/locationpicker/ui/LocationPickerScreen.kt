@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import ro.andrei.ariciu.feature.locationpicker.geometry.buildRadiusBoundary
 import ro.andrei.ariciu.feature.locationpicker.map.toGeoJsonPolygon
@@ -129,7 +130,11 @@ fun LocationPickerScreen(
             SelectedLocation(selectedCoordinates.latitude, selectedCoordinates.longitude, radiusMeters), { preview = false })
         return
     }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    val compact = maxHeight < 600.dp && density.fontScale > 1.3f || maxHeight < 400.dp
+    val compactMapHeight = (maxHeight - 88.dp).coerceIn(180.dp,300.dp)
     Column(Modifier.fillMaxSize()) {
+        Column(Modifier.weight(1f).then(if (compact) Modifier.verticalScroll(rememberScrollState()) else Modifier)) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text("Ariciu", style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
@@ -155,7 +160,7 @@ fun LocationPickerScreen(
             FilterChip(chainName != null, { choosingChain = true }, label = { Text(chainName ?: "Supermarket chain") }, modifier = Modifier.heightIn(min = 48.dp))
         }
         Spacer(Modifier.height(8.dp))
-        BoxWithConstraints(Modifier.weight(1f)) {
+        BoxWithConstraints(if (compact) Modifier.height(compactMapHeight) else Modifier.weight(1f)) {
         val sheetBodyHeight = (maxHeight - sheetPeek).coerceAtLeast(48.dp)
         BottomSheetScaffold(modifier = Modifier.fillMaxSize(), scaffoldState = sheetScaffold,
             sheetPeekHeight = sheetPeek, sheetContainerColor = colors.surface,
@@ -163,10 +168,10 @@ fun LocationPickerScreen(
                 Column(Modifier.fillMaxWidth().onSizeChanged { sheetPeek = with(density) { it.height.toDp() } }, horizontalAlignment = Alignment.CenterHorizontally) {
                     Surface(Modifier.padding(top = 8.dp).size(width = 32.dp, height = 4.dp), shape = MaterialTheme.shapes.small, color = colors.outlineVariant) {}
                     TextButton(onClick = { scope.launch { if (sheetState.currentValue == SheetValue.Expanded) sheetState.partialExpand() else sheetState.expand() } },
-                        modifier = Modifier.fillMaxWidth().testTag("place_sheet_toggle"), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)) {
+                        modifier = Modifier.fillMaxWidth().testTag("place_sheet_toggle").semantics { stateDescription = if (sheetState.currentValue == SheetValue.Expanded) "Expanded" else "Collapsed" }, contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)) {
                         Column(Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
-                            Text(if (chainName == null) "Around this spot" else "Around selected stores", style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
-                            Text(if (sheetState.currentValue == SheetValue.Expanded) "Collapse place options" else "Expand place options", style = MaterialTheme.typography.bodySmall)
+                            Text(if (compact) "Options" else if (chainName == null) "Around this spot" else "Around selected stores", style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
+                            if (!compact) Text(if (sheetState.currentValue == SheetValue.Expanded) "Collapse place options" else "Expand place options", style = MaterialTheme.typography.bodySmall)
                         }
                         Text("$radiusMeters m", style = MaterialTheme.typography.titleSmall, modifier = Modifier.testTag("location_picker_radius_value"))
                     }
@@ -230,12 +235,13 @@ fun LocationPickerScreen(
                     Text("© OpenMapTiles · © OpenStreetMap", Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                 }
-                Surface(Modifier.align(Alignment.TopCenter).padding(16.dp), shape = MaterialTheme.shapes.small,
+                if (!compact) Surface(Modifier.align(Alignment.TopCenter).padding(16.dp), shape = MaterialTheme.shapes.small,
                     color = colors.surface, shadowElevation = 2.dp) {
                     Text(if (mapFailed) "Map unavailable here. Check internet or use a downloaded area." else "Move the map to choose your spot", Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         style = MaterialTheme.typography.bodyMedium)
                 }
             }
+        }
         }
         }
         Surface(color = colors.surface) {
@@ -244,6 +250,7 @@ fun LocationPickerScreen(
             }, enabled = !cameraState.isCameraMoving && (chainName == null || nearbyStores.isNotEmpty()),
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp).testTag("location_picker_confirm_button"))
         }
+    }
     }
     if (choosingChain) AlertDialog(onDismissRequest = { choosingChain = false }, title = { Text("Choose a supermarket chain") }, text = {
         Column(Modifier.verticalScroll(rememberScrollState())) {
