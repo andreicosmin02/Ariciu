@@ -7,9 +7,11 @@ version: 1.1-rc2
 
 # Offline map packs and provider limits
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Maps and Current Location]], [[Ariciu - Sources and Licensing]], [[Ariciu - Risks and Technical Debt]].
 
-Sources: `feature/offlinemap/OfflineMaps.kt`, `DownloadBudget.kt`; picker download confirmation and Settings pack rows.
+Sources: [feature/offlinemap/OfflineMaps.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/offlinemap/OfflineMaps.kt), [DownloadBudget.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/offlinemap/DownloadBudget.kt); picker download confirmation and Settings pack rows.
 
 ## User-visible contract
 
@@ -51,9 +53,13 @@ A map pack does not cache all countries, arbitrary overview/deep zooms or both t
 
 Emulator verified 2026-10-16: one real light region completed with 31 protected vector tiles and 396 protected style/font/sprite resources; roads/labels and pin selection rendered with Wi-Fi/mobile data disabled. This was not a native download golden test, proof for all regions/themes, or a physical-phone positioning test.
 
-![[Attachments/rc-offline-light.png]]
+![Ariciu emulator capture: rc-offline-light](Attachments/rc-offline-light.png)
 
 
 ## Phone review update (17 October)
 
 The download explanation now distinguishes roads/labels/basemap from the bundled offline search catalogue. Packs do not add searchable stores or change geofence coverage. Settings explains explicit resume and the monitoring retry action separately. See [[Ariciu - Phone Review 1]].
+
+## Related reading
+
+[Maps and Current Location](Ariciu%20-%20Maps%20and%20Current%20Location.md) · [Sources and Licensing](Ariciu%20-%20Sources%20and%20Licensing.md) · [Risks and Technical Debt](Ariciu%20-%20Risks%20and%20Technical%20Debt.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md)

@@ -7,6 +7,8 @@ version: 1.1-rc4
 
 # Urgent Re-alerts and temporary Alarm retirement — rc4
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 > Historical implementation report. Subsequent owner-authorized master merge and GitHub pre-release are recorded in [[Ariciu - Releases and Signing]]. Current mechanism/evidence below remains unchanged; positive initial owner feedback is not comprehensive phone certification.
 
 17 October 2026. Branch `fix/urgent-realerts`, from clean rc3 `fix/phone-review-2` at `8f11976`. Candidate **1.1-rc4 / code 5**, Room **5**. Nothing merged or published. This owner-directed behavior supersedes rc3’s Urgent swipe-to-Next-time policy; historical Samsung rc2 observations remain valid for that old version.
@@ -94,32 +96,36 @@ Eight actual emulator captures, dummy content only; no personal-phone image. Nat
 
 ### urgent-pending-dark
 
-![[Attachments/urgent-urgent-pending-dark.png]]
+![Ariciu emulator capture: urgent-urgent-pending-dark](Attachments/urgent-urgent-pending-dark.png)
 
 ### urgent-pending-light
 
-![[Attachments/urgent-urgent-pending-light.png]]
+![Ariciu emulator capture: urgent-urgent-pending-light](Attachments/urgent-urgent-pending-light.png)
 
 ### urgent-pending-large
 
-![[Attachments/urgent-urgent-pending-large.png]]
+![Ariciu emulator capture: urgent-urgent-pending-large](Attachments/urgent-urgent-pending-large.png)
 
 ### legacy-alarm-light
 
-![[Attachments/urgent-legacy-alarm-light.png]]
+![Ariciu emulator capture: urgent-legacy-alarm-light](Attachments/urgent-legacy-alarm-light.png)
 
 ### three-levels-light
 
-![[Attachments/urgent-three-levels-light.png]]
+![Ariciu emulator capture: urgent-three-levels-light](Attachments/urgent-three-levels-light.png)
 
 ### three-levels-dark
 
-![[Attachments/urgent-three-levels-dark.png]]
+![Ariciu emulator capture: urgent-three-levels-dark](Attachments/urgent-three-levels-dark.png)
 
 ### urgent-editor-large
 
-![[Attachments/urgent-urgent-editor-large.png]]
+![Ariciu emulator capture: urgent-urgent-editor-large](Attachments/urgent-urgent-editor-large.png)
 
 ### three-levels-system-large-dark
 
-![[Attachments/urgent-three-levels-system-large-dark.png]]
+![Ariciu emulator capture: urgent-three-levels-system-large-dark](Attachments/urgent-three-levels-system-large-dark.png)
+
+## Related reading
+
+[Releases and Signing](Ariciu%20-%20Releases%20and%20Signing.md) · [Current Status](Ariciu%20-%20Current%20Status.md) · [Notifications and Alarm](Ariciu%20-%20Notifications%20and%20Alarm.md) · [Reminder Lifecycle](Ariciu%20-%20Reminder%20Lifecycle.md) · [Data and Migrations](Ariciu%20-%20Data%20and%20Migrations.md) · [Background Work and Recovery](Ariciu%20-%20Background%20Work%20and%20Recovery.md) · [Tests and Evidence](Ariciu%20-%20Tests%20and%20Evidence.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md)

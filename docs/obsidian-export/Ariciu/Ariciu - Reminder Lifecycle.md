@@ -7,9 +7,11 @@ version: 1.1-rc4
 
 # Reminder lifecycle and action semantics
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Data and Migrations]], [[Ariciu - Notifications and Alarm]], [[Ariciu - Chain Reminders]].
 
-Source: `feature/delivery/model/ReminderLifecycle.kt` and `DeliveryEngine.kt` under the main package. Status presentation is separate in `feature/reminders/ui/ReminderPresentation.kt`.
+Source: [feature/delivery/model/ReminderLifecycle.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/model/ReminderLifecycle.kt) and [DeliveryEngine.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/model/DeliveryEngine.kt) under the main package. Status presentation is separate in [feature/reminders/ui/ReminderPresentation.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/reminders/ui/ReminderPresentation.kt).
 
 ## Three independent axes
 
@@ -73,3 +75,7 @@ Card Done also works before a crossing and while snoozed. `DeliveryState.complet
 Optional immediate arrival is only the first new single ENTER occurrence. After save, fresh/accurate foreground evidence and exact generation pass through the real engine transaction/outbox. Duplicate attempt/reconcile cannot trigger another occurrence; Next time/Every visit require a real opposite crossing. Existing card completion/generation guards remain. No schema change or initialTrigger policy change. See [[Ariciu - Phone Review 2]].
 
 Current delayed-work/recovery/generation details and tests: [[Ariciu - Urgent Re-alerts]].
+
+## Related reading
+
+[Data and Migrations](Ariciu%20-%20Data%20and%20Migrations.md) · [Notifications and Alarm](Ariciu%20-%20Notifications%20and%20Alarm.md) · [Chain Reminders](Ariciu%20-%20Chain%20Reminders.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md) · [Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md)

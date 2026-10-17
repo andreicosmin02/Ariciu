@@ -7,6 +7,8 @@ version: 1.1-rc4
 
 # Architecture
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 ## Current rc4 update
 
 Room 5 adds two retry fields with an additive migration; application-owned Urgent lifecycle/delayed one-time work remains in the established engine/outbox architecture. No new dependency, permission or backend. See [[Ariciu - Urgent Re-alerts]].
@@ -60,3 +62,7 @@ flowchart TD
 - Room, WorkManager and Android services are separate commits. Recovery is best-effort; no absolute exactly-once guarantee.
 
 Do not move vendor types into domain models, replace the engine to fix a UI issue, or introduce a framework/dependency without demonstrated need. See [[Ariciu - Maintenance and Extension]].
+
+## Related reading
+
+[Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md) · [Code Map](Ariciu%20-%20Code%20Map.md) · [Data and Migrations](Ariciu%20-%20Data%20and%20Migrations.md) · [Background Work and Recovery](Ariciu%20-%20Background%20Work%20and%20Recovery.md) · [Maintenance and Extension](Ariciu%20-%20Maintenance%20and%20Extension.md)

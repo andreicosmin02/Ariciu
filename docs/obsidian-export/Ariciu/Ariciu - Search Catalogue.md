@@ -7,9 +7,11 @@ version: 1.1-rc3
 
 # Romania catalogue, search and data generation
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Chain Reminders]], [[Ariciu - Sources and Licensing]], [[Ariciu - Maintenance and Extension]].
 
-Sources: `feature/places/LocalPlaces.kt`, `PlaceCatalog.kt`; `app/src/main/assets/places/romania.tsv`, `NOTICE.md`; `tools/build_place_catalog.py`.
+Sources: [feature/places/LocalPlaces.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/places/LocalPlaces.kt), [PlaceCatalog.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/places/PlaceCatalog.kt); [app/src/main/assets/places/romania.tsv](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/assets/places/romania.tsv), [NOTICE.md](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/assets/places/NOTICE.md); [tools/build_place_catalog.py](https://github.com/andreicosmin02/Ariciu/blob/master/tools/build_place_catalog.py).
 
 ## Data and provenance
 
@@ -33,12 +35,12 @@ Seven recognized chains and shipped counts: Kaufland 200, Lidl 390, Carrefour 37
 
 ## Regeneration workflow
 
-Development-only PyOsmium parses a lawful free regional PBF. The app never downloads/imports that large extract at runtime.
+Development-only PyOsmium parses a lawful free regional PBF. The app never downloads/imports that large extract at runtime. Run from the repository root, replacing ROMANIA_PBF_PATH with your downloaded extract’s path. The environment is ignored by Git; on Windows use its Scripts/python.exe instead of bin/python.
 
 ```bash
-python3 -m venv /tmp/ariciu-catalog-tools
-/tmp/ariciu-catalog-tools/bin/pip install osmium
-/tmp/ariciu-catalog-tools/bin/python tools/build_place_catalog.py /path/to/romania.osm.pbf app/src/main/assets/places/romania.tsv
+python3 -m venv .venv-catalog
+.venv-catalog/bin/python -m pip install osmium
+.venv-catalog/bin/python tools/build_place_catalog.py ROMANIA_PBF_PATH app/src/main/assets/places/romania.tsv
 ```
 
 Before shipping regenerated data: verify provider/licence terms, source timestamp/hash, row/chain counts, coordinate bounds, duplication heuristic, file encoding and representative searches. Update NOTICE.md, UI date strings in picker/editor/Settings and status/evidence docs together. The script prints counts/hash and puts the UTC generation date in the header; it does not automatically update all these other metadata locations. Do not check the huge raw extract, temporary virtualenv or personal files into Git.
@@ -53,3 +55,7 @@ The importer now includes named `shop=mall` nodes/closed ways, including AFI Bra
 ## Second phone review — rc3
 
 Search progress now distinguishes local catalogue load, active current-query work and completed results. Revision/cancellation guards prevent an old result overwriting a new query; clearing returns to idle and query restores across recreation. Retry is explicit. No ranking/data/remote-service change. See [[Ariciu - Phone Review 2]].
+
+## Related reading
+
+[Chain Reminders](Ariciu%20-%20Chain%20Reminders.md) · [Sources and Licensing](Ariciu%20-%20Sources%20and%20Licensing.md) · [Maintenance and Extension](Ariciu%20-%20Maintenance%20and%20Extension.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md)

@@ -6,7 +6,7 @@ Ariciu is an offline-first Android app for location-based reminders. Reminders c
 
 ## Authoritative baseline and distribution
 
-`master` is the authoritative baseline for **1.1-rc4 / code 5 / Room 5**. The owner-authorized consolidation and first GitHub **pre-release** are recorded in [docs/GITHUB_RELEASE_RC4.md](docs/GITHUB_RELEASE_RC4.md). The downloadable APK retains debug signing; no Google Play publication or production key. Repository visibility remains private. Branch deletion still requires the owner’s final confirmation. Future merge/publication actions require session authorization.
+`master` is the authoritative baseline for **1.1-rc4 / code 5 / Room 5**. The owner-authorized consolidation and first GitHub **pre-release** are recorded in [docs/GITHUB_RELEASE_RC4.md](docs/GITHUB_RELEASE_RC4.md). The downloadable APK retains debug signing; no Google Play publication or production key. Repository visibility is a separate owner decision and must not be changed as routine development. The eight original merged development branches were safely deleted after approval; create new work from master. Future merge/publication actions require session authorization.
 
 ## Current product priority and visual direction
 

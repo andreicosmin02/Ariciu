@@ -7,6 +7,8 @@ version: 1.1-rc2
 
 # Product and decisions
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Features and Journeys]], [[Ariciu - Historical Notes]], [[Ariciu - Sources and Licensing]].
 
 ## Problem and vision
@@ -32,7 +34,7 @@ The product should feel calm, polished and predictable, including for older and 
 
 ## Scope and compromises
 
-Implemented: all four intensity choices, current map positioning, private local search, limited theme-specific offline map packs and selected-store chain reminders. See the feature note for their boundaries rather than reading this list as a guarantee.
+Implemented: Silent, Normal and Urgent choices (Alarm remains compatible only for existing records), current map positioning, private local search, limited theme-specific offline map packs and selected-store chain reminders. See the feature note for their boundaries rather than reading this list as a guarantee.
 
 Not implemented: complete/worldwide address search, automatic roaming chain coverage, user-importable store catalogues, editable snooze duration, full-screen alarm UI, custom continuous playback, completed-reminder restart, in-app Snooze controls, data export/backup and a non-Play-services positioning engine. These are not assumed next tasks.
 
@@ -44,3 +46,7 @@ The owner decides material UX/product trade-offs, coverage and privacy/cost chan
 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
+
+## Related reading
+
+[Features and Journeys](Ariciu%20-%20Features%20and%20Journeys.md) · [Historical Notes](Ariciu%20-%20Historical%20Notes.md) · [Sources and Licensing](Ariciu%20-%20Sources%20and%20Licensing.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md)

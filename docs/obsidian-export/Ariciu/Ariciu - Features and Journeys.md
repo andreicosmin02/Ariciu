@@ -7,6 +7,8 @@ version: 1.1-rc4
 
 # Features and user journeys
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 ## Current rc4 update
 
 New levels are Silent, Normal and Urgent. Urgent swipes re-alert after about five minutes until explicit Done/Next time, including after crossing again; card actions work while waiting. Existing Alarm stays supported and can be explicitly converted, retaining current snooze timing. See [[Ariciu - Urgent Re-alerts]].
@@ -62,3 +64,7 @@ Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
 ## Historical second phone review — rc3
 
 New single-place arrival reminders optionally check “Notify me now if I’m already here”, initially off. Save always commits before one bounded foreground precise location attempt. Clearly inside may request the chosen real alert; skipped/failed checks explain that saving succeeded. No chain/departure/edit support. Connected tabs/Mark done and search progress refine existing journeys. See [[Ariciu - Phone Review 2]].
+
+## Related reading
+
+[Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md) · [Reminder Lifecycle](Ariciu%20-%20Reminder%20Lifecycle.md) · [Notifications and Alarm](Ariciu%20-%20Notifications%20and%20Alarm.md) · [Design and Accessibility](Ariciu%20-%20Design%20and%20Accessibility.md) · [Risks and Technical Debt](Ariciu%20-%20Risks%20and%20Technical%20Debt.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md)

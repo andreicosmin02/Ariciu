@@ -1,5 +1,7 @@
 # Second phone review — rc2 observations and rc3 retest
 
+> Historical review record. Current implementation is rc4 on master; see [status](PROJECT_STATUS.md), [current Urgent policy](URGENT_RE_ALERTS.md) and [completed release/branch cleanup](GITHUB_RELEASE_RC4.md). Branch/version references below describe the original batch.
+
 Historical rc3 record. [rc4 Urgent re-alerts](URGENT_RE_ALERTS.md) supersede the swipe-to-Next-time policy and new Alarm choices below; original observations remain unchanged.
 
 Received 2026-10-17 from Samsung Galaxy S26 Ultra (SM-S948B), Android 16/API 36, One UI 8.5. Development is on `fix/phone-review-2`, based on clean `fix/phone-review-1` at `1b2eb13`. Candidate: **1.1-rc3 / code 4**. No master merge or publication. Source remains authoritative; the written tab structure guided implementation. No private image, log, location or notification text is committed.

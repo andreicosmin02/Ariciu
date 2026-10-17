@@ -1,6 +1,8 @@
 # First phone review — implementation and retest
 
-Review received 2026-10-17 for **1.1-rc1**. Implementation candidate: **1.1-rc2 / code 3**, branch `fix/phone-review-1`, based on `feat/phone-release-candidate` at `62557c5`. No merge or publication. Original Obsidian `Ariciu - Review 1.1-rc1.md` was read completely, together with all six unique referenced screenshots and both additional screenshots from the same capture sequence. Originals remain private and unchanged.
+> Historical review record. Current implementation is rc4 on master; see [status](PROJECT_STATUS.md), [current Urgent policy](URGENT_RE_ALERTS.md) and [completed release/branch cleanup](GITHUB_RELEASE_RC4.md). Branch/version references below describe the original batch.
+
+Review received 2026-10-17 for **1.1-rc1**. Implementation candidate: **1.1-rc2 / code 3**, branch `fix/phone-review-1`, based on `feat/phone-release-candidate` at `62557c5`. No merge or publication. The original written phone review and eight associated captures informed this batch. Personal originals are not distributed; this report and project emulator captures preserve the findings.
 
 ## Findings and decisions
 
@@ -52,9 +54,9 @@ Executed **2026-10-17**, final source unchanged afterward:
 Physical-device geofencing, actual sound/vibration, One UI behavior, TalkBack traversal and older-Android runtime behavior remain **unverified**. No physical phone was connected or modified. Tests use disposable emulator fixtures; no owner data was cleared. The earlier rc1 gate (64/19) is historical evidence only.
 
 
-## Documentation synchronization
+## Repository documentation evidence
 
-Repository handoff/status/stabilization/design and the existing Obsidian project folder were synchronized on 17 October. 26 focused notes and 27 emulator images (8 historical, 19 new) match the portable export. Existing notes were compared against the previous export; no conflicting user edits. Original planning notes, private review and eight phone screenshots were hash-checked unchanged. Filesystem escalation was needed for the vault outside writable roots; no personal-vault contents were added to Git.
+The rc2 batch updated repository handoff/status/stabilization/design records and retained 26 focused technical notes with 27 emulator images at that historical stage. The optional knowledge base now includes later rc3/rc4 records and does not depend on personal files.
 
 ## Phone retest
 

@@ -1,27 +1,40 @@
 # Ariciu documentation
 
-Current baseline: **1.1-rc4**, authoritative branch `master`, [GitHub pre-release v1.1-rc4](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4). [Public-facing introduction](../README.md). Current phase: **real-phone debugging and stabilization**, updated 2026-10-17. These documents describe inspected implementation and dated evidence; no physical-phone success is implied.
+Current implementation: **1.1-rc4 / code 5 / Room 5**, authoritative branch `master`. Ariciu is in physical-phone testing and stabilization; the [debug-signed pre-release](RELEASE_CANDIDATE.md) is not production-stable. Start with the [project introduction](../README.md).
 
-## Start a development session
+## Getting started
 
-1. [Working rules](../AGENTS.md)
-2. [Next Codex handoff](CODEX_HANDOFF.md)
-3. [Current status and verification](PROJECT_STATUS.md)
-4. [Stabilization workflow](STABILIZATION.md) and [limitations/source audit](STABILIZATION_AUDIT.md)
+- [Developer setup, SDK/JDK and build/test commands](DEVELOPMENT.md)
+- [Contributing and reporting bugs](../CONTRIBUTING.md)
+- [Current implementation/status and pending device checks](PROJECT_STATUS.md)
 
-## Product, implementation and testing
+## Current implementation
 
-- [GitHub release, signing, verification and branch cleanup audit](GITHUB_RELEASE_RC4.md)
-- [Urgent re-alerts and temporary Alarm retirement](URGENT_RE_ALERTS.md)
+| Topic | Start here | Focused explanation |
+| --- | --- | --- |
+| Architecture and reliability boundaries | [Delivery architecture](DELIVERY_ARCHITECTURE.md) | [Architecture](obsidian-export/Ariciu/Ariciu%20-%20Architecture.md), [code map](obsidian-export/Ariciu/Ariciu%20-%20Code%20Map.md) |
+| Reminder data and persistence | [Architecture](DELIVERY_ARCHITECTURE.md) | [Data model and Room migrations](obsidian-export/Ariciu/Ariciu%20-%20Data%20and%20Migrations.md) |
+| Geofence registration/recovery | [Architecture](DELIVERY_ARCHITECTURE.md) | [Permissions/geofencing](obsidian-export/Ariciu/Ariciu%20-%20Geofencing%20and%20Permissions.md), [background recovery](obsidian-export/Ariciu/Ariciu%20-%20Background%20Work%20and%20Recovery.md) |
+| Notifications and Urgent retries | [Current Urgent policy and rc4 evidence](URGENT_RE_ALERTS.md) | [Lifecycle](obsidian-export/Ariciu/Ariciu%20-%20Reminder%20Lifecycle.md), [notifications](obsidian-export/Ariciu/Ariciu%20-%20Notifications%20and%20Alarm.md) |
+| Maps and local search | [Implemented scope/coverage](FEATURE_COMPLETION.md) | [Maps](obsidian-export/Ariciu/Ariciu%20-%20Maps%20and%20Current%20Location.md), [catalogue](obsidian-export/Ariciu/Ariciu%20-%20Search%20Catalogue.md), [chains](obsidian-export/Ariciu/Ariciu%20-%20Chain%20Reminders.md), [offline packs](obsidian-export/Ariciu/Ariciu%20-%20Offline%20Maps.md) |
+| UI and accessibility | [Design system and screenshot evidence](design/DESIGN.md) | [Design/accessibility](obsidian-export/Ariciu/Ariciu%20-%20Design%20and%20Accessibility.md) |
 
-- [Second phone review: dispositions and retest](PHONE_REVIEW_2.md)
-- [First phone review: dispositions and retest](PHONE_REVIEW_1.md)
-- [Release candidate and APK](RELEASE_CANDIDATE.md)
-- [Nontechnical phone checklist](PHONE_VERIFICATION.md)
-- [Feature scope, provider/platform evidence and licensing](FEATURE_COMPLETION.md)
-- [Reminder delivery architecture](DELIVERY_ARCHITECTURE.md)
-- [Design direction and emulator screenshots](design/DESIGN.md)
+## Verification, limitations and releases
 
-## Full knowledge base
+- [Build/test commands](DEVELOPMENT.md), [dated test inventories/evidence](obsidian-export/Ariciu/Ariciu%20-%20Tests%20and%20Evidence.md) and [physical-phone checklist](PHONE_VERIFICATION.md)
+- [Debugging workflow](STABILIZATION.md) and [known boundaries versus unreproduced hypotheses](STABILIZATION_AUDIT.md)
+- [APK installation/signing](RELEASE_CANDIDATE.md), [rc4 publication and completed branch cleanup](GITHUB_RELEASE_RC4.md)
+- [Licensing review and recommendation awaiting approval](LICENSING.md)
+- [Public-use preparation audit and verification scope](PUBLIC_REPOSITORY_PREPARATION.md)
 
-[Obsidian export instructions](obsidian-export/README.md) and the [Ariciu index](obsidian-export/Ariciu/Ariciu.md) provide 29 focused notes with code references, diagrams, test inventories, user journeys and maintenance guidance. The existing personal vault was synchronized on 17 October; original planning/review notes and phone screenshots remain unchanged. Essential handoff information remains here in ordinary repository Markdown; the personal vault and its original notes are not committed.
+Future work includes proper Alarm support and production signing with a data-preserving transition. These are plans, not implemented capabilities or automatic authorization for expansion. Current phone feedback is positive; detailed OEM/background/accessibility checks remain open.
+
+## Historical evidence
+
+[First phone review (rc2 fixes)](PHONE_REVIEW_1.md), [second review (rc3 fixes)](PHONE_REVIEW_2.md), and [Urgent implementation batch (rc4)](URGENT_RE_ALERTS.md) retain dated root causes, tests and limitations. Old branch names, exact device commands and version-specific behavior in those reports are historical, not current setup instructions. Use current source/status when they differ.
+
+## Optional knowledge base and automation
+
+The [portable knowledge base](obsidian-export/README.md) contains **29 notes and 54 emulator screenshots**. Its [index](obsidian-export/Ariciu/Ariciu.md), standard links and images are browsable without Obsidian; internal wikilinks and Mermaid diagrams also work when opened as a vault. No personal directory, account, plugin or synchronization is required.
+
+[AGENTS.md](../AGENTS.md) and [Codex handoff](CODEX_HANDOFF.md) support optional agent-assisted work. Ordinary contributors can use CONTRIBUTING and developer setup directly.

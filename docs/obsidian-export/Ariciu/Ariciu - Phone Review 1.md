@@ -5,11 +5,15 @@ implementation_baseline: fix/phone-review-1
 version: 1.1-rc2
 ---
 
-Related: [[Ariciu - Review 1.1-rc1]] (private original in vault), [[Ariciu - Current Status]], [[Ariciu - Tests and Evidence]], [[Ariciu - Notifications and Alarm]]. Repository mirror: docs/PHONE_REVIEW_1.md. Original review/screenshots are preserved; only project emulator evidence is exported.
+Related: [[Ariciu - Current Status]], [[Ariciu - Tests and Evidence]], [[Ariciu - Notifications and Alarm]]. Repository mirror: docs/PHONE_REVIEW_1.md. Personal review/screenshots are not included; this note records findings and project emulator evidence.
 
 # First phone review — implementation and retest
 
-Review received 2026-10-17 for **1.1-rc1**. Implementation candidate: **1.1-rc2 / code 3**, branch `fix/phone-review-1`, based on `feat/phone-release-candidate` at `62557c5`. No merge or publication. Original Obsidian `Ariciu - Review 1.1-rc1.md` was read completely, together with all six unique referenced screenshots and both additional screenshots from the same capture sequence. Originals remain private and unchanged.
+> Historical rc2 implementation report. Current [status](Ariciu%20-%20Current%20Status.md) and [Urgent policy](Ariciu%20-%20Urgent%20Re-alerts.md) supersede version-specific behavior below.
+
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
+Review received 2026-10-17 for **1.1-rc1**. Implementation candidate: **1.1-rc2 / code 3**, branch `fix/phone-review-1`, based on `feat/phone-release-candidate` at `62557c5`. No merge or publication. The original written phone review and eight associated captures informed this batch. Those personal originals are not distributed; the findings and project emulator evidence are included here.
 
 ## Findings and decisions
 
@@ -61,9 +65,9 @@ Executed **2026-10-17**, final source unchanged afterward:
 Physical-device geofencing, actual sound/vibration, One UI behavior, TalkBack traversal and older-Android runtime behavior remain **unverified**. No physical phone was connected or modified. Tests use disposable emulator fixtures; no owner data was cleared. The earlier rc1 gate (64/19) is historical evidence only.
 
 
-## Documentation synchronization
+## Repository documentation evidence
 
-The existing vault and portable export were synchronized on 17 October: 26 focused notes/27 emulator images; previous-export comparison found no conflicts. Original planning notes, private review and eight phone screenshots were hash-checked unchanged. Repository handoff remains usable independently.
+The rc2 batch updated repository handoff/status/stabilization/design records and retained 26 focused technical notes with 27 emulator images at that historical stage. This collection now includes later rc3/rc4 material; no personal documentation folder is required.
 
 ## Phone retest
 
@@ -73,44 +77,48 @@ The existing vault and portable export were synchronized on 17 October: 26 focus
 4. Mark a waiting reminder Done on its card, then a triggered and a snoozed Alarm reminder. Each should move to Completed, stop alerting and lose monitoring after synchronization. Other reminders must remain. Editing a completed reminder must keep it completed; stale notification buttons must not revive it.
 5. Test Urgent on the Samsung phone: unlocked swipe should mean Next time, without immediate repost. Leave/return for the next visit. Compare locked-screen and Clear all behavior; Android controls dismissibility. Check normal/urgent/alarm sound settings and DND without assuming louder or full-screen behavior.
 6. Settings: expand/collapse Sound and alert settings and How reminders work. Check app-wide notification setup and individual channel links. Retry monitoring after restoring permissions; it must not invent a visit. Download one small map area and verify saved roads/labels in that theme with networking off; search coverage must remain the same.
-7. Continue background ENTER/EXIT, duplicate/next-visit, reboot/update, permission/Location-off and OEM battery checks from repository `docs/PHONE_VERIFICATION.md`. Record actual outcomes; automated checks are not a substitute.
+7. Continue background ENTER/EXIT, duplicate/next-visit, reboot/update, permission/Location-off and OEM battery checks from repository [docs/PHONE_VERIFICATION.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/PHONE_VERIFICATION.md). Record actual outcomes; automated checks are not a substitute.
 
 ## Actual emulator captures
 
-![[Attachments/review-1-rc-dark-create.png]]
+![Ariciu emulator capture: review-1-rc-dark-create](Attachments/review-1-rc-dark-create.png)
 
-![[Attachments/review-1-rc-dark-settings.png]]
+![Ariciu emulator capture: review-1-rc-dark-settings](Attachments/review-1-rc-dark-settings.png)
 
-![[Attachments/review-1-rc-large-alerts.png]]
+![Ariciu emulator capture: review-1-rc-large-alerts](Attachments/review-1-rc-large-alerts.png)
 
-![[Attachments/review-1-rc-large-reminders.png]]
+![Ariciu emulator capture: review-1-rc-large-reminders](Attachments/review-1-rc-large-reminders.png)
 
-![[Attachments/review-1-rc-light-create.png]]
+![Ariciu emulator capture: review-1-rc-light-create](Attachments/review-1-rc-light-create.png)
 
-![[Attachments/review-1-rc-light-editor.png]]
+![Ariciu emulator capture: review-1-rc-light-editor](Attachments/review-1-rc-light-editor.png)
 
-![[Attachments/review-1-rc-light-settings.png]]
+![Ariciu emulator capture: review-1-rc-light-settings](Attachments/review-1-rc-light-settings.png)
 
-![[Attachments/review-1-review-afi-search.png]]
+![Ariciu emulator capture: review-1-review-afi-search](Attachments/review-1-review-afi-search.png)
 
-![[Attachments/review-1-review-coordinates.png]]
+![Ariciu emulator capture: review-1-review-coordinates](Attachments/review-1-review-coordinates.png)
 
-![[Attachments/review-1-review-create-expanded.png]]
+![Ariciu emulator capture: review-1-review-create-expanded](Attachments/review-1-review-create-expanded.png)
 
-![[Attachments/review-1-review-fox.png]]
+![Ariciu emulator capture: review-1-review-fox](Attachments/review-1-review-fox.png)
 
-![[Attachments/review-1-review-large-create.png]]
+![Ariciu emulator capture: review-1-review-large-create](Attachments/review-1-review-large-create.png)
 
-![[Attachments/review-1-review-large-store-list.png]]
+![Ariciu emulator capture: review-1-review-large-store-list](Attachments/review-1-review-large-store-list.png)
 
-![[Attachments/review-1-review-manual-drag.png]]
+![Ariciu emulator capture: review-1-review-manual-drag](Attachments/review-1-review-manual-drag.png)
 
-![[Attachments/review-1-review-settings-expanded.png]]
+![Ariciu emulator capture: review-1-review-settings-expanded](Attachments/review-1-review-settings-expanded.png)
 
-![[Attachments/review-1-review-settings-help.png]]
+![Ariciu emulator capture: review-1-review-settings-help](Attachments/review-1-review-settings-help.png)
 
-![[Attachments/review-1-review-store-list.png]]
+![Ariciu emulator capture: review-1-review-store-list](Attachments/review-1-review-store-list.png)
 
-![[Attachments/review-1-review-store-map.png]]
+![Ariciu emulator capture: review-1-review-store-map](Attachments/review-1-review-store-map.png)
 
-![[Attachments/review-1-review-system-font.png]]
+![Ariciu emulator capture: review-1-review-system-font](Attachments/review-1-review-system-font.png)
+
+## Related reading
+
+[Current Status](Ariciu%20-%20Current%20Status.md) · [Tests and Evidence](Ariciu%20-%20Tests%20and%20Evidence.md) · [Notifications and Alarm](Ariciu%20-%20Notifications%20and%20Alarm.md)

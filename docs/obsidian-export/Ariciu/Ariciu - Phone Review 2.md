@@ -7,6 +7,8 @@ version: 1.1-rc3
 
 # Phone Review 2 — rc2 observations and rc3 retest
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Historical rc3 record. [[Ariciu - Urgent Re-alerts]] supersedes Urgent swipe-to-Next-time and new Alarm selection; the observations below remain unchanged.
 
 Received 2026-10-17 from Samsung Galaxy S26 Ultra (SM-S948B), Android 16/API 36, One UI 8.5. Development is on `fix/phone-review-2`, based on clean `fix/phone-review-1` at `1b2eb13`. Candidate: **1.1-rc3 / code 4**. No master merge or publication. Source remains authoritative; the written tab structure guided implementation. No private image, log, location or notification text is committed.
@@ -93,7 +95,7 @@ Older Android runtime behavior, TalkBack use, real GPS/crossings, OEM delivery t
 
 [[Ariciu - Current Status]] · [[Ariciu - Tests and Evidence]] · [[Ariciu - Notifications and Alarm]] · [[Ariciu - Reminder Lifecycle]] · [[Ariciu - Search Catalogue]] · [[Ariciu - Design and Accessibility]] · [[Ariciu - Phone Review 1]]
 
-Repository `docs/RELEASE_CANDIDATE.md` owns the current APK checksum/signing evidence. Repository handoff remains independent of vault access. Original planning/review notes and private screenshots remain unchanged.
+Repository [docs/RELEASE_CANDIDATE.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/RELEASE_CANDIDATE.md) owns the current APK checksum/signing evidence. Repository handoff remains independent of vault access. Personal originals are not distributed and are not needed to use this collection.
 
 ## Emulator screenshots
 
@@ -101,76 +103,80 @@ Repository `docs/RELEASE_CANDIDATE.md` owns the current APK checksum/signing evi
 
 ### reminders-dark
 
-![[Attachments/review-2-reminders-dark.png]]
+![Ariciu emulator capture: review-2-reminders-dark](Attachments/review-2-reminders-dark.png)
 
 ### reminders-light
 
-![[Attachments/review-2-reminders-light.png]]
+![Ariciu emulator capture: review-2-reminders-light](Attachments/review-2-reminders-light.png)
 
 ### completed-dark
 
-![[Attachments/review-2-completed-dark.png]]
+![Ariciu emulator capture: review-2-completed-dark](Attachments/review-2-completed-dark.png)
 
 ### tabs-large
 
-![[Attachments/review-2-tabs-large.png]]
+![Ariciu emulator capture: review-2-tabs-large](Attachments/review-2-tabs-large.png)
 
 ### settings-dark
 
-![[Attachments/review-2-settings-dark.png]]
+![Ariciu emulator capture: review-2-settings-dark](Attachments/review-2-settings-dark.png)
 
 ### settings-light
 
-![[Attachments/review-2-settings-light.png]]
+![Ariciu emulator capture: review-2-settings-light](Attachments/review-2-settings-light.png)
 
 ### settings-large
 
-![[Attachments/review-2-settings-large.png]]
+![Ariciu emulator capture: review-2-settings-large](Attachments/review-2-settings-large.png)
 
 ### arrival-off-light
 
-![[Attachments/review-2-arrival-off-light.png]]
+![Ariciu emulator capture: review-2-arrival-off-light](Attachments/review-2-arrival-off-light.png)
 
 ### arrival-on-dark
 
-![[Attachments/review-2-arrival-on-dark.png]]
+![Ariciu emulator capture: review-2-arrival-on-dark](Attachments/review-2-arrival-on-dark.png)
 
 ### arrival-large
 
-![[Attachments/review-2-arrival-large.png]]
+![Ariciu emulator capture: review-2-arrival-large](Attachments/review-2-arrival-large.png)
 
 ### search-query-loading
 
-![[Attachments/review-2-search-query-loading.png]]
+![Ariciu emulator capture: review-2-search-query-loading](Attachments/review-2-search-query-loading.png)
 
 ### create-dark
 
-![[Attachments/review-2-create-dark.png]]
+![Ariciu emulator capture: review-2-create-dark](Attachments/review-2-create-dark.png)
 
 ### create-light
 
-![[Attachments/review-2-create-light.png]]
+![Ariciu emulator capture: review-2-create-light](Attachments/review-2-create-light.png)
 
 ### create-expanded
 
-![[Attachments/review-2-create-expanded.png]]
+![Ariciu emulator capture: review-2-create-expanded](Attachments/review-2-create-expanded.png)
 
 ### create-large
 
-![[Attachments/review-2-create-large.png]]
+![Ariciu emulator capture: review-2-create-large](Attachments/review-2-create-large.png)
 
 ### create-compact-map
 
-![[Attachments/review-2-create-compact-map.png]]
+![Ariciu emulator capture: review-2-create-compact-map](Attachments/review-2-create-compact-map.png)
 
 ### create-compact-expanded
 
-![[Attachments/review-2-create-compact-expanded.png]]
+![Ariciu emulator capture: review-2-create-compact-expanded](Attachments/review-2-create-compact-expanded.png)
 
 ### notification-dark
 
-![[Attachments/review-2-notification-dark.png]]
+![Ariciu emulator capture: review-2-notification-dark](Attachments/review-2-notification-dark.png)
 
 ### notification-light
 
-![[Attachments/review-2-notification-light.png]]
+![Ariciu emulator capture: review-2-notification-light](Attachments/review-2-notification-light.png)
+
+## Related reading
+
+[Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md) · [Current Status](Ariciu%20-%20Current%20Status.md) · [Tests and Evidence](Ariciu%20-%20Tests%20and%20Evidence.md) · [Notifications and Alarm](Ariciu%20-%20Notifications%20and%20Alarm.md) · [Reminder Lifecycle](Ariciu%20-%20Reminder%20Lifecycle.md) · [Search Catalogue](Ariciu%20-%20Search%20Catalogue.md) · [Design and Accessibility](Ariciu%20-%20Design%20and%20Accessibility.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md)

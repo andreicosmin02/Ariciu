@@ -99,7 +99,7 @@ The RC screenshots above are dated emulator evidence, not physical-phone accessi
 
 Shared screen headings are 24sp; editor input uses bodyLarge and groups/cards have tighter spacing. No font-scale override. Active/Completed has strong selected styling, a text caption and sticky selection; large text stacks it. Alert type is separate and Done is visible on active cards. Settings uses consistent section surfaces and contained expandable help. The native vector app icon is an original restrained fox in graphite/slate blue with a pale muzzle and separate monochrome silhouette.
 
-Actual rc2 emulator captures are in `screenshots/review-1/`: dark/light Create, expanded sheet, AFI search, editor, store map/list, enlarged alert/reminder/Create, Settings/help and adaptive/small/monochrome fox. They are review evidence, not golden tests or physical-phone accessibility validation. The original owner screenshots remain private in Obsidian.
+Actual rc2 emulator captures are in `screenshots/review-1/`: dark/light Create, expanded sheet, AFI search, editor, store map/list, enlarged alert/reminder/Create, Settings/help and adaptive/small/monochrome fox. They are review evidence, not golden tests or physical-phone accessibility validation. Original personal-phone captures are not distributed; included captures are emulator evidence.
 
 ## Second phone review — rc3
 
