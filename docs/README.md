@@ -24,8 +24,8 @@ Current implementation: **1.1-rc4 / code 5 / Room 5**, authoritative branch `mas
 - [Build/test commands](DEVELOPMENT.md), [dated test inventories/evidence](obsidian-export/Ariciu/Ariciu%20-%20Tests%20and%20Evidence.md) and [physical-phone checklist](PHONE_VERIFICATION.md)
 - [Debugging workflow](STABILIZATION.md) and [known boundaries versus unreproduced hypotheses](STABILIZATION_AUDIT.md)
 - [APK installation/signing](RELEASE_CANDIDATE.md), [rc4 publication and completed branch cleanup](GITHUB_RELEASE_RC4.md)
-- [Licensing review and recommendation awaiting approval](LICENSING.md)
-- [Public-use preparation audit and verification scope](PUBLIC_REPOSITORY_PREPARATION.md)
+- [Apache-2.0 scope and third-party exclusions](LICENSING.md), [companion full notices](third-party/README.md)
+- [Public-use preparation audit (merged PR #3)](PUBLIC_REPOSITORY_PREPARATION.md) and [final licensing/readiness audit](PUBLIC_READINESS_AUDIT.md)
 
 Future work includes proper Alarm support and production signing with a data-preserving transition. These are plans, not implemented capabilities or automatic authorization for expansion. Current phone feedback is positive; detailed OEM/background/accessibility checks remain open.
 

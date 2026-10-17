@@ -1,8 +1,8 @@
 ---
 project: Ariciu
-reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+reviewed: 2026-10-18
+implementation_baseline: master
+version: 1.1-rc4
 ---
 
 # Sources, licensing, cost and privacy
@@ -12,6 +12,12 @@ version: 1.1-rc1
 Related: [[Ariciu - Maintenance and Extension]], [[Ariciu - Maps and Current Location]], [[Ariciu - Search Catalogue]], [[Ariciu - Notifications and Alarm]].
 
 These references preserve the official-source review recorded on **2026-10-15/16** in repository [docs/DELIVERY_ARCHITECTURE.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/DELIVERY_ARCHITECTURE.md) and [docs/FEATURE_COMPLETION.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/FEATURE_COMPLETION.md). This documentation audit checked local implementation/provenance. OpenFreeMap terms and MapLibre licence files were also rechecked live on 2026-10-17; the other references retain their earlier review dates, rather than implying a fresh verification of every external term. Recheck current official sources before changing services, permissions or provider usage.
+
+## Current project licence
+
+The owner approved Apache-2.0 for Ariciu-owned source, tests, scripts, documentation and original assets where the necessary rights are held. Root LICENSE is the complete official text; NOTICE explains exclusions. The catalogue remains ODbL, styles/map imagery and libraries retain their own terms, and no third-party ownership is asserted. See [repository licence scope](https://github.com/andreicosmin02/Ariciu/blob/master/docs/LICENSING.md).
+
+The historical v1.1-rc4 tag/APK predates these root licence files and is unchanged. Post-tag companion notices reproduce full version-pinned MapLibre BSD texts, Google OSS bundles and the separately MPL-licensed OkHttp Public Suffix List notice in distribution documentation. This is not a complete native/transitive binary licence certification.
 
 ## Cost boundary
 
@@ -29,7 +35,7 @@ No backend, Firebase, subscriptions, billing account, paid key, mandatory accoun
 | PyOsmium | BSD-2-Clause development-only parser; no app runtime dependency. |
 | Fonts/icons/background data | OpenFreeMap notice records Noto Sans SIL OFL 1.1, Maki CC0, Natural Earth public domain. Preserve licence files/credits. |
 
-There is no project-wide application licence declaration established by this audit; do not infer that third-party licences grant ownership/licensing of Ariciu itself. Future public distribution should review all required notices, signing and store policy. This does not block the existing private debug candidate.
+At the initial source audit, no application-wide licence had been declared. The subsequent owner-approved Apache-2.0 declaration above supersedes that historical state, without relicensing third parties or changing the old APK. Production distribution still needs its complete notice/signing/policy review.
 
 MapLibre licence evidence rechecked on 17 October: [Compose 0.13.1 licence](https://raw.githubusercontent.com/maplibre/maplibre-compose/v0.13.1/LICENSE), [Native licence](https://raw.githubusercontent.com/maplibre/maplibre-native/main/LICENSE.md). OpenFreeMap terms dated 14 October still state the recorded explicit download allowance.
 
@@ -62,7 +68,7 @@ Catalogue queries, reminders, lifecycle and theme are local; no analytics/backen
 
 ## rc4 consolidation and pre-release
 
-Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility is unchanged by documentation work; no production key or app-wide licence was introduced. Earlier dated implementation/source evidence above retains its own scope.
+Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility is unchanged by documentation work; no production key or app-wide licence was introduced in that historical consolidation. The later licensing PR applies the approved declaration to current Ariciu-owned material, preserving third-party exclusions. Earlier dated implementation/source evidence above retains its own scope.
 
 ## Related reading
 

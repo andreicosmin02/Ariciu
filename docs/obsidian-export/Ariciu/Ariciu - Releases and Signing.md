@@ -25,7 +25,7 @@ SHA256 `f6bfa834034599addd680768d39e1e86caac96c32a9cd79052723be1f5863d78`.
 
 Existing Android Debug certificate SHA256 `3064d0124e266f0d7cf26c742b7ab50a01afd118bf03e40cf731a3b2d765ad2c`. apksigner/aapt2 checked validity, package/version/permissions; the uploaded asset was actually downloaded and independently matched bytes/checksum/certificate. Debug assembly reproduced the same candidate. No new production key, permission or migration change.
 
-Install over the same-signed existing debug app; never uninstall/clear storage to update. A different developer's local debug key can be incompatible. Stop and investigate signature/version mismatch while retaining data. Plan production signing and a safe data-preserving transition separately. No project-wide application licence has been declared; third-party notices do not supply it.
+Install over the same-signed existing debug app; never uninstall/clear storage to update. A different developer's local debug key can be incompatible. Stop and investigate signature/version mismatch while retaining data. Plan production signing and a safe data-preserving transition separately. The owner subsequently approved Apache-2.0 for current Ariciu-owned material; the historical release/tag retains its original pre-licensing snapshot. Third-party notices remain separate.
 
 ## Verification and branch cleanup
 

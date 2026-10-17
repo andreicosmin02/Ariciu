@@ -44,6 +44,8 @@ Current gate passed 97 unit/44 connected tests, lint 0 errors/39 warnings and as
 
 The optional tracked Obsidian knowledge base is self-contained and portable; ordinary contributors use CONTRIBUTING.md and DEVELOPMENT.md without Codex or Obsidian. Do not access or synchronize anyone’s actual vault during repository work. Next work is rc4 Urgent/legacy Alarm phone retest and actual reported failures, not speculative refactoring/features.
 
-## Public-repository preparation handoff
+## Public-repository and licensing handoff
 
-Current task is documentation/contributor experience only on docs/public-repository-preparation. Keep all 29 knowledge-base notes and 54 attachments; private planning-note dependencies have been replaced by included technical chronology. Preserve author history, application code, permissions, Room schemas, v1.1-rc4, the existing debug certificate and release asset. Push a focused PR, **do not merge or change visibility** until owner review. Apache-2.0 is recommended but not applied; approval is separate. See PUBLIC_REPOSITORY_PREPARATION.md for review scope/results. No actual local Obsidian vault access is authorized for this work.
+PR #3 was merged at cfed6a1; its portable setup/contributor documentation is now on master. The owner explicitly approved Apache-2.0 for Ariciu-owned project material. Current licensing work is on docs/apache-2-public-readiness from that clean master: root LICENSE is the unmodified official text, NOTICE explains ownership/third-party exclusions, and docs/third-party supplies version-pinned companion notices without changing the app or historical APK.
+
+Preserve all 29 knowledge-base notes/54 attachments and existing author/device history. No actual personal vault access, application/runtime change, package/permission/schema/dependency change, signing change, tag rewrite, release edit, merge or visibility change is authorized by this task. Prepare a fresh PR for review; the old PR #3 is already merged. See LICENSING.md and PUBLIC_READINESS_AUDIT.md for current scope, executed checks, limits and publication checklist. The v1.1-rc4 snapshot predates the new licence files and remains exact.
