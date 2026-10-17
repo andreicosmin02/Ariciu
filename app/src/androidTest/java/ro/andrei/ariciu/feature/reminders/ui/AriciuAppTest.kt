@@ -51,10 +51,10 @@ class AriciuAppTest {
             assertEquals(1, repo.rows.value.size)
             assertEquals(ReminderTransition.EXIT, repo.rows.value.single().transition)
         }
-        compose.onNodeWithText("Done", substring = false).performScrollTo().performClick()
+        compose.onNodeWithText("Mark done", substring = false).performScrollTo().performClick()
         compose.onNodeWithText("Completed · 1").performScrollTo().performClick().assertIsSelected()
         compose.onNodeWithText("Buy milk").assertIsDisplayed()
-        compose.onNodeWithText("Completed reminders").assertIsDisplayed()
+        compose.onNodeWithTag("tab_completed").assertIsSelected()
     }
 
     @Test fun tabsPreserveDraftAndAppearanceSelectionIsExplicit() {

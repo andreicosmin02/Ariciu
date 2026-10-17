@@ -19,6 +19,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -212,22 +216,27 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
 private fun SetupStep(title: String, ready: Boolean, description: String, enabled: Boolean = true, onClick: () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val action: @Composable () -> Unit = {
-        TextButton(onClick = onClick, enabled = enabled,
-            modifier = Modifier.testTag("setup_$title").heightIn(min = 48.dp)) { Text(if (ready) "Review" else "Set up") }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (ready) Icon(AriciuIcons.Check, null, tint = colors.primary,
+                modifier = Modifier.size(20.dp).testTag("setup_status_$title"))
+            TextButton(onClick = onClick, enabled = enabled,
+                modifier = Modifier.testTag("setup_$title").heightIn(min = 48.dp).semantics {
+                    contentDescription = "$title. ${if (ready) "Review" else "Set up"}"
+                    stateDescription = if (ready) "Allowed" else "Needs setup"
+                }) { Text(if (ready) "Review" else "Set up") }
+        }
     }
     val descriptionContent: @Composable (Modifier) -> Unit = { modifier ->
         Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                if (ready) Icon(AriciuIcons.Check, "Allowed", tint = colors.primary, modifier = Modifier.size(20.dp))
-            }
+            Text(title, style = MaterialTheme.typography.titleMedium)
             Text(description, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
     }
-    if (LocalDensity.current.fontScale > 1.3f) Column(Modifier.fillMaxWidth().padding(16.dp)) {
-        descriptionContent(Modifier.fillMaxWidth()); action()
+    if (LocalDensity.current.fontScale > 1.3f) Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        descriptionContent(Modifier.fillMaxWidth())
+        Box(Modifier.align(Alignment.End)) { action() }
     } else Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         descriptionContent(Modifier.weight(1f)); action()
     }
 }

@@ -134,7 +134,7 @@ class ReleaseCandidateFlowTest {
         compose.onNodeWithText("Close").performClick()
         compose.onNodeWithTag("reminder_save").assertIsDisplayed().performClick()
         compose.runOnIdle { assertEquals(NotificationIntensity.ALARM, rows.value.single().intensity) }
-        compose.onNodeWithText("Done", substring = false).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Mark done", substring = false).performScrollTo().assertIsDisplayed()
         capture("rc-large-reminders")
         compose.runOnIdle { large = false }
         compose.onNodeWithTag("nav_Settings").performClick()

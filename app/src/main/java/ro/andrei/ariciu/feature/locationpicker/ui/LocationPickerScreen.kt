@@ -154,6 +154,7 @@ fun LocationPickerScreen(
             FilterChip(chainName == null, { onChainSelected(null) }, label = { Text("Single place") }, modifier = Modifier.heightIn(min = 48.dp))
             FilterChip(chainName != null, { choosingChain = true }, label = { Text(chainName ?: "Supermarket chain") }, modifier = Modifier.heightIn(min = 48.dp))
         }
+        Spacer(Modifier.height(8.dp))
         BoxWithConstraints(Modifier.weight(1f)) {
         val sheetBodyHeight = (maxHeight - sheetPeek).coerceAtLeast(48.dp)
         BottomSheetScaffold(modifier = Modifier.fillMaxSize(), scaffoldState = sheetScaffold,
@@ -284,36 +285,4 @@ private fun CenterSelectionMarker() {
         drawCircle(color = colors.primary, radius = size.minDimension / 3)
         drawCircle(color = colors.onPrimary, radius = size.minDimension / 9)
     }
-}
-
-@Composable
-private fun PlaceSearchDialog(centre: SelectedCoordinates, onDismiss: () -> Unit, onSelect: (CatalogPlace) -> Unit) {
-    val context = LocalContext.current
-    var query by rememberSaveable { mutableStateOf("") }
-    var places by remember { mutableStateOf<List<CatalogPlace>?>(null) }
-    var failed by remember { mutableStateOf(false) }
-    LaunchedEffect(context) { try { places = LocalPlaces.load(context) } catch (e: CancellationException) { throw e } catch (_: Exception) { failed = true } }
-    val matches by produceState(emptyList<CatalogPlace>(), query, places) {
-        value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) { searchPlaces(places.orEmpty(), query, centre.latitude, centre.longitude) }
-    }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text("Find a place") }, text = {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(query, { query = it }, label = { Text("Town, mall, store or store address") }, singleLine = true, modifier = Modifier.fillMaxWidth().testTag("place_search"))
-            Text("Romania · offline · OpenStreetMap. Selected malls, shops and towns, not every address. OSM source: 15 Oct 2026.", style = MaterialTheme.typography.bodySmall)
-            when {
-                failed -> Text("Could not open the local catalogue. You can still choose a pin on the map.")
-                places == null -> Text("Opening local places…")
-                query.isBlank() -> Text("Try Brașov or Kaufland Brașov.")
-                matches.isEmpty() -> Text("No matches in this catalogue. Try a nearby town, then move the map.")
-                else -> LazyColumn(Modifier.heightIn(max = 300.dp)) { items(matches, key = { it.id }) { place ->
-                    TextButton(onClick = { onSelect(place) }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
-                        Column(Modifier.fillMaxWidth()) {
-                            Text(place.name, style = MaterialTheme.typography.titleMedium)
-                            Text(place.address.ifBlank { if (place.kind == "town") "Town or village in Romania" else "${if (place.kind == "mall") "Shopping centre" else "Shop"} · Address not listed" }, style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                } }
-            }
-        }
-    }, confirmButton = { TextButton(onClick = onDismiss) { Text("Close") } })
 }
