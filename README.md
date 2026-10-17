@@ -36,7 +36,7 @@ Saving and monitoring are separate: Settings and reminder cards show registratio
 
 ## Install the phone-testing build
 
-[Release notes: Ariciu 1.1-rc4](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4) · [Download the APK](https://github.com/andreicosmin02/Ariciu/releases/download/v1.1-rc4/Ariciu-1.1-rc4-debug.apk)
+[Release notes: Ariciu 1.1-rc4](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4) · [Download the APK](https://github.com/andreicosmin02/Ariciu/releases/download/v1.1-rc4/Ariciu-1.1-rc4-debug.apk) · [Companion third-party notices](docs/third-party/README.md)
 
 Download access follows repository visibility. Requires **Android 8.0/API 26+**, a compatible map-rendering device and **Google Play services**. This minimum is a build requirement; not every supported Android version has been tested. Location services, appropriate location/background access and notification access are needed for delivery.
 
@@ -94,10 +94,18 @@ The rc4 gate passed **97 unit tests, 44 Android 17 emulator tests, lint with 0 e
 
 Start with [project status](docs/PROJECT_STATUS.md), [contributor guide](CONTRIBUTING.md), [documentation index](docs/README.md), [Urgent evidence](docs/URGENT_RE_ALERTS.md) and the [phone retest checklist](docs/PHONE_VERIFICATION.md).
 
+## Licence
+
+Ariciu-owned source code and original project material are distributed under **[Apache License 2.0](LICENSE)**, where the owner has the necessary rights. See [NOTICE](NOTICE) and the [licence scope](docs/LICENSING.md).
+
+Third-party code/assets retain their own licences. The Romanian OSM-derived catalogue remains **ODbL 1.0**; map styles and depicted map content retain their BSD/Creative Commons/data terms. Apache-2.0 does not relicense these materials.
+
+The existing **v1.1-rc4 tag and debug APK predate these licence files** and remain unchanged. Read the [companion distribution notices](docs/third-party/README.md) when downloading or redistributing the testing APK; they are supplied separately, not inserted into that historical binary.
+
 ## Credits and licences
 
 - **OpenStreetMap contributors:** map data and the Romanian catalogue are attributed to OSM. The derived catalogue is distributed under **ODbL 1.0**, with the full [TSV](app/src/main/assets/places/romania.tsv), [provenance/notice](app/src/main/assets/places/NOTICE.md) and [reproducible generator](tools/build_place_catalog.py). The source extract is from Geofabrik.
 - **OpenFreeMap and OpenMapTiles:** hosting, schema and style lineage; bundled [upstream notice](app/src/main/assets/map/LICENSE-openfreemap.md), [light-style licence](app/src/main/assets/map/LICENSE-light-style.md) and [dark-style licence](app/src/main/assets/map/LICENSE-dark-style.md) retain MIT/BSD, CC-BY and source-design attributions as applicable. These notices also credit Noto Sans, Maki and Natural Earth.
 - **MapLibre Compose/Native:** [BSD-3-Clause](https://raw.githubusercontent.com/maplibre/maplibre-compose/v0.13.1/LICENSE)/[BSD-2-Clause](https://raw.githubusercontent.com/maplibre/maplibre-native/main/LICENSE.md) projects. Kotlin, AndroidX and OkHttp retain their respective licences; Google Play services is governed by its SDK terms.
 
-There is currently **no project-wide Ariciu licence declaration**. Third-party licences do not establish a licence for Ariciu’s own source or assets. See the [licensing review and recommendation awaiting approval](docs/LICENSING.md) and bundled notices. Proper Alarm support and production signing are future work, not features promised by this testing build.
+Existing upstream notices and attribution remain intact. Proper Alarm support, a complete production binary notice inventory and production signing are future work, not capabilities or certification promised by this testing build.

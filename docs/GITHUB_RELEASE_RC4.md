@@ -66,3 +66,7 @@ Repository handoff/status/release instructions and the optional tracked knowledg
 Remaining phone checks: [Urgent swipe/retry/Done/Next time and legacy Alarm](URGENT_RE_ALERTS.md#physical-phone-retest), real ENTER/EXIT crossings, overnight/Doze/Samsung lock/Clear all, sound/vibration, notification settings, TalkBack and older runtimes. WorkManager/geofence delays, OEM restrictions, DND/access and the 100-area limit remain; do not promise exact or safety-critical alerts. Offline map/search coverage remains bounded.
 
 Future work: stabilize actual reported failures, reconsider genuine Alarm support separately, and plan production signing plus a data-preserving transition and project licensing before production distribution. No unrelated feature development is included here.
+
+## Subsequent licensing; unchanged historical release
+
+The owner later approved Apache-2.0 for Ariciu-owned material. [Current scope](LICENSING.md), root LICENSE/NOTICE and [companion third-party notices](third-party/README.md) are post-tag repository documentation. The tag remains at c8c47ce with its original tree; no root licence files were retroactively inserted. The release page, APK, checksum, debug certificate and package/version are unchanged. Full MapLibre BSD texts and version-matched Google OSS bundles are provided separately with installation documentation, addressing the identified companion-notice gaps without rebuilding the APK. No comprehensive native/transitive binary certification is claimed.

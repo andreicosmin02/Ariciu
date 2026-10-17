@@ -90,7 +90,7 @@ Historical rc3 gate: **82 unit / 35 emulator instrumentation tests passed**, lin
 
 ## rc4 consolidation and pre-release
 
-Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility is unchanged by documentation work; no production key or app-wide licence was introduced. Earlier dated implementation/source evidence above retains its own scope.
+Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility is unchanged by documentation work; no production key or app-wide licence was introduced during that historical consolidation. The later licensing PR adds the owner-approved declaration, without changing the app or tag. Earlier dated implementation/source evidence above retains its own scope.
 
 ## Related reading
 

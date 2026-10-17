@@ -16,7 +16,7 @@ git switch -c fix/short-description
 
 Discuss substantial product changes, dependencies, service costs and privacy implications first. Submit a pull request targeting `master` with the problem, resulting behavior, relevant screenshots, tests actually run and remaining device checks. Preserve unrelated changes and commit history; do not force-push shared branches. Maintainers review and merge; a PR is not authorization to publish an APK.
 
-**Project-wide licensing is pending a separate maintainer decision.** Do not infer a licence from upstream notices. See the [licensing review](docs/LICENSING.md) before relying on reuse rights or proposing substantial external contributions.
+Ariciu-owned material is under [Apache-2.0](LICENSE), with the [scope and third-party exclusions](docs/LICENSING.md) explained separately. Submit work you have the rights to contribute; identify third-party sources and preserve their notices. Apache-2.0 section 5 addresses intentional contributions unless explicitly stated otherwise. No separate contributor agreement is introduced.
 
 ## Engineering principles
 

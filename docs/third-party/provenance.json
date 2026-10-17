@@ -1,0 +1,111 @@
+[
+  {
+    "file": "LICENSE-MapLibre-Compose-0.13.1.txt",
+    "sha256": "da90527705e69ff478e12335fea885af162f267bbfb5a265174608ed7840e377",
+    "bytes": 1496,
+    "stored_as": "LICENSE-MapLibre-Compose-0.13.1.txt",
+    "source_url": "https://raw.githubusercontent.com/maplibre/maplibre-compose/v0.13.1/LICENSE"
+  },
+  {
+    "file": "LICENSE-MapLibre-Native-13.0.2.txt",
+    "sha256": "554cff8b6f6d2e77629e8c6eab769844ab86adc610ca2d60401ba2e0dce3c229",
+    "bytes": 1374,
+    "stored_as": "LICENSE-MapLibre-Native-13.0.2.txt",
+    "source_url": "https://raw.githubusercontent.com/maplibre/maplibre-native/android-v13.0.2/LICENSE.md"
+  },
+  {
+    "file": "LICENSE-OkHttp-4.12.0.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "bytes": 11358,
+    "stored_as": "../../LICENSE",
+    "source_url": "https://raw.githubusercontent.com/square/okhttp/parent-4.12.0/LICENSE.txt"
+  },
+  {
+    "file": "play-services-location-21.3.0-third_party_licenses.txt",
+    "aar_sha256": "d5024384d5bf66c75edf353d95eb8e7b5bf64483138474c6e2e93e2c2394f842",
+    "sha256": "f452362efd095bdfafe7f0056aedfcc284146bf172f9c983f375b8b9012ee6a1",
+    "bytes": 367213,
+    "stored_as": "play-services-location-21.3.0-third_party_licenses.txt",
+    "artifact_url": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-location/21.3.0/play-services-location-21.3.0.aar",
+    "archive_entry": "third_party_licenses.txt"
+  },
+  {
+    "file": "play-services-location-21.3.0-third_party_licenses.json",
+    "aar_sha256": "d5024384d5bf66c75edf353d95eb8e7b5bf64483138474c6e2e93e2c2394f842",
+    "sha256": "bd57872d0cffe691d76fb7f458c2674b9911093981086e1fd94d405e6ee75637",
+    "bytes": 1086,
+    "stored_as": "play-services-location-21.3.0-third_party_licenses.json",
+    "artifact_url": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-location/21.3.0/play-services-location-21.3.0.aar",
+    "archive_entry": "third_party_licenses.json"
+  },
+  {
+    "file": "play-services-base-18.5.0-third_party_licenses.txt",
+    "aar_sha256": "59a5c0c2da12311d75d965ce1f419498536b1a167fb28ff7dfc2dfd9cefa4157",
+    "sha256": "653d2e7a2bb02c79b897e826df9c3b2d8e8b1a3b2cef5e29585124fa455ddaf5",
+    "bytes": 313001,
+    "stored_as": "google-play-services-common.txt",
+    "artifact_url": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-base/18.5.0/play-services-base-18.5.0.aar",
+    "archive_entry": "third_party_licenses.txt"
+  },
+  {
+    "file": "play-services-base-18.5.0-third_party_licenses.json",
+    "aar_sha256": "59a5c0c2da12311d75d965ce1f419498536b1a167fb28ff7dfc2dfd9cefa4157",
+    "sha256": "f49b0d3754fe9430ca8e1d7578b98f9c74c912fa5182bee2db86f0c386ab7970",
+    "bytes": 834,
+    "stored_as": "google-play-services-common.json",
+    "artifact_url": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-base/18.5.0/play-services-base-18.5.0.aar",
+    "archive_entry": "third_party_licenses.json"
+  },
+  {
+    "file": "play-services-basement-18.4.0-third_party_licenses.txt",
+    "aar_sha256": "ce5c936fd66814b3602f5c6a5e929911ff973d4b05f6de9996da596bef97cad2",
+    "sha256": "653d2e7a2bb02c79b897e826df9c3b2d8e8b1a3b2cef5e29585124fa455ddaf5",
+    "bytes": 313001,
+    "stored_as": "google-play-services-common.txt",
+    "artifact_url": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-basement/18.4.0/play-services-basement-18.4.0.aar",
+    "archive_entry": "third_party_licenses.txt"
+  },
+  {
+    "file": "play-services-basement-18.4.0-third_party_licenses.json",
+    "aar_sha256": "ce5c936fd66814b3602f5c6a5e929911ff973d4b05f6de9996da596bef97cad2",
+    "sha256": "f49b0d3754fe9430ca8e1d7578b98f9c74c912fa5182bee2db86f0c386ab7970",
+    "bytes": 834,
+    "stored_as": "google-play-services-common.json",
+    "artifact_url": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-basement/18.4.0/play-services-basement-18.4.0.aar",
+    "archive_entry": "third_party_licenses.json"
+  },
+  {
+    "file": "play-services-tasks-18.2.0-third_party_licenses.txt",
+    "aar_sha256": "7f2aaa8f502068eaf54356ca92aec04271d6e7c416c52c45c0d23440fcbd1654",
+    "sha256": "653d2e7a2bb02c79b897e826df9c3b2d8e8b1a3b2cef5e29585124fa455ddaf5",
+    "bytes": 313001,
+    "stored_as": "google-play-services-common.txt",
+    "artifact_url": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-tasks/18.2.0/play-services-tasks-18.2.0.aar",
+    "archive_entry": "third_party_licenses.txt"
+  },
+  {
+    "file": "play-services-tasks-18.2.0-third_party_licenses.json",
+    "aar_sha256": "7f2aaa8f502068eaf54356ca92aec04271d6e7c416c52c45c0d23440fcbd1654",
+    "sha256": "f49b0d3754fe9430ca8e1d7578b98f9c74c912fa5182bee2db86f0c386ab7970",
+    "bytes": 834,
+    "stored_as": "google-play-services-common.json",
+    "artifact_url": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-tasks/18.2.0/play-services-tasks-18.2.0.aar",
+    "archive_entry": "third_party_licenses.json"
+  },
+  {
+    "file": "NOTICE-OkHttp-4.12.0-publicsuffix.txt",
+    "jar_sha256": "b1050081b14bb7a3a7e55a4d3ef01b5dcfabc453b4573a4fc019767191d5f4e0",
+    "sha256": "8a9c58fbded5ea3474315e4a9824ca8b1486098a1a03e897e0b19419d5e1876a",
+    "bytes": 218,
+    "stored_as": "NOTICE-OkHttp-4.12.0-publicsuffix.txt",
+    "artifact_url": "https://repo.maven.apache.org/maven2/com/squareup/okhttp3/okhttp/4.12.0/okhttp-4.12.0.jar",
+    "archive_entry": "okhttp3/internal/publicsuffix/NOTICE"
+  },
+  {
+    "file": "LICENSE-MPL-2.0.txt",
+    "stored_as": "LICENSE-MPL-2.0.txt",
+    "source_url": "https://www.mozilla.org/media/MPL/2.0/index.txt",
+    "bytes": 16726,
+    "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+  }
+]
