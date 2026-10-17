@@ -10,7 +10,7 @@ enum class ReminderRepeat { ONCE, EVERY_VISIT }
 enum class NotificationIntensity(val label: String, val explanation: String) {
     SILENT("Silent", "In the notification list. No sound, vibration or pop-up."),
     NORMAL("Normal", "A standard reminder alert, following your phone settings."),
-    URGENT("Urgent", "A prominent alert that stays until handled, where Android permits."),
+    URGENT("Urgent", "An ongoing alert. Android 14 and later allow swiping; swiping waits for your next visit. Sound follows phone settings."),
     ALARM("Alarm", "Repeating notification sound and strong vibration, where permitted. Stop, Done or Snooze for 10 minutes. Opening notifications may stop the sound. No automatic full-screen launch."),
 }
 

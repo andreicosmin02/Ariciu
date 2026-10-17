@@ -17,6 +17,36 @@ import java.util.UUID
 
 /** Injects a crossing at the worker boundary; does not simulate Play services positioning. */
 class NotificationDeliveryTest {
+    @Test fun cardCompletionCancelsDeliveredAlarmAndRejectsOldActions() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        if (android.os.Build.VERSION.SDK_INT >= 33) InstrumentationRegistry.getInstrumentation().uiAutomation
+            .grantRuntimePermission(context.packageName, Manifest.permission.POST_NOTIFICATIONS)
+        val dao = ReminderDatabase.getInstance(context).reminderDao()
+        val repository = RoomReminderRepository(dao) { DeliveryWork.reconcile(context) }
+        val id = "card-done-${UUID.randomUUID()}"
+        val manager = context.getSystemService(NotificationManager::class.java)
+        suspend fun row() = requireNotNull(dao.find(id))
+        try {
+            repository.save(Reminder(id, "Card completion test", SelectedLocation(45.0,25.0,200),
+                ReminderTransition.ENTER, ReminderRepeat.ONCE, intensity = NotificationIntensity.ALARM))
+            val original = row()
+            DeliveryWork.command(context, workDataOf("command" to "transition", "transition" to "ENTER",
+                "ids" to arrayOf("$id:${original.generation}"), "elapsed" to 10L, "boot" to 123)).result.get()
+            withTimeout(20_000) { while (manager.activeNotifications.none { it.tag == "reminder:$id" } || row().notificationPending) delay(100) }
+            val old = manager.activeNotifications.single { it.tag == "reminder:$id" }.notification
+            repository.complete(id, row().occurrence)
+            withTimeout(20_000) { while (manager.activeNotifications.any { it.tag == "reminder:$id" }) delay(100) }
+            assertEquals(DeliveryPhase.COMPLETED.name, row().phase)
+            assertNotEquals(original.generation, row().generation)
+            old.actions.last().actionIntent.send() // An obsolete Alarm Snooze cannot revive the completed task.
+            DeliveryWork.command(context, workDataOf("command" to "snooze")).result.get()
+            withTimeout(20_000) { while (androidx.work.WorkManager.getInstance(context).getWorkInfosForUniqueWork("delivery-events").get().any { !it.state.isFinished }) delay(100) }
+            assertEquals(DeliveryPhase.COMPLETED.name, row().phase)
+            assertEquals(0L, row().snoozeUntilMs)
+            assertFalse(manager.activeNotifications.any { it.tag == "reminder:$id" })
+        } finally { repository.delete(id); manager.cancel("reminder:$id", 1) }
+    }
+
     @Test fun intensityChannelsAndAlarmStopSnoozeUsePersistedTokens() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         if (android.os.Build.VERSION.SDK_INT >= 33) InstrumentationRegistry.getInstrumentation().uiAutomation
@@ -25,10 +55,12 @@ class NotificationDeliveryTest {
         val manager = context.getSystemService(NotificationManager::class.java)
         val repository = RoomReminderRepository(ReminderDatabase.getInstance(context).reminderDao())
         val store = RoomDeliveryStore(ReminderDatabase.getInstance(context))
-        val id = "intensity-${UUID.randomUUID()}"
+        val ids = mutableListOf<String>()
         try {
             NotificationIntensity.entries.forEach { intensity ->
-                val state = DeliveryState().onTransition(ReminderTransition.ENTER, ReminderTransition.ENTER, ReminderRepeat.ONCE, 1, 1)
+                val id = "intensity-${intensity.name}-${UUID.randomUUID()}"
+                ids += id
+                val state = DeliveryState().onTransition(ReminderTransition.ENTER, ReminderTransition.ENTER, ReminderRepeat.ONCE, 1, 1).copy(notificationPending = false) // Direct construction test: no pending outbox for concurrent workers.
                 repository.save(Reminder(id, "Intensity test", SelectedLocation(45.0,25.0,200), ReminderTransition.ENTER,
                     ReminderRepeat.ONCE, intensity = intensity))
                 val record = store.all().single { it.reminder.id == id }
@@ -60,8 +92,10 @@ class NotificationDeliveryTest {
                     assertFalse(store.all().single { it.reminder.id == id }.reminder.delivery.notificationVisible)
                 }
                 manager.cancel("reminder:$id", 1)
+                // Cancellation is asynchronous; isolate each fresh-channel scenario from the previous occurrence.
+                withTimeout(20_000) { while (manager.activeNotifications.any { it.tag == "reminder:$id" }) delay(100) }
             }
-        } finally { repository.delete(id); manager.cancel("reminder:$id", 1) }
+        } finally { ids.forEach { repository.delete(it); manager.cancel("reminder:$it", 1) } }
     }
 
     @Test fun persistentWorkerPostsNotificationAndReceiverHandlesSwipeNextTimeAndDone() = runBlocking {
