@@ -2,7 +2,7 @@
 
 ## Current direction — 2026-10-17
 
-**Ariciu 1.1-rc4 / version code 5**, branch **fix/urgent-realerts**, based on clean rc3 `fix/phone-review-2` at `8f11976`. Current behavior, migration, evidence and retest are in [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md); [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md) records historical rc3 behavior. No master merge or release publication. Source is authoritative; final evidence belongs to the review record.
+**Ariciu 1.1-rc4 / version code 5 / Room 5**, authoritative branch **master**. Owner-authorized normal merge [PR #1](https://github.com/andreicosmin02/Ariciu/pull/1), commit `c8c47ce4642ba7f70ee0d61355bb5175e2334cc0`, has exactly the verified rc4 tree from `525b609`. Tag **v1.1-rc4** identifies that commit; the [GitHub pre-release](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4) includes the verified, existing debug-signed APK. The repository remains private; this is an early testing build, not production-stable or Google Play distribution. [Publication audit, verification and cleanup plan](GITHUB_RELEASE_RC4.md). Current behavior remains in [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md); [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md) is historical rc3 evidence.
 
 ## Current owner-directed stabilization
 
@@ -20,9 +20,11 @@ Alarm is hidden from new choices; legacy ALARM data/actions/snooze remain suppor
 
 ## Physical evidence versus pending retest
 
+The owner reports positive initial rc4 physical-phone feedback. No detailed scenario/results were supplied, so the targeted Urgent/legacy Alarm/GPS/OEM/TalkBack checklist remains open. Consolidation verification used only the deliberately selected emulator; no daily-phone settings/data/process changes occurred.
+
 The Samsung S26 Ultra / Android 16 / One UI 8.5 was connected for read-only rc2 diagnostics. Its actual Urgent alert had HIGH importance, ongoing flag and a delete intent. After the owner's unlocked swipe, the matching row was WAITING_NEXT_VISIT/INSIDE, occurrence 1, no visible/pending alert, still REGISTERED; no active Ariciu notification or delivery warning remained at the snapshot. This confirms that swipe’s Next time handling, not background/geofence timing or all later visits.
 
-Connection dropped, and the owner explicitly requested emulator-only continuation. The phone was not upgraded, force-stopped, cleared, rebooted, reconfigured or used for instrumentation. New rc3 UI/fox/immediate location behavior, locked/Clear all, extended same-visit observations and actual crossings remain for physical retest. Android 14+ permits individual unlocked ongoing dismissal; Ariciu retains the strongest applicable compliant request.
+Connection dropped, and the owner explicitly requested emulator-only continuation. In that agent-led session, the phone was not upgraded, force-stopped, cleared, rebooted, reconfigured or used for instrumentation. New rc3 UI/fox/immediate location behavior, locked/Clear all, extended same-visit observations and actual crossings remain for physical retest. Android 14+ permits individual unlocked ongoing dismissal; Ariciu retains the strongest applicable compliant request.
 
 ## Preserved architecture and boundaries
 
@@ -34,4 +36,4 @@ Romania catalogue remains 26,065 rows from 15 October source (231 malls added in
 
 Current gate: **97 unit / 44 emulator tests**, lint **0 errors / 39 warnings**, debug assembly/install/signature passed. An extra native system-font 2.0 UI test passed; actual emulator reboot/update/process-death/permission-denial recovery was observed for the shipping five-minute retry. [Executed checks, screenshots and phone retest](URGENT_RE_ALERTS.md). Historical rc3 gate: 82 unit/35 connected tests; rc2: 68/23; rc1: 64/19. Those results are not reused to validate rc4.
 
-Install the [current candidate](RELEASE_CANDIDATE.md) over the existing app with the same signing key, never uninstall/clear storage. Prioritize the new Urgent swipe/re-alert/resolve checklist and legacy Alarm conversion, then real crossings, idle/reboot/OEM behavior and TalkBack. No speculative expansion, merge, force-push or release publication.
+Install the [current candidate](RELEASE_CANDIDATE.md) over the existing app with the same signing key, never uninstall/clear storage. Prioritize the new Urgent swipe/re-alert/resolve checklist and legacy Alarm conversion, then real crossings, idle/reboot/OEM behavior and TalkBack. No speculative expansion. The authorized rc4 merge/pre-release is complete; future merges/publications need session authorization. No force-push or branch deletion. Plan genuine Alarm support and production signing/data-preserving transition separately.

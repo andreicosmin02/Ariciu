@@ -85,3 +85,7 @@ Lint warning groups include dependency/version advisories, LogNotTimber, Modifie
 ## Second phone review
 
 Current rc3 gate: **82 unit / 35 emulator instrumentation tests passed**, lint **0 errors / 39 warnings**, assembly/install/signature passed. Both raw and Gradle connected runners passed. Current checks, 19 new screenshots, actual foreground provider/manual simulated-position outcomes and limits are in [[Ariciu - Phone Review 2]]. Historical sections above do not prove new code. Actual Samsung rc2 swipe lifecycle was inspected read-only; all rc3 instrumentation targets only the emulator.
+
+## rc4 consolidation and pre-release
+
+Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility remains private; no production key or app-wide licence was introduced. Earlier dated implementation/source evidence above retains its own scope.

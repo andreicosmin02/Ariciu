@@ -57,3 +57,7 @@ Local evidence: `app/src/main/assets/map/LICENSE-openfreemap.md`, `LICENSE-dark-
 ## Privacy behavior
 
 Catalogue queries, reminders, lifecycle and theme are local; no analytics/backend/cloud sync was added. Normal map browsing/downloads reveal requested tile/style/font areas and IP to the provider/CDN. Play services positioning is a vendor/system boundary and may use network assistance. No claim of wholly disconnected positioning or absence of vendor telemetry is made. Avoid storing precise user locations, log dumps or personal vault contents in documentation/Git.
+
+## rc4 consolidation and pre-release
+
+Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility remains private; no production key or app-wide licence was introduced. Earlier dated implementation/source evidence above retains its own scope.

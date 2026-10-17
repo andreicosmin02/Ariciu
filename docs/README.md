@@ -1,6 +1,6 @@
 # Ariciu documentation
 
-Current baseline: **1.1-rc4**, branch `fix/urgent-realerts`. Current phase: **real-phone debugging and stabilization**, updated 2026-10-17. These documents describe inspected implementation and dated evidence; no physical-phone success is implied.
+Current baseline: **1.1-rc4**, authoritative branch `master`, [GitHub pre-release v1.1-rc4](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4). [Public-facing introduction](../README.md). Current phase: **real-phone debugging and stabilization**, updated 2026-10-17. These documents describe inspected implementation and dated evidence; no physical-phone success is implied.
 
 ## Start a development session
 
@@ -11,6 +11,7 @@ Current baseline: **1.1-rc4**, branch `fix/urgent-realerts`. Current phase: **re
 
 ## Product, implementation and testing
 
+- [GitHub release, signing, verification and branch cleanup audit](GITHUB_RELEASE_RC4.md)
 - [Urgent re-alerts and temporary Alarm retirement](URGENT_RE_ALERTS.md)
 
 - [Second phone review: dispositions and retest](PHONE_REVIEW_2.md)
@@ -23,4 +24,4 @@ Current baseline: **1.1-rc4**, branch `fix/urgent-realerts`. Current phase: **re
 
 ## Full knowledge base
 
-[Obsidian export instructions](obsidian-export/README.md) and the [Ariciu index](obsidian-export/Ariciu/Ariciu.md) provide 28 focused notes with code references, diagrams, test inventories, user journeys and maintenance guidance. The existing personal vault was synchronized on 17 October; original planning/review notes and phone screenshots remain unchanged. Essential handoff information remains here in ordinary repository Markdown; the personal vault and its original notes are not committed.
+[Obsidian export instructions](obsidian-export/README.md) and the [Ariciu index](obsidian-export/Ariciu/Ariciu.md) provide 29 focused notes with code references, diagrams, test inventories, user journeys and maintenance guidance. The existing personal vault was synchronized on 17 October; original planning/review notes and phone screenshots remain unchanged. Essential handoff information remains here in ordinary repository Markdown; the personal vault and its original notes are not committed.

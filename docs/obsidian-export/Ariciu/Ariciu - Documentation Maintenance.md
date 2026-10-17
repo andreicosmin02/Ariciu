@@ -34,4 +34,4 @@ When copying newer exports into an existing vault, compare/merge same-named note
 
 ## Access note
 
-The existing vault is outside the sandbox's writable roots; synchronization uses explicit filesystem escalation. Compare same-named notes against the previous repository export and refuse conflicts before writing. Preserve all original planning notes, private phone review/screenshots and unrelated files. The portable repository copy remains authoritative for handoff if the vault is unavailable. See docs/obsidian-export/README.md for the recorded synchronization outcome.
+The current session has authorized filesystem access to the existing vault; no background sync/plugin is used. Future sessions must check their actual permissions rather than assuming escalation is required. Compare same-named notes against the previous repository export and refuse conflicts before writing. Preserve all original planning notes, private phone review/screenshots and unrelated files. The portable repository copy remains authoritative for handoff if the vault is unavailable. See docs/obsidian-export/README.md for the recorded synchronization outcome.
