@@ -126,11 +126,19 @@ class AndroidReminderNotifications(private val context: Context) : ReminderNotif
             else "reminders_${intensity.name.lowercase()}_v1"
     }
 
+    override fun requiresRefresh(record: DeliveryRecord): Boolean = record.reminder.intensity == NotificationIntensity.URGENT &&
+        manager.activeNotifications.firstOrNull { it.tag == "reminder:${record.reminder.id}" }?.notification?.extras
+            ?.getBoolean("ariciu_urgent_swipe_retry",false) == false
+
     private fun action(record: DeliveryRecord, action: OccurrenceAction): PendingIntent {
+        val attempt = record.reminder.delivery.notificationAttempt
+        // Preserve existing explicit-action identities. Only swipes address an individual alert attempt.
+        val suffix = if (action == OccurrenceAction.DISMISS) "/$attempt" else ""
         val intent = Intent(context, NotificationActionReceiver::class.java)
             .setAction(action.name)
-            .setData(Uri.parse("ariciu://occurrence/${Uri.encode(record.requestId)}/${record.reminder.delivery.occurrence}/${action.name}"))
+            .setData(Uri.parse("ariciu://occurrence/${Uri.encode(record.requestId)}/${record.reminder.delivery.occurrence}/${action.name}$suffix"))
             .putExtra("request_id", record.requestId).putExtra("occurrence", record.reminder.delivery.occurrence)
+            .putExtra("notification_attempt",attempt)
         return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     }
 
@@ -146,18 +154,19 @@ class AndroidReminderNotifications(private val context: Context) : ReminderNotif
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val next = action(record, OccurrenceAction.NEXT_TIME)
         val existing = manager.activeNotifications.firstOrNull { it.tag == "reminder:${r.id}" }?.notification
-        val sameOccurrence = existing?.extras?.getInt("ariciu_number", -1) == r.delivery.occurrence
+        val sameOccurrence = existing?.extras?.getInt("ariciu_number", -1) == r.delivery.occurrence &&
+            existing.extras.getInt("ariciu_attempt",0) == r.delivery.notificationAttempt && existing.channelId == channelId(r.intensity)
         if (existing != null && existing.channelId != channelId(r.intensity)) manager.cancel("reminder:${r.id}", 1)
         val notification = NotificationCompat.Builder(context, channelId(r.intensity))
             .setSmallIcon(R.drawable.ic_reminder_notification)
             .setContentTitle(r.title)
-            .setContentText(if (r.chainName != null) "${if (r.transition == ReminderTransition.ENTER) "Near" else "Left"} a selected ${r.chainName} store." else if (r.transition == ReminderTransition.ENTER) "You arrived at your chosen place." else "You left your chosen place.")
-            .setContentIntent(open).setAutoCancel(false).setDeleteIntent(next)
+            .setContentText(if (r.intensity == NotificationIntensity.URGENT && r.delivery.notificationAttempt > 0) "Still pending. Choose Done or Next time." else if (r.chainName != null) "${if (r.transition == ReminderTransition.ENTER) "Near" else "Left"} a selected ${r.chainName} store." else if (r.transition == ReminderTransition.ENTER) "You arrived at your chosen place." else "You left your chosen place.")
+            .setContentIntent(open).setAutoCancel(false).setDeleteIntent(if (r.intensity == NotificationIntensity.URGENT) action(record,OccurrenceAction.DISMISS) else next)
             .setOngoing(r.intensity in setOf(NotificationIntensity.URGENT, NotificationIntensity.ALARM))
             .setSilent(r.intensity == NotificationIntensity.SILENT || r.delivery.quiet || sameOccurrence)
             .setCategory(if (r.intensity == NotificationIntensity.ALARM) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_REMINDER)
             .setPriority(NotificationCompat.PRIORITY_HIGH).setOnlyAlertOnce(sameOccurrence)
-            .setExtras(Bundle().apply { putString("ariciu_generation", record.generation); putString("ariciu_occurrence", "${record.generation}:${r.delivery.occurrence}"); putInt("ariciu_number", r.delivery.occurrence) })
+            .setExtras(Bundle().apply { putString("ariciu_generation", record.generation); putString("ariciu_occurrence", "${record.generation}:${r.delivery.occurrence}"); putInt("ariciu_number", r.delivery.occurrence); putInt("ariciu_attempt",r.delivery.notificationAttempt); putBoolean("ariciu_urgent_swipe_retry",r.intensity == NotificationIntensity.URGENT) })
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .apply {
                 if (r.intensity == NotificationIntensity.ALARM && !r.delivery.quiet)

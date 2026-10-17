@@ -10,8 +10,9 @@ enum class ReminderRepeat { ONCE, EVERY_VISIT }
 enum class NotificationIntensity(val label: String, val explanation: String) {
     SILENT("Silent", "In the notification list. No sound, vibration or pop-up."),
     NORMAL("Normal", "A standard reminder alert, following your phone settings."),
-    URGENT("Urgent", "An ongoing alert. Android 14 and later allow swiping; swiping waits for your next visit. Sound follows phone settings."),
-    ALARM("Alarm", "Repeating notification sound and strong vibration, where permitted. Stop, Done or Snooze for 10 minutes. Opening notifications may stop the sound. No automatic full-screen launch."),
+    URGENT("Urgent", "An ongoing alert. If you swipe it away, it alerts again after about 5 minutes until you choose Done or Next time. Android may delay it; sound follows your phone settings."),
+    ALARM("Alarm", "Repeating notification sound and strong vibration, where permitted. Stop, Done or Snooze for 10 minutes. Opening notifications may stop the sound. No automatic full-screen launch.");
+    companion object { val available = listOf(SILENT, NORMAL, URGENT) }
 }
 
 data class Reminder(
@@ -27,6 +28,7 @@ data class Reminder(
     val chainName: String? = null,
     val chainAreas: List<ChainArea> = emptyList(),
 ) {
+    val unresolvedUrgent: Boolean get() = intensity == NotificationIntensity.URGENT && delivery.phase == ro.andrei.ariciu.feature.delivery.model.DeliveryPhase.TRIGGERED
     fun toDraft() = ReminderDraft(title, location, transition, repeat, intensity, chainName, chainAreas)
 }
 

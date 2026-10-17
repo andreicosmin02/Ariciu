@@ -127,6 +127,32 @@ class RemindersViewModelTest {
         assertFalse(restored.draft.value.notifyOnSave)
     }
 
+    @Test fun newAlarmDraftsUseUrgentButExistingAlarmEditsKeepTheirLevel() = runTest(dispatcher) {
+        val repo = FakeRepository()
+        val vm = RemindersViewModel(repo,SavedStateHandle(mapOf("intensity" to "ALARM")))
+        assertEquals(NotificationIntensity.URGENT,vm.draft.value.intensity)
+        vm.updateDraft(ReminderDraft("New",location,intensity = NotificationIntensity.ALARM))
+        assertEquals(NotificationIntensity.URGENT,vm.draft.value.intensity)
+        vm.edit(Reminder("legacy","Legacy",location,ReminderTransition.ENTER,ReminderRepeat.ONCE,intensity = NotificationIntensity.ALARM))
+        assertEquals(NotificationIntensity.ALARM,vm.draft.value.intensity)
+        vm.save(); advanceUntilIdle()
+        assertEquals(NotificationIntensity.ALARM,repo.rows.value.single().intensity)
+    }
+
+    @Test fun cardNextTimeTargetsTheDisplayedOccurrenceAndPreservesOtherReminders() = runTest(dispatcher) {
+        val repo = FakeRepository()
+        val pending = Reminder("urgent","Urgent",location,ReminderTransition.ENTER,ReminderRepeat.EVERY_VISIT,
+            intensity = NotificationIntensity.URGENT,delivery = ro.andrei.ariciu.feature.delivery.model.DeliveryState(
+                phase = ro.andrei.ariciu.feature.delivery.model.DeliveryPhase.TRIGGERED,occurrence = 2,urgentRetryAtMs = 301000))
+        val other = pending.copy(id = "other")
+        repo.rows.value = listOf(pending,other)
+        val vm = RemindersViewModel(repo,SavedStateHandle()); advanceUntilIdle()
+        vm.nextTime(pending); advanceUntilIdle()
+        assertEquals(ro.andrei.ariciu.feature.delivery.model.DeliveryPhase.WAITING_NEXT_VISIT,repo.rows.value.first().delivery.phase)
+        assertEquals(other,repo.rows.value.last())
+        assertEquals(0L,repo.rows.value.first().delivery.urgentRetryAtMs)
+    }
+
     private class FakeRepository : ReminderRepository {
         val rows = MutableStateFlow(emptyList<Reminder>())
         var failSave = false
@@ -144,6 +170,10 @@ class RemindersViewModelTest {
                 rows.value = rows.value.map { if (it.id == id && it.delivery.occurrence == occurrence)
                     it.copy(delivery = it.delivery.completed()) else it }
             }
-            override suspend fun delete(id: String) { rows.value = rows.value.filterNot { it.id == id } }
+            override suspend fun nextTime(id: String, occurrence: Int) {
+            rows.value = rows.value.map { if (it.id == id && it.unresolvedUrgent)
+                it.copy(delivery = it.delivery.onAction(ro.andrei.ariciu.feature.delivery.model.OccurrenceAction.NEXT_TIME,occurrence,it.transition,allowUnresolvedUrgent = true)) else it }
+        }
+        override suspend fun delete(id: String) { rows.value = rows.value.filterNot { it.id == id } }
     }
 }

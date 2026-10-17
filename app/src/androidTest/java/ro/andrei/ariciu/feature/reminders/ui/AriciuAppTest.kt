@@ -27,6 +27,7 @@ class AriciuAppTest {
                 rows.value = rows.value.map { if (it.id == id && it.delivery.occurrence == occurrence)
                     it.copy(delivery = it.delivery.completed()) else it }
             }
+            override suspend fun nextTime(id: String, occurrence: Int) = Unit
             override suspend fun delete(id: String) { rows.value = rows.value.filterNot { it.id == id } }
         }
         lateinit var vm: RemindersViewModel
@@ -63,6 +64,7 @@ class AriciuAppTest {
             override fun observeReminders() = MutableStateFlow(emptyList<Reminder>())
             override suspend fun save(reminder: Reminder) = "test-generation"
             override suspend fun complete(id: String, occurrence: Int) = Unit
+            override suspend fun nextTime(id: String, occurrence: Int) = Unit
             override suspend fun delete(id: String) = Unit
         }
         lateinit var vm: RemindersViewModel

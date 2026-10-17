@@ -75,6 +75,7 @@ class ReleaseCandidateFlowTest {
                 rows.value = rows.value.map { if (it.id == id && it.delivery.occurrence == occurrence)
                     it.copy(delivery = it.delivery.completed()) else it }
             }
+            override suspend fun nextTime(id: String, occurrence: Int) = Unit
             override suspend fun delete(id: String) { rows.value = emptyList() }
         }
         lateinit var vm: RemindersViewModel
@@ -111,7 +112,7 @@ class ReleaseCandidateFlowTest {
         compose.onNodeWithTag("location_picker_confirm_button").performClick()
         compose.onNodeWithTag("reminder_editor_title_field").performTextInput("Buy groceries")
         compose.onNodeWithText("Alert: Normal").performScrollTo().performClick()
-        compose.onNodeWithText("Alarm", substring = false).performScrollTo().performClick()
+        compose.onNodeWithText("Urgent", substring = false).performScrollTo().performClick()
         compose.runOnIdle { assertEquals("Kaufland", vm.draft.value.chainName); assertTrue(vm.draft.value.chainAreas.isNotEmpty()); assertTrue(vm.draft.value.chainAreas.size <= 40) }
         compose.onNodeWithText("New reminder").performScrollTo()
         capture("rc-light-editor")
@@ -129,11 +130,11 @@ class ReleaseCandidateFlowTest {
         compose.onNodeWithTag("store_preview_close").assertIsDisplayed()
         capture("review-large-store-list")
         compose.onNodeWithTag("store_preview_close").performClick()
-        compose.onNodeWithText("Alert: Alarm").performScrollTo().performClick()
+        compose.onNodeWithText("Alert: Urgent").performScrollTo().performClick()
         capture("rc-large-alerts")
         compose.onNodeWithText("Close").performClick()
         compose.onNodeWithTag("reminder_save").assertIsDisplayed().performClick()
-        compose.runOnIdle { assertEquals(NotificationIntensity.ALARM, rows.value.single().intensity) }
+        compose.runOnIdle { assertEquals(NotificationIntensity.URGENT, rows.value.single().intensity) }
         compose.onNodeWithText("Mark done", substring = false).performScrollTo().assertIsDisplayed()
         capture("rc-large-reminders")
         compose.runOnIdle { large = false }

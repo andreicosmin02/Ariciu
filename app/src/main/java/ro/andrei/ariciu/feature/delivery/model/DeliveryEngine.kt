@@ -2,6 +2,7 @@ package ro.andrei.ariciu.feature.delivery.model
 
 import ro.andrei.ariciu.feature.reminders.model.Reminder
 import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
+import ro.andrei.ariciu.feature.reminders.model.NotificationIntensity
 
 data class DeliveryRecord(val reminder: Reminder, val generation: String, val area: ChainArea? = null) {
     val requestId: String get() = "${reminder.id}:$generation" + (area?.let { ":${it.id}" } ?: "")
@@ -25,6 +26,7 @@ interface GeofenceBackend {
 }
 
 interface ReminderNotifications {
+    fun requiresRefresh(record: DeliveryRecord): Boolean = false
     fun post(record: DeliveryRecord): Boolean
     fun cancelExcept(reminderIds: Set<String>)
 }
@@ -34,6 +36,7 @@ class DeliveryEngine(
     private val store: DeliveryStore,
     private val backend: GeofenceBackend,
     private val notifications: ReminderNotifications,
+    private val urgentDelayMs: Long = URGENT_RE_ALERT_DELAY_MS,
 ) {
     suspend fun transition(requestIds: Set<String>, transition: ReminderTransition, elapsedMs: Long, boot: Int) {
         store.transaction {
@@ -41,7 +44,7 @@ class DeliveryEngine(
                 var reminder = record.reminder
                 if (reminder.chainName == null) {
                     if (record.requestId in requestIds) reminder = reminder.copy(delivery = reminder.delivery.onTransition(
-                        transition, reminder.transition, reminder.repeat, elapsedMs, boot))
+                        transition, reminder.transition, reminder.repeat, elapsedMs, boot, holdUnresolved = reminder.intensity == NotificationIntensity.URGENT))
                 } else {
                     record.monitoringAreas.filter { it.requestId in requestIds }.sortedBy { it.requestId }.forEach {
                         reminder = reminder.crossChain(requireNotNull(it.area).id, transition, elapsedMs, boot)
@@ -65,13 +68,17 @@ class DeliveryEngine(
         true
     }
 
-    suspend fun action(requestId: String, occurrence: Int, action: OccurrenceAction, nowMs: Long = 0) {
+    suspend fun action(requestId: String, occurrence: Int, action: OccurrenceAction, nowMs: Long = 0, notificationAttempt: Int = 0) {
         store.transaction {
             store.all().firstOrNull { it.requestId == requestId }?.let { record ->
                 val r = record.reminder
                 if (action in setOf(OccurrenceAction.STOP, OccurrenceAction.SNOOZE) &&
                     r.intensity != ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.ALARM) return@let
-                val next = r.delivery.onAction(action, occurrence, r.transition, nowMs)
+                val next = if (action == OccurrenceAction.DISMISS) {
+                    if (r.intensity != NotificationIntensity.URGENT) return@let
+                    r.delivery.onUrgentDismiss(occurrence,notificationAttempt,nowMs,urgentDelayMs)
+                } else r.delivery.onAction(action, occurrence, r.transition, nowMs,
+                    allowUnresolvedUrgent = r.intensity == NotificationIntensity.URGENT)
                 if (next != r.delivery) store.put(record.copy(reminder = r.copy(delivery = next)))
             }
         }
@@ -81,6 +88,18 @@ class DeliveryEngine(
         store.transaction {
             store.all().forEach { record ->
                 val next = record.reminder.delivery.onSnoozeDue(nowMs)
+                if (next != record.reminder.delivery) store.put(record.copy(reminder = record.reminder.copy(delivery = next)))
+            }
+        }
+    }
+
+    /** Re-alerts remain the same occurrence; a separate attempt rejects old swipe broadcasts. */
+    suspend fun wakeUrgentRetries(nowMs: Long, requestId: String? = null, occurrence: Int? = null, attempt: Int? = null) {
+        store.transaction {
+            store.all().filter { it.reminder.intensity == NotificationIntensity.URGENT &&
+                (requestId == null || (it.requestId == requestId && it.reminder.delivery.occurrence == occurrence &&
+                    it.reminder.delivery.notificationAttempt == attempt)) }.forEach { record ->
+                val next = record.reminder.delivery.onUrgentRetryDue(nowMs)
                 if (next != record.reminder.delivery) store.put(record.copy(reminder = record.reminder.copy(delivery = next)))
             }
         }
@@ -150,13 +169,21 @@ class DeliveryEngine(
         val all = store.all()
         notifications.cancelExcept(all.filter { it.reminder.delivery.notificationVisible }.map { it.reminder.id }.toSet())
         if (!allowed) return
-        all.filter { it.reminder.delivery.notificationVisible &&
-            (it.reminder.delivery.notificationPending || restoreVisible) }.forEach { record ->
-            val presentation = if (restoreVisible && !record.reminder.delivery.notificationPending)
+        suspend fun deliver(record: DeliveryRecord) {
+            val refresh = notifications.requiresRefresh(record)
+            if (!record.reminder.delivery.notificationVisible ||
+                !(record.reminder.delivery.notificationPending || restoreVisible || refresh)) return
+            val presentation = if (!record.reminder.delivery.notificationPending)
                 record.copy(reminder = record.reminder.copy(delivery = record.reminder.delivery.copy(quiet = true))) else record
-            val persisted = if (record.reminder.intensity == ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.ALARM) presentation else record
+            val persisted = if (record.reminder.intensity == NotificationIntensity.ALARM) presentation else record
             if (notifications.post(presentation)) store.put(persisted.copy(reminder = persisted.reminder.copy(
                 delivery = persisted.reminder.delivery.copy(notificationPending = false))))
+        }
+        all.filter { it.reminder.delivery.notificationVisible }.forEach { snapshot ->
+            if (snapshot.reminder.intensity == NotificationIntensity.URGENT) store.transaction {
+                // Serialize the final validation/post with card completion/edit/delete transactions.
+                store.all().firstOrNull { it.requestId == snapshot.requestId }?.let { deliver(it) }
+            } else deliver(snapshot)
         }
     }
 }

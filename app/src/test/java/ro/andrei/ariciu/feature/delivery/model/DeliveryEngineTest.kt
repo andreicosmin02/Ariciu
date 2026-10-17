@@ -212,6 +212,91 @@ class DeliveryEngineTest {
         assertFalse(f.engine.immediateArrival("id:v1",fix,4_000,1)) // A newer real event takes precedence.
     }
 
+    @Test fun urgentEveryVisitRemainsUnresolvedAcrossExitAndReentry() = runBlocking {
+        val original = record(repeat = ReminderRepeat.EVERY_VISIT)
+        val f = Fixture(original.copy(reminder = original.reminder.copy(intensity = ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.URGENT)))
+        f.engine.transition(setOf("id:v1"),ReminderTransition.ENTER,10,1)
+        f.engine.dispatchNotifications(true)
+        f.engine.transition(setOf("id:v1"),ReminderTransition.EXIT,20,1)
+        assertEquals(DeliveryPhase.TRIGGERED,f.store.records.getValue("id").reminder.delivery.phase)
+        f.engine.transition(setOf("id:v1"),ReminderTransition.ENTER,30,1)
+        f.engine.dispatchNotifications(true)
+        assertEquals(1,f.store.records.getValue("id").reminder.delivery.occurrence)
+        assertEquals(1,f.notifications.posts)
+    }
+
+    @Test fun immediateUrgentArrivalSwipeRetryAndExplicitActionsKeepOneOccurrence() = runBlocking {
+        val original = record().let { it.copy(reminder = it.reminder.copy(intensity = NotificationIntensity.URGENT)) }
+        val f = Fixture(original)
+        assertTrue(f.engine.immediateArrival("id:v1",ArrivalLocationFix(45.0,25.0,10.0,100,1),200,1))
+        f.engine.dispatchNotifications(true)
+        f.engine.action("id:old",1,OccurrenceAction.DISMISS,1_000)
+        assertEquals(0L,f.store.records.getValue("id").reminder.delivery.urgentRetryAtMs)
+        f.engine.action("id:v1",1,OccurrenceAction.DISMISS,1_000)
+        f.engine.action("id:v1",1,OccurrenceAction.DISMISS,2_000)
+        assertEquals(301_000L,f.store.records.getValue("id").reminder.delivery.urgentRetryAtMs)
+        f.engine.dispatchNotifications(true); assertTrue(f.notifications.visible.isEmpty())
+        f.engine.wakeUrgentRetries(300_999); f.engine.dispatchNotifications(true); assertEquals(1,f.notifications.posts)
+        f.engine.wakeUrgentRetries(301_000); f.engine.dispatchNotifications(true)
+        assertEquals(2,f.notifications.posts)
+        assertEquals(1,f.store.records.getValue("id").reminder.delivery.occurrence)
+        f.engine.action("id:v1",1,OccurrenceAction.DISMISS,302_000,notificationAttempt = 0)
+        assertTrue(f.store.records.getValue("id").reminder.delivery.notificationVisible)
+        f.engine.wakeUrgentRetries(900_000); f.engine.dispatchNotifications(true)
+        assertEquals(2,f.notifications.posts)
+        f.engine.action("id:v1",1,OccurrenceAction.DISMISS,303_000,notificationAttempt = 1)
+        f.engine.action("id:v1",1,OccurrenceAction.DONE)
+        f.engine.wakeUrgentRetries(1_000_000); f.engine.dispatchNotifications(true)
+        assertEquals(DeliveryPhase.COMPLETED,f.store.records.getValue("id").reminder.delivery.phase)
+        assertEquals(2,f.notifications.posts)
+    }
+
+    @Test fun dueRetryWithNoNotificationAccessWaitsInOutboxAndStaleWakeCannotTargetEditedGeneration() = runBlocking {
+        val original = record().let { it.copy(reminder = it.reminder.copy(intensity = NotificationIntensity.URGENT)) }
+        val f = Fixture(original)
+        f.engine.transition(setOf("id:v1"),ReminderTransition.ENTER,10,1)
+        f.engine.action("id:v1",1,OccurrenceAction.DISMISS,1_000)
+        val pending = f.store.records.getValue("id").copy(generation = "edited")
+        f.store.records["id"] = pending
+        f.engine.wakeUrgentRetries(900_000,"id:v1",1,0)
+        assertEquals(pending,f.store.records.getValue("id"))
+        f.engine.wakeUrgentRetries(900_000,"id:edited",1,0)
+        f.engine.dispatchNotifications(false)
+        assertTrue(f.store.records.getValue("id").reminder.delivery.notificationPending)
+        assertEquals(0,f.notifications.posts)
+        f.engine.dispatchNotifications(true); f.engine.dispatchNotifications(true)
+        assertEquals(1,f.notifications.posts)
+        f.store.records.remove("id")
+        f.engine.wakeUrgentRetries(1_000_000,"id:edited",1,0)
+        assertTrue(f.store.records.isEmpty())
+    }
+
+    @Test fun normalAndAlarmDismissEventsCannotStartUrgentRetry() = runBlocking {
+        for (intensity in listOf(NotificationIntensity.SILENT,NotificationIntensity.NORMAL,NotificationIntensity.ALARM)) {
+            val original = record().let { it.copy(reminder = it.reminder.copy(intensity = intensity)) }
+            val f = Fixture(original)
+            f.engine.transition(setOf("id:v1"),ReminderTransition.ENTER,10,1)
+            val before = f.store.records.getValue("id")
+            f.engine.action("id:v1",1,OccurrenceAction.DISMISS,1_000)
+            assertEquals(before,f.store.records.getValue("id"))
+        }
+    }
+
+    @Test fun blockedChannelBackendKeepsTheDueAttemptInOutboxWithoutBurstingOnRecovery() = runBlocking {
+        val original = record().let { it.copy(reminder = it.reminder.copy(intensity = NotificationIntensity.URGENT)) }
+        val f = Fixture(original)
+        f.engine.transition(setOf("id:v1"),ReminderTransition.ENTER,10,1)
+        f.engine.action("id:v1",1,OccurrenceAction.DISMISS,1_000)
+        f.engine.wakeUrgentRetries(301_000)
+        f.notifications.allowed = false
+        f.engine.dispatchNotifications(true)
+        assertTrue(f.store.records.getValue("id").reminder.delivery.notificationPending)
+        assertEquals(0,f.notifications.posts)
+        f.notifications.allowed = true
+        f.engine.dispatchNotifications(true); f.engine.dispatchNotifications(true)
+        assertEquals(1,f.notifications.posts)
+    }
+
     private class Fixture(vararg records: DeliveryRecord) {
         val store = FakeStore(records.toList())
         val backend = FakeBackend()
@@ -243,8 +328,10 @@ class DeliveryEngineTest {
     }
     private class FakeNotifications : ReminderNotifications {
         var posts = 0
+        var allowed = true
         val visible = mutableMapOf<String, Int>()
         override fun post(record: DeliveryRecord): Boolean {
+            if (!allowed) return false
             posts++; visible[record.reminder.id] = record.reminder.delivery.occurrence; return true
         }
         override fun cancelExcept(reminderIds: Set<String>) { visible.keys.retainAll(reminderIds) }

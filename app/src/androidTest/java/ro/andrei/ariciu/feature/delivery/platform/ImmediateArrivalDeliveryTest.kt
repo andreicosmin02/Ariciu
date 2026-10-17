@@ -40,9 +40,14 @@ class ImmediateArrivalDeliveryTest {
             assertEquals(AndroidReminderNotifications.channelId(NotificationIntensity.URGENT),notification.channelId)
             assertFalse(DeliveryWork.immediateArrival(context,requestId,fix,{ true }))
             notification.deleteIntent.send()
-            withTimeout(20_000) { while (row().phase != DeliveryPhase.WAITING_NEXT_VISIT.name || manager.activeNotifications.any { it.tag == "reminder:$id" }) delay(50) }
+            withTimeout(20_000) { while (row().urgentRetryAtMs == 0L || manager.activeNotifications.any { it.tag == "reminder:$id" }) delay(50) }
             settle()
-            assertEquals(DeliveryPhase.WAITING_NEXT_VISIT.name,row().phase)
+            assertEquals(DeliveryPhase.TRIGGERED.name,row().phase)
+            assertTrue(row().urgentRetryAtMs > System.currentTimeMillis())
+            notification.actions.first { it.title == "Next time" }.actionIntent.send()
+            withTimeout(20_000) { while (row().phase != DeliveryPhase.WAITING_NEXT_VISIT.name) delay(50) }
+            settle()
+            assertEquals(0L,row().urgentRetryAtMs)
             DeliveryWork.reconcile(context,force = true).result.get()
             withTimeout(20_000) { while (manager.activeNotifications.any { it.tag == "reminder:$id" }) delay(50) }
             assertFalse(DeliveryWork.immediateArrival(context,requestId,fix,{ true }))

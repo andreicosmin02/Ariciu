@@ -99,7 +99,7 @@ class NotificationDeliveryTest {
         } finally { ids.forEach { repository.delete(it); manager.cancel("reminder:$it", 1) } }
     }
 
-    @Test fun persistentWorkerPostsNotificationAndReceiverHandlesSwipeNextTimeAndDone() = runBlocking {
+    @Test fun normalWorkerPostsNotificationAndReceiverHandlesSwipeNextTimeAndDone() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             InstrumentationRegistry.getInstrumentation().uiAutomation.grantRuntimePermission(context.packageName, Manifest.permission.POST_NOTIFICATIONS)
@@ -120,7 +120,7 @@ class NotificationDeliveryTest {
         }
         fun notification() = manager.activeNotifications.firstOrNull { it.tag == "reminder:$id" }
         try {
-            repository.save(Reminder(id, "Test arrival", SelectedLocation(45.0,25.0,200), ReminderTransition.ENTER, ReminderRepeat.ONCE, intensity = NotificationIntensity.URGENT))
+            repository.save(Reminder(id, "Test arrival", SelectedLocation(45.0,25.0,200), ReminderTransition.ENTER, ReminderRepeat.ONCE, intensity = NotificationIntensity.NORMAL))
             crossing("ENTER", 10)
             awaitCondition { notification() != null && !record().notificationPending }
             val first = requireNotNull(notification()).notification

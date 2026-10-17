@@ -64,7 +64,7 @@ class RemindersViewModel(
 
     fun updateDraft(incoming: ReminderDraft) {
         if (state.value.busy) return
-        val value = incoming.copy(notifyOnSave = incoming.notifyOnSave && incoming.canCheckArrival && !editing)
+        val value = incoming.copy(intensity = allowedDraftIntensity(incoming.intensity), notifyOnSave = incoming.notifyOnSave && incoming.canCheckArrival && !editing)
         mutableDraft.value = value
         savedState["title"] = value.title
         savedState["latitude"] = value.location?.latitude
@@ -142,6 +142,10 @@ class RemindersViewModel(
         perform("Could not complete reminder. Please retry.") { repository.complete(reminder.id, reminder.delivery.occurrence) }
     }
 
+    fun nextTime(reminder: Reminder) {
+        perform("Could not postpone reminder. Please retry.") { repository.nextTime(reminder.id,reminder.delivery.occurrence) }
+    }
+
     fun delete(reminder: Reminder) {
         perform("Could not delete reminder. Please retry.") { repository.delete(reminder.id) }
     }
@@ -161,6 +165,10 @@ class RemindersViewModel(
         }
     }
 
+    private fun allowedDraftIntensity(intensity: ro.andrei.ariciu.feature.reminders.model.NotificationIntensity) =
+        if (!editing && intensity == ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.ALARM)
+            ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.URGENT else intensity
+
     private fun restoreDraft(): ReminderDraft {
         val latitude = savedState.get<Double>("latitude")
         val longitude = savedState.get<Double>("longitude")
@@ -171,7 +179,7 @@ class RemindersViewModel(
                 SelectedLocation(latitude, longitude, radius) else null,
             transition = ReminderTransition.valueOf(savedState["transition"] ?: ReminderTransition.ENTER.name),
             repeat = ReminderRepeat.valueOf(savedState["repeat"] ?: ReminderRepeat.ONCE.name),
-            intensity = ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.valueOf(savedState["intensity"] ?: "NORMAL"),
+            intensity = allowedDraftIntensity(ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.valueOf(savedState["intensity"] ?: "NORMAL")),
             chainName = savedState["chainName"],
             notifyOnSave = savedState["notifyOnSave"] ?: false,
             chainAreas = ro.andrei.ariciu.feature.delivery.model.decodeChainAreas(savedState["chainAreas"] ?: ""),

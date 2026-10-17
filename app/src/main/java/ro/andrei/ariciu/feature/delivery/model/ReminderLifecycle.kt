@@ -6,7 +6,9 @@ import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
 enum class DeliveryPhase { WAITING, TRIGGERED, WAITING_NEXT_VISIT, COMPLETED }
 enum class AreaPosition { UNKNOWN, INSIDE, OUTSIDE }
 enum class RegistrationState { PENDING, REGISTERED, BLOCKED, FAILED, PARTIAL, LIMIT_REACHED, INACTIVE }
-enum class OccurrenceAction { DONE, NEXT_TIME, STOP, SNOOZE }
+enum class OccurrenceAction { DONE, NEXT_TIME, STOP, SNOOZE, DISMISS }
+
+const val URGENT_RE_ALERT_DELAY_MS = 5 * 60_000L
 
 data class DeliveryState(
     val phase: DeliveryPhase = DeliveryPhase.WAITING,
@@ -18,16 +20,19 @@ data class DeliveryState(
     val lastEventBoot: Int = -1,
     val quiet: Boolean = false,
     val snoozeUntilMs: Long = 0,
+    val urgentRetryAtMs: Long = 0,
+    val notificationAttempt: Int = 0,
 ) {
     val active: Boolean get() = phase != DeliveryPhase.COMPLETED
 
     fun onTransition(event: ReminderTransition, wanted: ReminderTransition, repeat: ReminderRepeat,
-        elapsedMs: Long, boot: Int): DeliveryState {
+        elapsedMs: Long, boot: Int, holdUnresolved: Boolean = false): DeliveryState {
         if (!active || (lastEventBoot == boot && elapsedMs <= lastEventElapsedMs)) return this
         val newPosition = if (event == ReminderTransition.ENTER) AreaPosition.INSIDE else AreaPosition.OUTSIDE
         // Do not advance the timestamp for a same-position duplicate: it carries no new crossing.
         if (position == newPosition) return this
         val updated = copy(position = newPosition, lastEventElapsedMs = elapsedMs, lastEventBoot = boot)
+        if (holdUnresolved && phase == DeliveryPhase.TRIGGERED) return updated
         if (event != wanted) {
             return if (phase == DeliveryPhase.WAITING_NEXT_VISIT ||
                 (phase == DeliveryPhase.TRIGGERED && repeat == ReminderRepeat.EVERY_VISIT))
@@ -35,15 +40,17 @@ data class DeliveryState(
         }
         if (phase != DeliveryPhase.WAITING) return updated
         return updated.copy(phase = DeliveryPhase.TRIGGERED, occurrence = occurrence + 1,
-            notificationVisible = true, notificationPending = true, quiet = false, snoozeUntilMs = 0)
+            notificationVisible = true, notificationPending = true, quiet = false, snoozeUntilMs = 0, urgentRetryAtMs = 0, notificationAttempt = 0)
     }
 
     /** Explicit task completion also works before a crossing or while snoozed. */
     fun completed() = copy(phase = DeliveryPhase.COMPLETED, notificationVisible = false,
-        notificationPending = false, quiet = true, snoozeUntilMs = 0)
+        notificationPending = false, quiet = true, snoozeUntilMs = 0, urgentRetryAtMs = 0)
 
-    fun onAction(action: OccurrenceAction, token: Int, wanted: ReminderTransition, nowMs: Long = 0): DeliveryState {
-        if (!active || !notificationVisible || occurrence != token) return this
+    fun onAction(action: OccurrenceAction, token: Int, wanted: ReminderTransition, nowMs: Long = 0, allowUnresolvedUrgent: Boolean = false): DeliveryState {
+        if (action == OccurrenceAction.DISMISS) return this // Requires a delivery-attempt token, handled separately.
+        if (!active || occurrence != token || (!notificationVisible &&
+            !(allowUnresolvedUrgent && phase == DeliveryPhase.TRIGGERED && urgentRetryAtMs > 0 && action in setOf(OccurrenceAction.DONE, OccurrenceAction.NEXT_TIME)))) return this
         if (action == OccurrenceAction.STOP) return if (quiet) this else copy(quiet = true, notificationPending = true)
         if (action == OccurrenceAction.SNOOZE) return copy(notificationVisible = false, notificationPending = false,
             quiet = false, snoozeUntilMs = nowMs + 10 * 60_000)
@@ -51,12 +58,25 @@ data class DeliveryState(
         val triggeringPosition = if (wanted == ReminderTransition.ENTER) AreaPosition.INSIDE else AreaPosition.OUTSIDE
         return copy(phase = if (position == triggeringPosition || position == AreaPosition.UNKNOWN)
             DeliveryPhase.WAITING_NEXT_VISIT else DeliveryPhase.WAITING,
-            notificationVisible = false, notificationPending = false, snoozeUntilMs = 0)
+            notificationVisible = false, notificationPending = false, snoozeUntilMs = 0, urgentRetryAtMs = 0)
     }
+
+    fun onUrgentDismiss(token: Int, attempt: Int, nowMs: Long,
+        delayMs: Long = URGENT_RE_ALERT_DELAY_MS): DeliveryState {
+        if (phase != DeliveryPhase.TRIGGERED || !notificationVisible || occurrence != token || notificationAttempt != attempt) return this
+        require(delayMs > 0)
+        return copy(notificationVisible = false, notificationPending = false, quiet = false,
+            urgentRetryAtMs = nowMs + delayMs)
+    }
+
+    fun onUrgentRetryDue(nowMs: Long): DeliveryState =
+        if (phase == DeliveryPhase.TRIGGERED && !notificationVisible && urgentRetryAtMs > 0 && nowMs >= urgentRetryAtMs)
+            copy(urgentRetryAtMs = 0, notificationAttempt = notificationAttempt + 1,
+                notificationVisible = true, notificationPending = true, quiet = false) else this
 
     fun onSnoozeDue(nowMs: Long): DeliveryState = if (active && snoozeUntilMs > 0 && nowMs >= snoozeUntilMs)
         copy(snoozeUntilMs = 0, occurrence = occurrence + 1, quiet = false,
-            notificationVisible = true, notificationPending = true) else this
+            notificationVisible = true, notificationPending = true, notificationAttempt = 0) else this
 }
 
 data class DeliveryCapabilities(

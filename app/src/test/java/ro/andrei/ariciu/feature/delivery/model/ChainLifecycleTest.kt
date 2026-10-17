@@ -32,4 +32,15 @@ class ChainLifecycleTest {
         assertEquals(12, allocated.size)
         assertEquals(10, allocated.map { it.reminder.id }.distinct().size)
     }
+    @Test fun unresolvedUrgentChainKeepsItsOccurrenceAcrossStoreExitAndReentry() {
+        val reminder = ro.andrei.ariciu.feature.reminders.model.Reminder("urgent","Chain",ro.andrei.ariciu.feature.locationpicker.model.SelectedLocation(45.0,25.0,200),
+            ReminderTransition.ENTER,ReminderRepeat.EVERY_VISIT,intensity = NotificationIntensity.URGENT,chainName = "Kaufland",chainAreas = listOf(ChainArea("n1",45.0,25.0)))
+        val first = reminder.crossChain("n1",ReminderTransition.ENTER,10,1)
+        val swiped = first.copy(delivery = first.delivery.onUrgentDismiss(1,0,1_000))
+        val next = swiped.crossChain("n1",ReminderTransition.EXIT,20,1).crossChain("n1",ReminderTransition.ENTER,30,1)
+        assertEquals(1,next.delivery.occurrence)
+        assertEquals(DeliveryPhase.TRIGGERED,next.delivery.phase)
+        assertEquals(swiped.delivery.urgentRetryAtMs,next.delivery.urgentRetryAtMs)
+    }
+
 }

@@ -49,18 +49,20 @@ data class ReminderEntity(
     @ColumnInfo(defaultValue = "0") val snoozeUntilMs: Long = 0,
     val chainName: String? = null,
     @ColumnInfo(defaultValue = "''") val chainAreas: String = "",
+    @ColumnInfo(defaultValue = "0") val urgentRetryAtMs: Long = 0,
+    @ColumnInfo(defaultValue = "0") val notificationAttempt: Int = 0,
 ) {
     fun toReminder() = Reminder(id, title, SelectedLocation(latitude, longitude, radiusMeters),
         ReminderTransition.valueOf(transition), ReminderRepeat.valueOf(repeat),
         DeliveryState(DeliveryPhase.valueOf(phase), AreaPosition.valueOf(position), occurrence,
-            notificationVisible, notificationPending, lastEventElapsedMs, lastEventBoot, quiet, snoozeUntilMs),
+            notificationVisible, notificationPending, lastEventElapsedMs, lastEventBoot, quiet, snoozeUntilMs, urgentRetryAtMs, notificationAttempt),
         RegistrationState.valueOf(registration), deliveryError, NotificationIntensity.valueOf(intensity), chainName, decodeChainAreas(chainAreas))
 }
 
 fun Reminder.toEntity(generation: String = "") = ReminderEntity(id, title, location.latitude, location.longitude,
     location.radiusMeters, transition.name, repeat.name, generation, delivery.phase.name, delivery.position.name,
     delivery.occurrence, delivery.notificationVisible, delivery.notificationPending, delivery.lastEventElapsedMs,
-    delivery.lastEventBoot, registration.name, deliveryError, intensity.name, delivery.quiet, delivery.snoozeUntilMs, chainName, encodeChainAreas(chainAreas))
+    delivery.lastEventBoot, registration.name, deliveryError, intensity.name, delivery.quiet, delivery.snoozeUntilMs, chainName, encodeChainAreas(chainAreas), delivery.urgentRetryAtMs, delivery.notificationAttempt)
 
 @Entity(tableName = "registered_geofences")
 data class RegisteredGeofence(@PrimaryKey val requestId: String)
@@ -81,6 +83,17 @@ interface ReminderDao {
             registration = RegistrationState.INACTIVE, deliveryError = null).toEntity(UUID.randomUUID().toString()))
     }
 
+    @Transaction
+    suspend fun nextTime(id: String, occurrence: Int) {
+        val old = find(id) ?: return
+        val current = old.toReminder()
+        if (!current.unresolvedUrgent || old.occurrence != occurrence) return
+        val next = current.delivery.onAction(OccurrenceAction.NEXT_TIME,occurrence,current.transition,allowUnresolvedUrgent = true)
+        if (next == current.delivery) return
+        upsert(current.copy(delivery = next,registration = RegistrationState.PENDING,deliveryError = null)
+            .toEntity(UUID.randomUUID().toString()))
+    }
+
     @Query("SELECT * FROM reminders") suspend fun getAll(): List<ReminderEntity>
     @Query("SELECT * FROM registered_geofences") suspend fun registrations(): List<RegisteredGeofence>
     @Upsert suspend fun track(registrations: List<RegisteredGeofence>)
@@ -97,28 +110,38 @@ interface ReminderDao {
             occurrence = old.occurrence, notificationVisible = old.notificationVisible,
             notificationPending = old.notificationVisible, lastEventElapsedMs = old.lastEventElapsedMs,
             lastEventBoot = old.lastEventBoot, quiet = old.quiet, snoozeUntilMs = old.snoozeUntilMs,
+            urgentRetryAtMs = old.urgentRetryAtMs, notificationAttempt = old.notificationAttempt,
             chainAreas = encodeChainAreas(decodeChainAreas(reminder.chainAreas).map { area ->
                 if (old.chainName != reminder.chainName || moved) area else decodeChainAreas(old.chainAreas).firstOrNull {
                     it.id == area.id && it.latitude == area.latitude && it.longitude == area.longitude } ?: area
             }),
         )
-        upsert(preserved)
+        val converted = when {
+            old == null || old.intensity == reminder.intensity -> preserved
+            reminder.intensity == NotificationIntensity.URGENT.name && old.phase != DeliveryPhase.COMPLETED.name ->
+                preserved.copy(phase = if (old.notificationVisible || old.snoozeUntilMs > 0) DeliveryPhase.TRIGGERED.name else old.phase,
+                    urgentRetryAtMs = old.snoozeUntilMs, snoozeUntilMs = 0, quiet = false)
+            else -> preserved.copy(urgentRetryAtMs = 0,
+                notificationVisible = old.notificationVisible || old.urgentRetryAtMs > 0,
+                notificationPending = old.notificationVisible || old.urgentRetryAtMs > 0)
+        }
+        upsert(converted)
     }
 
 
     @Query("""UPDATE reminders SET phase=:phase, position=:position, occurrence=:occurrence,
         notificationVisible=:visible, notificationPending=:pending, lastEventElapsedMs=:elapsed,
-        lastEventBoot=:boot, registration=:registration, deliveryError=:error, quiet=:quiet, snoozeUntilMs=:snoozeUntilMs, chainAreas=:chainAreas
+        lastEventBoot=:boot, registration=:registration, deliveryError=:error, quiet=:quiet, snoozeUntilMs=:snoozeUntilMs, chainAreas=:chainAreas, urgentRetryAtMs=:urgentRetryAtMs, notificationAttempt=:notificationAttempt
         WHERE id=:id AND generation=:generation""")
     suspend fun updateDelivery(id: String, generation: String, phase: String, position: String,
         occurrence: Int, visible: Boolean, pending: Boolean, elapsed: Long, boot: Int,
-        registration: String, error: String?, quiet: Boolean, snoozeUntilMs: Long, chainAreas: String)
+        registration: String, error: String?, quiet: Boolean, snoozeUntilMs: Long, chainAreas: String, urgentRetryAtMs: Long, notificationAttempt: Int)
 
     @Query("DELETE FROM reminders WHERE id = :id")
     suspend fun delete(id: String)
 }
 
-@Database(entities = [ReminderEntity::class, RegisteredGeofence::class], version = 4, exportSchema = true)
+@Database(entities = [ReminderEntity::class, RegisteredGeofence::class], version = 5, exportSchema = true)
 abstract class ReminderDatabase : RoomDatabase() {
     abstract fun reminderDao(): ReminderDao
 
@@ -155,11 +178,20 @@ abstract class ReminderDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE reminders ADD COLUMN urgentRetryAtMs INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE reminders ADD COLUMN notificationAttempt INTEGER NOT NULL DEFAULT 0")
+                // rc3 EVERY_VISIT could rearm while its Urgent alert remained unanswered.
+                db.execSQL("UPDATE reminders SET phase='TRIGGERED' WHERE intensity='URGENT' AND phase!='COMPLETED' AND notificationVisible=1 AND occurrence>0")
+            }
+        }
+
         @Volatile private var instance: ReminderDatabase? = null
 
         fun getInstance(context: Context): ReminderDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext,
-                ReminderDatabase::class.java, "reminders.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build().also { instance = it }
+                ReminderDatabase::class.java, "reminders.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build().also { instance = it }
         }
     }
 }
@@ -176,6 +208,7 @@ class RoomReminderRepository(private val dao: ReminderDao, private val onChanged
         return generation
     }
     override suspend fun complete(id: String, occurrence: Int) { dao.complete(id, occurrence); onChanged() }
+    override suspend fun nextTime(id: String, occurrence: Int) { dao.nextTime(id, occurrence); onChanged() }
     override suspend fun delete(id: String) { dao.delete(id); onChanged() }
 }
 
@@ -187,7 +220,7 @@ class RoomDeliveryStore(private val db: ReminderDatabase) : DeliveryStore {
         val d = r.delivery
         dao.updateDelivery(r.id, record.generation, d.phase.name, d.position.name, d.occurrence,
             d.notificationVisible, d.notificationPending, d.lastEventElapsedMs, d.lastEventBoot,
-            r.registration.name, r.deliveryError, d.quiet, d.snoozeUntilMs, encodeChainAreas(r.chainAreas))
+            r.registration.name, r.deliveryError, d.quiet, d.snoozeUntilMs, encodeChainAreas(r.chainAreas), d.urgentRetryAtMs, d.notificationAttempt)
     }
     override suspend fun registeredIds() = dao.registrations().map { it.requestId }.toSet()
     override suspend fun track(ids: Set<String>) { dao.track(ids.map { RegisteredGeofence(it) }) }

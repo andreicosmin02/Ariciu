@@ -15,7 +15,7 @@ fun Reminder.crossChain(areaId: String, event: ReminderTransition, time: Long, b
     val aggregate = if (areas.any { it.position == AreaPosition.INSIDE }) ReminderTransition.ENTER else ReminderTransition.EXIT
     // Each area has its own ordering guard. Parent timestamps must not discard a valid different-area event.
     val state = delivery.onTransition(aggregate, transition, repeat,
-        maxOf(time, delivery.lastEventElapsedMs + 1), boot)
+        maxOf(time, delivery.lastEventElapsedMs + 1), boot, holdUnresolved = intensity == NotificationIntensity.URGENT)
     return copy(chainAreas = areas, delivery = state)
 }
 

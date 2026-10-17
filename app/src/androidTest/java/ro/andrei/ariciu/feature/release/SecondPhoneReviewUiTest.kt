@@ -34,6 +34,7 @@ class SecondPhoneReviewUiTest {
             override fun observeReminders() = rows
             override suspend fun save(reminder: Reminder): String { rows.value = rows.value + reminder; return "generation" }
             override suspend fun complete(id: String, occurrence: Int) { rows.value = rows.value.map { if (it.id == id) it.copy(delivery = it.delivery.completed()) else it } }
+            override suspend fun nextTime(id: String, occurrence: Int) = Unit
             override suspend fun delete(id: String) { rows.value = rows.value.filterNot { it.id == id } }
         }
         lateinit var vm: RemindersViewModel

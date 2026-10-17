@@ -76,7 +76,9 @@ class DeliveryWorker(context: Context, parameters: WorkerParameters) : Coroutine
                         ReminderTransition.valueOf(requireNotNull(inputData.getString("transition"))),
                         inputData.getLong("elapsed", -1), inputData.getInt("boot", -1))
                     "action" -> engine.action(requireNotNull(inputData.getString("request_id")),
-                        inputData.getInt("occurrence", -1), OccurrenceAction.valueOf(requireNotNull(inputData.getString("action"))), System.currentTimeMillis())
+                        inputData.getInt("occurrence", -1), OccurrenceAction.valueOf(requireNotNull(inputData.getString("action"))),
+                        if (inputData.getString("action") == OccurrenceAction.DISMISS.name) inputData.getLong("action_at",System.currentTimeMillis()) else System.currentTimeMillis(),
+                        inputData.getInt("notification_attempt",0))
                     "unavailable" -> engine.invalidateRegistrations("Location monitoring became unavailable. Check location settings, then Retry.")
                 }
                 if (command == "snooze" && store.all().any { it.reminder.delivery.snoozeUntilMs > System.currentTimeMillis() } &&
@@ -85,6 +87,18 @@ class DeliveryWorker(context: Context, parameters: WorkerParameters) : Coroutine
                 store.all().filter { it.reminder.delivery.snoozeUntilMs > 0 }.forEach {
                     DeliveryWork.snoozeWake(applicationContext, it.requestId, it.reminder.delivery.occurrence, it.reminder.delivery.snoozeUntilMs)
                 }
+                val now = System.currentTimeMillis()
+                val earlyUrgentWake = command == "urgent_retry" && store.all().any {
+                    it.requestId == inputData.getString("request_id") && it.reminder.delivery.occurrence == inputData.getInt("occurrence",-1) &&
+                        it.reminder.delivery.notificationAttempt == inputData.getInt("notification_attempt",-1) &&
+                        it.reminder.intensity == ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.URGENT &&
+                        !it.reminder.delivery.notificationVisible && it.reminder.delivery.urgentRetryAtMs > now
+                }
+                if (command == "urgent_retry") engine.wakeUrgentRetries(now,inputData.getString("request_id"),
+                    inputData.getInt("occurrence",-1),inputData.getInt("notification_attempt",-1))
+                else engine.wakeUrgentRetries(now)
+                UrgentRetryWork.synchronize(applicationContext,store.all(),id)
+                if (earlyUrgentWake) return Result.retry() // Wall clock moved backwards; never alert early.
                 val capabilities = applicationContext.deliveryCapabilities()
                 // Actions/notifications never wait behind a long backoff for geofence registration.
                 engine.dispatchNotifications(capabilities.notifications,
@@ -142,10 +156,11 @@ class NotificationActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action?.let { name -> OccurrenceAction.entries.firstOrNull { it.name == name } } ?: return
         val requestId = intent.getStringExtra("request_id") ?: return
-        context.quietNotificationAction(requestId, intent.getIntExtra("occurrence", -1))
+        if (action != OccurrenceAction.DISMISS) context.quietNotificationAction(requestId, intent.getIntExtra("occurrence", -1))
         val pending = goAsync()
         try { finishAfter(DeliveryWork.command(context, workDataOf("command" to "action", "action" to action.name,
-            "request_id" to requestId, "occurrence" to intent.getIntExtra("occurrence", -1))), pending) }
+            "request_id" to requestId, "occurrence" to intent.getIntExtra("occurrence", -1),
+            "notification_attempt" to intent.getIntExtra("notification_attempt",0), "action_at" to System.currentTimeMillis())), pending) }
         catch (e: Exception) { Log.e("AriciuDelivery", "Could not enqueue notification action", e); pending.finish() }
     }
 }
