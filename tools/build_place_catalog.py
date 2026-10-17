@@ -2,7 +2,7 @@
 """Generate a small ODbL catalogue from an official Geofabrik Romania .osm.pbf.
 Development tool only: pip install osmium (BSD-2-Clause); no app/network dependency.
 Usage: python tools/build_place_catalog.py INPUT.osm.pbf OUTPUT.tsv
-Includes place nodes and selected supermarket nodes/closed ways, not relations.
+Includes place nodes and selected supermarket and mall nodes/closed ways, not relations.
 """
 import sys, math, hashlib
 from datetime import datetime, timezone
@@ -14,16 +14,16 @@ class Catalog(osmium.SimpleHandler):
     def add(self, obj, lat, lon, prefix):
         t = dict(obj.tags); name = t.get('name', '')
         place = t.get('place') in ['city', 'town', 'village', 'hamlet']
-        if not place and t.get('shop') not in ['supermarket', 'convenience']: return
+        if not place and t.get('shop') not in ['supermarket', 'convenience', 'mall']: return
         if not name: name = t.get('brand', '')
         if not name or not (20 < lon < 30.5 and 43.5 < lat < 49): return
-        chain = next((c for c in CHAINS if c.lower() in (t.get('brand','')+' '+name).lower()), '')
+        chain = '' if t.get('shop') == 'mall' else next((c for c in CHAINS if c.lower() in (t.get('brand','')+' '+name).lower()), '')
         address = ', '.join(filter(None, [t.get('addr:city',''), ' '.join(filter(None, [t.get('addr:street',''), t.get('addr:housenumber','')]))]))
-        rows.append([prefix+str(obj.id), name, 'town' if place else 'store', address, f'{lat:.6f}', f'{lon:.6f}', chain])
+        rows.append([prefix+str(obj.id), name, 'town' if place else ('mall' if t.get('shop') == 'mall' else 'store'), address, f'{lat:.6f}', f'{lon:.6f}', chain])
     def node(self, n):
         if n.location.valid(): self.add(n, n.location.lat, n.location.lon, 'n')
     def way(self, w):
-        if w.tags.get('shop') not in ['supermarket', 'convenience'] or not w.is_closed(): return
+        if w.tags.get('shop') not in ['supermarket', 'convenience', 'mall'] or not w.is_closed(): return
         coords = [(n.lat,n.lon) for n in w.nodes if n.location.valid()]
         if coords: self.add(w, sum(x[0] for x in coords)/len(coords), sum(x[1] for x in coords)/len(coords), 'w')
 Catalog().apply_file(sys.argv[1], locations=True, idx='sparse_file_array')

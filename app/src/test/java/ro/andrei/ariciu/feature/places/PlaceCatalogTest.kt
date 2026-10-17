@@ -14,6 +14,18 @@ class PlaceCatalogTest {
         assertEquals("n2", searchPlaces(places, "kaufland", 45.65, 25.6).first().id)
         assertTrue(searchPlaces(places, " ", 45.65, 25.6).isEmpty())
     }
+    @Test fun shortQueriesMatchTokensRatherThanUnrelatedFragments() {
+        val rows = listOf(
+            CatalogPlace("n4", "Trandafiri", "store", "", 45.65, 25.6),
+            CatalogPlace("n5", "AFI Brașov", "mall", "Brașov", 45.66, 25.61),
+            CatalogPlace("n6", "Cafe", "store", "AFI Brașov", 45.65, 25.6))
+        assertEquals(listOf("n5", "n6"), searchPlaces(rows, " afi ", 45.65, 25.6).map { it.id })
+    }
+    @Test fun chainSelectionDoesNotFillWithDistantStoresAndCapsAtForty() {
+        assertEquals(listOf("n2"), chainPlaces(places, "Kaufland", 45.65, 25.6).map { it.id })
+        val many = (1..60).map { CatalogPlace("n$it", "Kaufland", "store", "", 45.65, 25.6, "Kaufland") }
+        assertEquals(40, chainPlaces(many, "Kaufland", 45.65, 25.6, 60).size)
+    }
     @Test fun chainAreasUseStableIdsAndNearestLocations() {
         val selected = chainPlaces(places, "Kaufland", 45.65, 25.6, 1)
         assertEquals(listOf("n2"), selected.map { it.id })

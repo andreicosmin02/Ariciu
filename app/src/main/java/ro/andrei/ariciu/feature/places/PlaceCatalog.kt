@@ -14,13 +14,28 @@ fun distanceMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Doub
 }
 private fun normalized(value: String) = Normalizer.normalize(value, Normalizer.Form.NFD)
     .replace(Regex("\\p{M}+"), "").lowercase(Locale.ROOT)
+private fun tokens(value: String) = normalized(value).split(Regex("[^\\p{L}\\p{N}]+")).filter { it.isNotEmpty() }
 fun searchPlaces(places: List<CatalogPlace>, query: String, latitude: Double, longitude: Double): List<CatalogPlace> {
-    val words = normalized(query).trim().split(Regex("\\s+")).filter { it.isNotBlank() }
+    val words = tokens(query)
     if (words.isEmpty()) return emptyList()
-    return places.filter { p -> words.all { it in normalized("${p.name} ${p.address}") } }
-        .sortedWith(compareBy<CatalogPlace> { if (normalized(it.name) == normalized(query.trim())) 0 else 1 }
+    fun rank(p: CatalogPlace): Int {
+        val name = tokens(p.name)
+        return when {
+            name == words -> 0
+            words.all { it in name } -> 1
+            words.all { q -> name.any { it.startsWith(q) } } -> 2
+            else -> 3
+        }
+    }
+    return places.filter { p -> val all = tokens("${p.name} ${p.address}")
+        words.all { q -> all.any { it.startsWith(q) } } }
+        .sortedWith(compareBy<CatalogPlace> { rank(it) }
             .thenBy { distanceMeters(latitude, longitude, it.latitude, it.longitude) }.thenBy { it.id }).take(30)
 }
+
+/** New/explicitly refreshed snapshots cover nearby shops, never fill slots across Romania. */
+const val CHAIN_COVERAGE_METERS = 25_000.0
 fun chainPlaces(places: List<CatalogPlace>, chain: String, latitude: Double, longitude: Double, limit: Int = 40) =
-    places.filter { it.chain == chain }.sortedWith(compareBy<CatalogPlace> {
-        distanceMeters(latitude, longitude, it.latitude, it.longitude) }.thenBy { it.id }).take(limit)
+    places.filter { it.chain == chain && distanceMeters(latitude, longitude, it.latitude, it.longitude) <= CHAIN_COVERAGE_METERS }
+        .sortedWith(compareBy<CatalogPlace> { distanceMeters(latitude, longitude, it.latitude, it.longitude) }.thenBy { it.id })
+        .take(limit.coerceIn(0, 40))
