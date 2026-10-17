@@ -1,67 +1,37 @@
 # Project status
 
-## Current milestone
+## Current direction — 2026-10-17
 
-The MapLibre location-selection feasibility spike and result contract are complete.
+**Ariciu 1.1-rc4 / version code 5**, branch **fix/urgent-realerts**, based on clean rc3 `fix/phone-review-2` at `8f11976`. Current behavior, migration, evidence and retest are in [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md); [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md) records historical rc3 behavior. No master merge or release publication. Source is authoritative; final evidence belongs to the review record.
 
-## Implemented behavior
+## Current owner-directed stabilization
 
-- MapLibre Compose renders the map using the OpenFreeMap Positron style.
-- The initial camera opens around Brașov (`45.6579`, `25.6012`, zoom `13.0`).
-- A fixed Compose center marker sits above the movable map.
-- After camera movement settles, the camera target is copied into application-owned `SelectedCoordinates` and displayed with deterministic five-decimal formatting.
-- The Material 3 slider stores an `Int` radius in metres: 100–1000m in 100m intervals, default 200m.
-- Plain Kotlin builds a closed 64-segment spherical radius boundary (65 coordinates including the repeated first point).
-- A map-boundary adapter converts that ring to a SpatialK GeoJSON polygon.
-- MapLibre renders the polygon with a low-opacity fill and a 2dp outline. It updates after a radius change or settled camera-center change.
-- `SelectedLocation` is a plain application-owned result containing the selected latitude, longitude, and radius.
-- The Material 3 **Use this location** button emits that result through `LocationPickerScreen`'s required callback.
-- `MainActivity` currently supplies a no-op callback because a reminder editor and navigation flow do not exist yet.
+Silent, Normal and Urgent are the three available levels. An Urgent swipe retains its unresolved occurrence and schedules one delayed re-alert after about five minutes. Explicit Done/Next time resolves it, including from the card while waiting. Separate persisted deadline/attempt fields, generation/occurrence guards and unique one-time WorkManager jobs protect against duplicates and stale retries. Unresolved Urgent holds across Every visit/chain crossings. No periodic job, exact alarm, foreground service, continuous sound or GPS polling.
 
-## Important boundaries
+Alarm is hidden from new choices; legacy ALARM data/actions/snooze remain supported. Existing Alarm edits keep their intensity until explicit conversion; a current snooze retains its deadline when converted to Urgent. Room **5**, additive 4→5 migration/export, keeps every reminder and earlier migration history. No permission/dependency/channel identity or recurring-cost change.
 
-- MapLibre is the renderer; OpenFreeMap currently provides the style and tiles.
-- `SelectedCoordinates`, `SelectedLocation`, radius selection, and radius geometry are application-owned.
-- SpatialK and MapLibre types are confined to the map-integration boundary.
-- The map needs internet for uncached or new areas.
-- GPS and Android location runtime permissions are not implemented.
-- Room, a reminder editor, geofencing, and notifications are not implemented.
+## Preserved rc3 implementation
 
-## Relevant files
+- Search now has explicit catalogue-loading, idle, searching, current-results and failure states; inline progress, retry, cancellation/revision guards and recreation-safe query. Local ranking/catalogue remain unchanged.
+- Active/Completed are horizontal accessible tabs joined directly to the scrolling bordered panel, with counts and fixed selection. Redundant headings/empty spacing removed; notification targeting uses corrected offsets. Mark done is an outlined action without a checkmark; completion lifecycle is unchanged.
+- Create has an 8dp selector/map gap; short screens at large text scroll the header above a bounded map, keeping options and the primary action reachable. Settings places its status check immediately before Review and stacks the action group at larger text.
+- Dedicated monochrome 24dp fox notification resource; launcher/adaptive icons/channel identities unchanged.
+- New single-place ENTER editor drafts optionally check Notify me now if I’m already here, initially off. Save commits first and returns the exact generation. One bounded foreground precise fix may create only occurrence 0’s real engine transition/outbox; failure keeps the reminder saved and explains the result. Freshness/accuracy/lifecycle guards and no automatic replay. Normal registration remains initialTrigger0.
 
-- Screen: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/ui/LocationPickerScreen.kt`
-- Activity entry point: `app/src/main/java/ro/andrei/ariciu/MainActivity.kt`
-- Coordinates: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/model/SelectedCoordinates.kt`
-- Picker result: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/model/SelectedLocation.kt`
-- Coordinate formatting: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/ui/SelectedCoordinatesFormatter.kt`
-- Radius selection: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/ui/RadiusSelection.kt`
-- Radius geometry: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/geometry/RadiusGeometry.kt`
-- GeoJSON adapter: `app/src/main/java/ro/andrei/ariciu/feature/locationpicker/map/RadiusMapGeometry.kt`
-- Unit tests: `app/src/test/java/ro/andrei/ariciu/feature/locationpicker/`
-- Compose instrumentation test: `app/src/androidTest/java/ro/andrei/ariciu/feature/locationpicker/ui/LocationPickerScreenTest.kt`
-- Manifest: `app/src/main/AndroidManifest.xml`
-- App dependencies: `app/build.gradle.kts`
-- Version catalog: `gradle/libs.versions.toml`
+## Physical evidence versus pending retest
 
-## Verification
+The Samsung S26 Ultra / Android 16 / One UI 8.5 was connected for read-only rc2 diagnostics. Its actual Urgent alert had HIGH importance, ongoing flag and a delete intent. After the owner's unlocked swipe, the matching row was WAITING_NEXT_VISIT/INSIDE, occurrence 1, no visible/pending alert, still REGISTERED; no active Ariciu notification or delivery warning remained at the snapshot. This confirms that swipe’s Next time handling, not background/geofence timing or all later visits.
 
-The currently passing checks are:
+Connection dropped, and the owner explicitly requested emulator-only continuation. The phone was not upgraded, force-stopped, cleared, rebooted, reconfigured or used for instrumentation. New rc3 UI/fox/immediate location behavior, locked/Clear all, extended same-visit observations and actual crossings remain for physical retest. Android 14+ permits individual unlocked ongoing dismissal; Ariciu retains the strongest applicable compliant request.
 
-```bash
-./gradlew :app:testDebugUnitTest
-./gradlew :app:connectedDebugAndroidTest
-./gradlew :app:assembleDebug
-```
+## Preserved architecture and boundaries
 
-Re-run these before relying on this snapshot.
+Kotlin/Compose/Material 3, constructor injection, Room 5/additive migrations 1–5, Play-services geofencing, WorkManager and MapLibre remain. No dependency/permission/backend/account/paid API/recurring cost change; schema 5 is an additive migration. Existing reminders, generations/actions, registration journal/outbox, conservative rearming, saved chain snapshots and 100-area limit remain. No full-screen/FGS/exact-alarm workaround, continuous GPS or guaranteed immediate/exactly-once delivery.
 
-## Reminder Creation
+Romania catalogue remains 26,065 rows from 15 October source (231 malls added in rc2). New/refreshed chain selections stay within 25km/max 40; old selections stay intact until explicit refresh. Theme-specific small offline basemap packs retain their existing limits and do not add search or guaranteed disconnected positioning. Graphite/slate identity, System/Light/Dark and Create/Reminders/Settings remain.
 
-- `ReminderEditorScreen` provides a title-only editor shell with a single-line Material 3 text field.
-- The title is held in local `rememberSaveable` Compose state.
-- `MainActivity` currently launches `ReminderEditorScreen` directly.
-- The completed location picker is not connected to the editor yet.
+## Verification and next work
 
-## Next milestone
+Current gate: **97 unit / 44 emulator tests**, lint **0 errors / 39 warnings**, debug assembly/install/signature passed. An extra native system-font 2.0 UI test passed; actual emulator reboot/update/process-death/permission-denial recovery was observed for the shipping five-minute retry. [Executed checks, screenshots and phone retest](URGENT_RE_ALERTS.md). Historical rc3 gate: 82 unit/35 connected tests; rc2: 68/23; rc1: 64/19. Those results are not reused to validate rc4.
 
-Add the ENTER/EXIT trigger choice.
+Install the [current candidate](RELEASE_CANDIDATE.md) over the existing app with the same signing key, never uninstall/clear storage. Prioritize the new Urgent swipe/re-alert/resolve checklist and legacy Alarm conversion, then real crossings, idle/reboot/OEM behavior and TalkBack. No speculative expansion, merge, force-push or release publication.

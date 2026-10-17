@@ -1,0 +1,41 @@
+# Codex handoff — Urgent re-alert stabilization
+
+Updated 17 October 2026. Current candidate **1.1-rc4/code 5**, branch **fix/urgent-realerts**, based on clean rc3 fix/phone-review-2 at `8f11976`. Inspect actual Git/history/worktree before continuing; nothing merged/published.
+
+Read AGENTS.md, URGENT_RE_ALERTS.md, PROJECT_STATUS.md, PHONE_REVIEW_2.md, PHONE_REVIEW_1.md, STABILIZATION.md, STABILIZATION_AUDIT.md, DELIVERY_ARCHITECTURE.md and design/DESIGN.md. Owner authorizes focused autonomous debugging, verification, commits and fix-branch push. Preserve data/unrelated edits; no master merge, force-push or publication.
+
+## Current Urgent and Alarm policy
+
+Read URGENT_RE_ALERTS.md first. Urgent swipes now mean distinct DISMISS and a five-minute delayed re-alert, superseding rc3 Next time. Done/Next time explicitly resolves the occurrence from notification or card. Room 5 adds urgentRetryAtMs and notificationAttempt; additive MIGRATION_4_5 retains all data/old schemas and holds legacy visible Urgent Every visit rows. A retry advances attempt only, never occurrence. Old dismissal attempts cannot dismiss newer alerts; explicit resolution addresses generation/occurrence and remains valid across attempts. Urgent remains TRIGGERED/unresolved across opposite/reentry/chain transitions until handled.
+
+UrgentRetryWork schedules one unique delayed worker per request/generation/occurrence/attempt with KEEP, removes obsolete jobs and excludes its running worker from self-cancellation. Dispatch revalidates current Urgent inside a Room transaction. Due blocked delivery remains one pending outbox attempt until resume/recovery, without polling. A marker quietly refreshes older visible Urgent delete intents. Receipt time determines the deadline; clock changes and Android scheduling can delay it. Default 300000ms is constructor-configurable only for tests.
+
+Only Silent/Normal/Urgent are offered. ALARM enum/channel/database/actions/snooze remain for existing reminders; editor explains explicit Urgent conversion and keeps a pending legacy snooze deadline. Never silently convert persisted Alarm rows. New/restored unsaved Alarm drafts become Urgent for review. No permission/dependency/service/continuous sound/GPS/exact-alarm change. Room/WorkManager/platform commits remain separate; cleanup/recovery is best effort.
+
+## Preserved second-review changes
+
+Search moved from ambiguous produceState to dialog-owned PlaceSearchController, explicit current-query states, progress/error/retry and revision/cancellation guards. Query stays saveable; IO/catalogue and Default CPU ranking remain private/offline. Tests cover late noncooperative results, clearing, failure/retry, cancellation and recreation. No artificial loading delay.
+
+Reminders use fixed horizontal tabs connected to a bordered scrolling panel, no redundant headings/empty placeholder. Corrected notification scroll offsets; selected/count/Tab semantics and large-text wrapping. Mark done has no checkmark and uses the existing safe completion transaction. Settings status is beside Review, with row-specific accessible action/state and stacked larger text. Create selector/map gap: 8dp; short screens with larger text scroll the header above a bounded map and use a compact Options summary, retaining the fixed primary action. Dedicated white/transparent fox small-icon resource; launcher and channels remain.
+
+New draft notifyOnSave flag is SavedState only. Eligible only for new single-place ENTER; off by default, cleared for chain/EXIT/edit. New-save retries keep ID and eligibility via newSave saved-state marker. ReminderRepository.save now returns its exact committed generation; all fakes/callers are updated. Room schema is now 5; the rc3 option still adds no column.
+
+ForegroundArrivalCheck is created per current Compose lifecycle, passed to save rather than retained inside the ViewModel across Activity recreation. Save commits first, then a 20s bounded foreground precise fix (provider age 5s/duration 18s). ON_STOP/DESTROY cancels the provider child/token. Result explains a saved reminder even when unavailable/uncertain; saving failure and location-check failure are distinct. Engine requires same boot, age 0–10s, accuracy≤50m and distance+2×accuracy≤radius, exact request generation, WAITING/occurrence 0/single ENTER. DeliveryWork.immediateArrival shares the worker runtimeMutex, persists normal lifecycle/outbox and enqueues ordinary dispatch. It is not called by reconciliation/restart. The rc3 foreground check itself adds no Room fields; rc4 retry fields are separate. No continuous GPS or global initial trigger.
+
+## Phone evidence and restrictions
+
+Read-only ADB on Samsung S26 Ultra/Android 16/One UI 8.5 confirmed rc2/code 3 permissions, actual HIGH/ongoing Urgent/deleteIntent and old pin small icon. Owner swiped; DB WAITING_NEXT_VISIT/INSIDE/occurrence 1, no visible/pending alert, registration REGISTERED, no active alert/warnings at snapshot. This is physical evidence for that swipe only. Private read-only database/WAL/log/screenshot artifacts stay outside Git; documentation contains no reminder title/ID/coordinates/ADB credentials.
+
+Phone disconnected; owner explicitly said to continue on emulator. Do not attempt further phone operations without renewed context. Never uninstall/clear data, run daily-use-phone instrumentation, change permissions/settings/clock/location, force-stop or reboot it without explicit permission. Commands that install/run tests must target emulator-5554 explicitly; do not rely on an unqualified adb command or all-device Gradle test task. No rc3/rc4 phone upgrade/retest occurred.
+
+Android 14+ unlocked individual dismissal is permitted. Ongoing/HIGH remain; rc4 swipes schedule delayed re-alerts and explicit Next time resolves. Locked/Clear all and new Samsung fox/immediate behavior still need phone retest. No call/media/DPC exemption or immediate repost loop. Official Android/Google sources and exact evidence are in PHONE_REVIEW_2.md.
+
+## Preserved delivery invariants
+
+Room 5 with additive 4→5 migration and unchanged earlier schemas/history; exact-generation conditional writes, occurrence/visible action guards, journal-before-add/removal retry, stable notification tags/outbox, both crossings and initialTrigger0, 100-area allocation, conservative union rearming. Card Done rotates generation and cleanup remains asynchronous. Completed edits stay completed. Search: 26,065, chains new/refresh max 40 within 25km, older snapshots explicit refresh; small theme-specific offline packs unchanged. No dependency/permission/backend/cost added.
+
+## Verification and continuation
+
+Current gate passed 97 unit/44 connected tests, lint 0 errors/39 warnings and assembly/signature. Native system font 2.0 passed an extra 1/1. A shipping five-minute retry survived actual emulator process death/reboot/package replacement and remained pending while runtime notification permission was denied; restore/resume posted one attempt. Exact evidence, fixture corrections and remaining phone checks are in URGENT_RE_ALERTS.md; PHONE_REVIEW_2.md preserves historical rc3 evidence. Use android-milestone/android-verification skills; unit+lint+assemble gate, emulator-only instrumentation. Installed MainActivity + actual foreground GMS adapter was exercised with emulator positions: outside skips; inside creates occurrence 1 and real Urgent via outbox. This does not validate real GPS/crossings/audio/OEM/TalkBack/older Android. Inspect current artifact signature/hash in RELEASE_CANDIDATE.md; install over existing app with same key.
+
+Repository and existing Obsidian focused notes are synchronized after this batch; compare same-named notes before future overwrite and preserve private originals. The essential repository handoff must work independently of vault access. Next work is rc4 Urgent/legacy Alarm phone retest and actual reported failures, not speculative refactoring/features.

@@ -1,0 +1,188 @@
+package ro.andrei.ariciu.feature.reminders.ui
+
+import androidx.lifecycle.SavedStateHandle
+import ro.andrei.ariciu.feature.delivery.model.ImmediateArrivalAttempt
+import ro.andrei.ariciu.feature.delivery.model.ImmediateArrivalResult
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import java.util.UUID
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import ro.andrei.ariciu.feature.locationpicker.model.SelectedLocation
+import ro.andrei.ariciu.feature.reminders.model.Reminder
+import ro.andrei.ariciu.feature.reminders.model.ReminderDraft
+import ro.andrei.ariciu.feature.reminders.model.ReminderRepeat
+import ro.andrei.ariciu.feature.reminders.model.ReminderRepository
+import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
+
+enum class ReminderRoute { MAP, EDITOR, LIST, DELIVERY }
+
+data class RemindersUiState(
+    val reminders: List<Reminder> = emptyList(),
+    val loading: Boolean = true,
+    val busy: Boolean = false,
+    val error: String? = null,
+    val notice: String? = null,
+    val checkingArrival: Boolean = false,
+)
+
+class RemindersViewModel(
+    private val repository: ReminderRepository,
+    private val savedState: SavedStateHandle,
+) : ViewModel() {
+    private val mutableState = MutableStateFlow(RemindersUiState())
+    val state = mutableState.asStateFlow()
+    val route = savedState.getStateFlow("route", ReminderRoute.MAP.name)
+    private val mutableDraft = MutableStateFlow(restoreDraft())
+    val draft = mutableDraft.asStateFlow()
+    val editing: Boolean get() = savedState.get<String>("editingId") != null && savedState.get<Boolean>("newSave") != true
+
+    private var loadStarted = false
+    private var loadJob: kotlinx.coroutines.Job? = null
+
+    init { reload() }
+
+    fun reload() {
+        if (mutableState.value.loading && loadStarted) return
+        loadStarted = true
+        mutableState.value = mutableState.value.copy(loading = true, error = null)
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            try {
+                repository.observeReminders().collect {
+                    mutableState.value = mutableState.value.copy(reminders = it, loading = false)
+                }
+            } catch (e: CancellationException) { throw e
+            } catch (_: Exception) {
+                mutableState.value = mutableState.value.copy(loading = false,
+                    error = "Could not load reminders. Please retry.")
+            }
+        }
+    }
+
+    fun updateDraft(incoming: ReminderDraft) {
+        if (state.value.busy) return
+        val value = incoming.copy(intensity = allowedDraftIntensity(incoming.intensity), notifyOnSave = incoming.notifyOnSave && incoming.canCheckArrival && !editing)
+        mutableDraft.value = value
+        savedState["title"] = value.title
+        savedState["latitude"] = value.location?.latitude
+        savedState["longitude"] = value.location?.longitude
+        savedState["radius"] = value.location?.radiusMeters
+        savedState["transition"] = value.transition.name
+        savedState["repeat"] = value.repeat.name
+        savedState["intensity"] = value.intensity.name
+        savedState["chainName"] = value.chainName
+        savedState["notifyOnSave"] = value.notifyOnSave
+        savedState["chainAreas"] = ro.andrei.ariciu.feature.delivery.model.encodeChainAreas(value.chainAreas)
+    }
+
+    fun chooseLocation(location: SelectedLocation) {
+        updateDraft(draft.value.copy(location = location, chainAreas = if (draft.value.chainName != null) emptyList() else draft.value.chainAreas))
+        navigate(ReminderRoute.EDITOR)
+    }
+
+    fun edit(reminder: Reminder) {
+        if (state.value.busy) return
+        savedState["newSave"] = false
+        savedState["editingId"] = reminder.id
+        updateDraft(reminder.toDraft())
+        navigate(ReminderRoute.EDITOR)
+    }
+
+    fun openReminder(id: String) {
+        savedState["openReminderId"] = id
+        navigate(ReminderRoute.LIST)
+        // Listing keeps any existing draft intact; the matching reminder is highlighted in the UI.
+    }
+
+    val openReminderId get() = savedState.get<String>("openReminderId")
+
+    fun navigate(destination: ReminderRoute) {
+        if (!state.value.busy) savedState["route"] = destination.name
+    }
+
+    fun discard() {
+        if (state.value.busy) return
+        savedState["editingId"] = null
+        savedState["newSave"] = null
+        updateDraft(ReminderDraft())
+        navigate(ReminderRoute.MAP)
+    }
+
+    fun save(immediateArrival: ImmediateArrivalAttempt? = null) {
+        if (state.value.busy || !draft.value.canSave) return
+        // Reuse this ID on retries and after recreation; an interrupted save cannot duplicate a row.
+        val checkArrival = !editing && draft.value.notifyOnSave && draft.value.canCheckArrival
+        val id = savedState.get<String>("editingId") ?: UUID.randomUUID().toString().also {
+            savedState["newSave"] = true
+            savedState["editingId"] = it
+        }
+        val reminder = draft.value.toReminder(id)
+        perform("Could not save reminder. Your draft is preserved; please retry.") {
+            val generation = repository.save(reminder)
+            if (checkArrival) {
+                mutableState.value = state.value.copy(checkingArrival = true)
+                val result = try {
+                    immediateArrival?.check("$id:$generation",reminder) ?: ImmediateArrivalResult.UNAVAILABLE
+                } catch (e: CancellationException) { throw e
+                } catch (_: Exception) { ImmediateArrivalResult.UNAVAILABLE }
+                mutableState.value = state.value.copy(notice = result.message, checkingArrival = false)
+            }
+            savedState["editingId"] = null
+            savedState["newSave"] = null
+            mutableState.value = state.value.copy(busy = false)
+            updateDraft(ReminderDraft())
+            navigate(ReminderRoute.LIST)
+        }
+    }
+
+    fun complete(reminder: Reminder) {
+        perform("Could not complete reminder. Please retry.") { repository.complete(reminder.id, reminder.delivery.occurrence) }
+    }
+
+    fun nextTime(reminder: Reminder) {
+        perform("Could not postpone reminder. Please retry.") { repository.nextTime(reminder.id,reminder.delivery.occurrence) }
+    }
+
+    fun delete(reminder: Reminder) {
+        perform("Could not delete reminder. Please retry.") { repository.delete(reminder.id) }
+    }
+
+    fun clearNotice() { mutableState.value = state.value.copy(notice = null) }
+
+    fun clearError() { mutableState.value = state.value.copy(error = null) }
+
+    private fun perform(errorMessage: String, action: suspend () -> Unit) {
+        if (state.value.busy) return
+        mutableState.value = state.value.copy(busy = true, error = null, notice = null)
+        viewModelScope.launch {
+            try { action()
+            } catch (e: CancellationException) { throw e
+            } catch (_: Exception) { mutableState.value = state.value.copy(error = errorMessage)
+            } finally { mutableState.value = state.value.copy(busy = false, checkingArrival = false) }
+        }
+    }
+
+    private fun allowedDraftIntensity(intensity: ro.andrei.ariciu.feature.reminders.model.NotificationIntensity) =
+        if (!editing && intensity == ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.ALARM)
+            ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.URGENT else intensity
+
+    private fun restoreDraft(): ReminderDraft {
+        val latitude = savedState.get<Double>("latitude")
+        val longitude = savedState.get<Double>("longitude")
+        val radius = savedState.get<Int>("radius")
+        return ReminderDraft(
+            title = savedState["title"] ?: "",
+            location = if (latitude != null && longitude != null && radius != null)
+                SelectedLocation(latitude, longitude, radius) else null,
+            transition = ReminderTransition.valueOf(savedState["transition"] ?: ReminderTransition.ENTER.name),
+            repeat = ReminderRepeat.valueOf(savedState["repeat"] ?: ReminderRepeat.ONCE.name),
+            intensity = allowedDraftIntensity(ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.valueOf(savedState["intensity"] ?: "NORMAL")),
+            chainName = savedState["chainName"],
+            notifyOnSave = savedState["notifyOnSave"] ?: false,
+            chainAreas = ro.andrei.ariciu.feature.delivery.model.decodeChainAreas(savedState["chainAreas"] ?: ""),
+        )
+    }
+}
