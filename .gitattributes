@@ -1,0 +1,7 @@
+# Preserve canonical licence bytes across platforms (Google indexes use byte offsets).
+/LICENSE -text
+/docs/third-party/*.txt -text
+/docs/third-party/*.json -text
+# These two unmodified upstream bundles contain intentional trailing whitespace.
+/docs/third-party/google-play-services-common.txt -whitespace
+/docs/third-party/play-services-location-21.3.0-third_party_licenses.txt -whitespace

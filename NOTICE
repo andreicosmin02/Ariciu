@@ -1,0 +1,36 @@
+Ariciu
+
+Ariciu-owned application source, tests, scripts, documentation and original
+project assets are distributed under the Apache License, Version 2.0, in
+LICENSE, to the extent the owner has the necessary rights. Existing author
+and copyright information is retained. This informational NOTICE does not
+modify any licence or assert ownership of third-party material.
+
+Third-party material retains its own copyright and licence terms:
+
+- The Romanian place catalogue derives from OpenStreetMap contributors'
+  data and is distributed under ODbL 1.0. Geofabrik extract provenance,
+  attribution and the complete derived database are in
+  app/src/main/assets/places/NOTICE.md and romania.tsv.
+- OpenFreeMap upstream material, OpenMapTiles/map styles and map imagery
+  retain their MIT/BSD/Creative Commons/data terms and CARTO, Stamen,
+  Paul Norman and other upstream attribution. Full notices are in
+  app/src/main/assets/map/LICENSE-openfreemap.md,
+  LICENSE-light-style.md and LICENSE-dark-style.md.
+- Screenshots combine original Ariciu UI with separately licensed map
+  content. The original UI does not relicense the depicted data/styles.
+- MapLibre Compose and Native retain their BSD-3-Clause and BSD-2-Clause
+  notices. Companion full texts are in docs/third-party/.
+- Noto Sans, Maki and Natural Earth resources retain the font/icon/data
+  terms identified by the OpenFreeMap notice (OFL, CC0 and public domain).
+- AndroidX, Kotlin, OkHttp, Gradle and other dependencies retain their
+  respective upstream terms. OkHttp's Public Suffix List has a separate
+  MPL-2.0 notice. Google Play services retains its SDK terms and separate
+  open-source component notices. See docs/third-party/README.md and
+  docs/LICENSING.md for the available full texts and provenance.
+
+The v1.1-rc4 tag and existing debug APK predate these repository licence
+files. Neither the historical source snapshot nor the APK was rewritten.
+Post-tag companion notices are distributed separately with the current
+repository documentation; they do not replace upstream notices or imply
+production certification.

@@ -1,28 +1,35 @@
-# Licensing review — approval pending
+# Apache-2.0 scope and third-party licensing
 
-Ariciu has **no project-wide licence declaration**. Making a repository visible does not itself grant an open-source licence. No licence is applied by this documentation PR; a maintainer decision is required.
+The owner explicitly approved **Apache License 2.0** for Ariciu-owned project material. The complete, unmodified official text is in [LICENSE](../LICENSE), with an informational [NOTICE](../NOTICE). SPDX identifier: **Apache-2.0**. No repetitive Kotlin headers, invented copyright holder or contributor agreement is added.
 
-## Recommendation
+## Scope
 
-Recommend **Apache License 2.0** for Ariciu-owned source, documentation and original assets, subject to confirming ownership and explicit maintainer approval. It permits modification and commercial/proprietary redistribution, includes an express contributor patent grant with patent-litigation termination, and requires retaining the licence/notices and identifying modifications. It does not grant trademark rights or warranties. These consequences are defined by the [authoritative licence text](https://www.apache.org/licenses/LICENSE-2.0).
+The declaration covers original Ariciu application source, tests, scripts/build configuration, documentation and original project assets, including the original fox artwork, **where the owner has the necessary rights**. It does not assert ownership of upstream code/data or override notices already attached to third-party material. Screenshot map content and derivative map styles are separately licensed even where the surrounding UI/documentation is original.
 
-MIT is a shorter permissive alternative, but lacks Apache-2.0’s explicit patent terms. Apache-2.0 is the recommended developer-facing choice; this review is not a grant or a claim that all existing contributors’ rights have been independently established.
+Apache-2.0 permits modification and commercial/proprietary redistribution, includes an express contributor patent grant with patent-litigation termination, and requires retaining applicable licence/notices and identifying modifications. It does not grant trademark rights or warranties. The [official text](https://www.apache.org/licenses/LICENSE-2.0.txt) controls; NOTICE is informational and does not amend it.
 
-Third-party code, data and styles retain their own terms under either choice. In particular, an application licence cannot replace the OSM-derived database’s ODbL or map-design attribution obligations. A future LICENSE/NOTICE change should make these boundaries explicit.
+## Third-party exclusions and attribution
 
-## Existing evidence and attribution
-
-| Material | Existing evidence / obligations |
+| Material | Terms and retained evidence |
 | --- | --- |
-| Romanian catalogue | [NOTICE](../app/src/main/assets/places/NOTICE.md), complete [derived TSV](../app/src/main/assets/places/romania.tsv), [generator](../tools/build_place_catalog.py). OSM contributors, Geofabrik source, timestamp/hash, transformations and coverage exclusions are documented. Derived database is distributed under [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/), separately from application code. |
-| OpenFreeMap upstream material | [Bundled upstream notice](../app/src/main/assets/map/LICENSE-openfreemap.md). Its “project/repo MIT” wording refers to **OpenFreeMap**, not an Ariciu-wide MIT licence. |
-| Map styles / OpenMapTiles | [Light](../app/src/main/assets/map/LICENSE-light-style.md) and [dark](../app/src/main/assets/map/LICENSE-dark-style.md) notices retain BSD code, CC-BY design and CartoDB/Stamen/Paul Norman provenance. Visible OSM/OpenMapTiles map and screenshot attribution is retained. |
-| Fonts, icons, background data | Upstream notice records Noto Sans (SIL OFL), Maki (CC0) and Natural Earth (public domain). Keep their notices with distributed material. |
-| MapLibre Compose / Native | [Compose BSD-3-Clause](https://raw.githubusercontent.com/maplibre/maplibre-compose/v0.13.1/LICENSE) and [Native BSD-2-Clause](https://raw.githubusercontent.com/maplibre/maplibre-native/main/LICENSE.md); preserve upstream copyright/licence conditions. |
-| Android/Kotlin libraries | AndroidX, Kotlin and OkHttp retain their licences; Google Play services has SDK terms. Declared dependency versions remain unchanged. See the [source/licence evidence note](obsidian-export/Ariciu/Ariciu%20-%20Sources%20and%20Licensing.md). |
+| Romanian catalogue | OpenStreetMap-derived database under **ODbL 1.0**, not Apache-2.0. [NOTICE](../app/src/main/assets/places/NOTICE.md), [complete TSV](../app/src/main/assets/places/romania.tsv) and [generator](../tools/build_place_catalog.py) retain OSM attribution, Geofabrik provenance, source timestamp/hash, transformation and coverage boundaries. [ODbL text](https://opendatacommons.org/licenses/odbl/1-0/) governs the database. |
+| OpenFreeMap upstream material | The [bundled notice](../app/src/main/assets/map/LICENSE-openfreemap.md) retains its MIT and related notices. Its “project/repo MIT” wording refers to upstream OpenFreeMap, not Ariciu. |
+| Map styles, OpenMapTiles and depicted map content | [Light](../app/src/main/assets/map/LICENSE-light-style.md) / [dark](../app/src/main/assets/map/LICENSE-dark-style.md) notices retain BSD code, CC-BY design and CartoDB/Stamen/Paul Norman provenance. Visible OSM/OpenMapTiles attribution remains in maps/screenshots. These portions are excluded from the project-wide Apache declaration. |
+| Fonts/icons/background data | Upstream notice records Noto Sans (SIL OFL), Maki (CC0), Natural Earth (public domain) and related credits. They retain those terms. Remote map resources are not newly owned by Ariciu. |
+| MapLibre Compose / Native | Version-pinned complete **BSD-3-Clause / BSD-2-Clause** notices are supplied in [companion distribution documents](third-party/README.md); no upstream copyright is removed. |
+| AndroidX, Kotlin, Gradle, OkHttp and other libraries/tools | Retain their respective upstream terms, commonly Apache-2.0; no third-party ownership is transferred. OkHttp’s Public Suffix List separately retains **MPL-2.0**. Optional PyOsmium tooling is upstream BSD-2-Clause and not an Android runtime dependency. |
+| Google Play services | Proprietary SDK terms remain separate from extracted OSS component licences. Version-matched notice bundles/indexes and provenance are provided with the [companion notices](third-party/README.md). No SDK is relicensed. |
 
-The repository already includes catalogue provenance/distribution material, bundled style notices, in-app attribution and README screenshot credits. This focused review preserves them byte-for-byte; it does not certify every transitive binary notice or all distribution obligations. Broader binary/licensing review and production signing are separate work before a production release.
+All four pre-existing bundled map/catalogue notice files and the derived TSV are preserved byte-for-byte. New full upstream companion texts are also copied without reformatting; their source/hashes are recorded. The root Apache text is reused for OkHttp because it is byte-identical to OkHttp 4.12.0’s upstream licence text, not because Ariciu claims ownership of it.
 
-## Before public visibility
+## Contributions
 
-Approve a project-wide licence deliberately; keep author history and third-party notices intact. Decide visibility separately. The current debug-signed rc4 pre-release remains an early testing build, with no replacement APK/key or production-signing transition implied.
+Contributors should have the rights necessary to submit their work and identify third-party material with its original terms. Apache-2.0 section 5 addresses intentional submissions unless explicitly stated otherwise; this documentation does not introduce a separate CLA or establish ownership of unreviewed external material.
+
+## Historical tag, APK and visibility
+
+The owner’s licence decision is implemented in the current licensing branch and will reach master only after the new PR is approved/merged. **`v1.1-rc4` remains its historical pre-licensing source snapshot**, with no new root LICENSE/NOTICE files inserted. The existing debug APK, checksum, certificate, package/version and original release page remain unchanged. The current source declaration does not rewrite historical Git objects or certify the old binary’s complete licensing inventory.
+
+Companion notices linked beside installation instructions supply the identified missing full BSD texts and Google OSS bundle documentation separately from the APK. Full transitive/native distribution certification is not claimed. Future production packaging should provide a complete version-specific notice inventory and user-accessible presentation.
+
+Repository visibility remains a separate owner decision. No licence approval authorizes a merge, a Private→Public change, a new signing key or release publication. See the [final readiness audit/checklist](PUBLIC_READINESS_AUDIT.md).
