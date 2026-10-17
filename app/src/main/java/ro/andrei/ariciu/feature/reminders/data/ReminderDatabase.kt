@@ -71,6 +71,16 @@ interface ReminderDao {
     fun observeAll(): Flow<List<ReminderEntity>>
 
     @Query("SELECT * FROM reminders WHERE id = :id") suspend fun find(id: String): ReminderEntity?
+    @Transaction
+    suspend fun complete(id: String, occurrence: Int) {
+        val old = find(id) ?: return
+        val current = old.toReminder()
+        if (old.occurrence != occurrence || !current.delivery.active) return
+        // Rotate identity so an interrupted worker cannot undo completion.
+        upsert(current.copy(delivery = current.delivery.completed(),
+            registration = RegistrationState.INACTIVE, deliveryError = null).toEntity(UUID.randomUUID().toString()))
+    }
+
     @Query("SELECT * FROM reminders") suspend fun getAll(): List<ReminderEntity>
     @Query("SELECT * FROM registered_geofences") suspend fun registrations(): List<RegisteredGeofence>
     @Upsert suspend fun track(registrations: List<RegisteredGeofence>)
@@ -163,6 +173,7 @@ class RoomReminderRepository(private val dao: ReminderDao, private val onChanged
         dao.saveEdited(reminder.toEntity(UUID.randomUUID().toString()))
         onChanged()
     }
+    override suspend fun complete(id: String, occurrence: Int) { dao.complete(id, occurrence); onChanged() }
     override suspend fun delete(id: String) { dao.delete(id); onChanged() }
 }
 

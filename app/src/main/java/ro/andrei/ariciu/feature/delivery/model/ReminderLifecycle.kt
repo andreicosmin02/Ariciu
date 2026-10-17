@@ -38,13 +38,16 @@ data class DeliveryState(
             notificationVisible = true, notificationPending = true, quiet = false, snoozeUntilMs = 0)
     }
 
+    /** Explicit task completion also works before a crossing or while snoozed. */
+    fun completed() = copy(phase = DeliveryPhase.COMPLETED, notificationVisible = false,
+        notificationPending = false, quiet = true, snoozeUntilMs = 0)
+
     fun onAction(action: OccurrenceAction, token: Int, wanted: ReminderTransition, nowMs: Long = 0): DeliveryState {
         if (!active || !notificationVisible || occurrence != token) return this
         if (action == OccurrenceAction.STOP) return if (quiet) this else copy(quiet = true, notificationPending = true)
         if (action == OccurrenceAction.SNOOZE) return copy(notificationVisible = false, notificationPending = false,
             quiet = false, snoozeUntilMs = nowMs + 10 * 60_000)
-        if (action == OccurrenceAction.DONE) return copy(phase = DeliveryPhase.COMPLETED,
-            notificationVisible = false, notificationPending = false, snoozeUntilMs = 0)
+        if (action == OccurrenceAction.DONE) return completed()
         val triggeringPosition = if (wanted == ReminderTransition.ENTER) AreaPosition.INSIDE else AreaPosition.OUTSIDE
         return copy(phase = if (position == triggeringPosition || position == AreaPosition.UNKNOWN)
             DeliveryPhase.WAITING_NEXT_VISIT else DeliveryPhase.WAITING,

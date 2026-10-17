@@ -119,6 +119,10 @@ class RemindersViewModel(
         }
     }
 
+    fun complete(reminder: Reminder) {
+        perform("Could not complete reminder. Please retry.") { repository.complete(reminder.id, reminder.delivery.occurrence) }
+    }
+
     fun delete(reminder: Reminder) {
         perform("Could not delete reminder. Please retry.") { repository.delete(reminder.id) }
     }

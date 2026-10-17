@@ -11,6 +11,25 @@ class DeliveryEngineTest {
     private fun record(id: String = "id", generation: String = "v1", transition: ReminderTransition = ReminderTransition.ENTER,
         repeat: ReminderRepeat = ReminderRepeat.ONCE) = DeliveryRecord(Reminder(id, "Bread", SelectedLocation(45.0, 25.0, 200), transition, repeat), generation)
 
+    @Test fun explicitCardCompletionCleansEveryChainAreaAndVisibleNotification() = runBlocking {
+        val original = record().let { it.copy(reminder = it.reminder.copy(chainName = "Kaufland",
+            chainAreas = listOf(ChainArea("n1", 45.0, 25.0), ChainArea("n2", 45.01, 25.01)))) }
+        val f = Fixture(original)
+        f.engine.reconcile(ready)
+        f.engine.transition(setOf("id:v1:n1"), ReminderTransition.ENTER, 10, 1)
+        f.engine.dispatchNotifications(true)
+        val current = f.store.records.getValue("id")
+        f.store.records["id"] = current.copy(generation = "completed", reminder = current.reminder.copy(delivery = current.reminder.delivery.completed()))
+        f.engine.dispatchNotifications(true)
+        f.engine.reconcile(ready)
+        assertTrue(f.notifications.visible.isEmpty())
+        assertTrue(f.backend.registered.isEmpty())
+        assertTrue(f.store.tracked.isEmpty())
+        f.engine.transition(setOf("id:v1:n2"), ReminderTransition.ENTER, 20, 1)
+        f.engine.action("id:v1", 1, OccurrenceAction.SNOOZE, 20)
+        assertFalse(f.store.records.getValue("id").reminder.delivery.active)
+    }
+
     @Test fun chainEventsKeepOneNotificationAndDoneRemovesEveryStore() = runBlocking {
         val chain = record().copy(reminder = record().reminder.copy(chainName = "Kaufland",
             chainAreas = listOf(ChainArea("n1",45.0,25.0), ChainArea("n2",45.1,25.1)), repeat = ReminderRepeat.EVERY_VISIT))

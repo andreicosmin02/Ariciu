@@ -85,7 +85,7 @@ class NotificationDeliveryTest {
         }
         fun notification() = manager.activeNotifications.firstOrNull { it.tag == "reminder:$id" }
         try {
-            repository.save(Reminder(id, "Test arrival", SelectedLocation(45.0,25.0,200), ReminderTransition.ENTER, ReminderRepeat.ONCE))
+            repository.save(Reminder(id, "Test arrival", SelectedLocation(45.0,25.0,200), ReminderTransition.ENTER, ReminderRepeat.ONCE, intensity = NotificationIntensity.URGENT))
             crossing("ENTER", 10)
             awaitCondition { notification() != null && !record().notificationPending }
             val first = requireNotNull(notification()).notification

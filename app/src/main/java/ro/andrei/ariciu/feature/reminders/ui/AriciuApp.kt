@@ -79,7 +79,7 @@ fun AriciuApp(viewModel: RemindersViewModel,
                     onSettings = { viewModel.navigate(ReminderRoute.DELIVERY) },
                     onEdit = { reminder ->
                         if (draft.title.isNotBlank() || viewModel.editing) pendingEdit = reminder else viewModel.edit(reminder)
-                    }, onDelete = { deleteCandidate = it })
+                    }, onDelete = { deleteCandidate = it }, onDone = viewModel::complete)
             }
         }
     }

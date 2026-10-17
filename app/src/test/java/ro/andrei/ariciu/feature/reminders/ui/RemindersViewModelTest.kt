@@ -92,6 +92,10 @@ class RemindersViewModelTest {
             if (failSave) error("Disk unavailable")
             rows.value = rows.value.filterNot { it.id == reminder.id } + reminder
         }
-        override suspend fun delete(id: String) { rows.value = rows.value.filterNot { it.id == id } }
+        override suspend fun complete(id: String, occurrence: Int) {
+                rows.value = rows.value.map { if (it.id == id && it.delivery.occurrence == occurrence)
+                    it.copy(delivery = it.delivery.completed()) else it }
+            }
+            override suspend fun delete(id: String) { rows.value = rows.value.filterNot { it.id == id } }
     }
 }

@@ -5,6 +5,19 @@ import org.junit.Test
 import ro.andrei.ariciu.feature.reminders.model.*
 
 class ReminderLifecycleTest {
+    @Test fun explicitCompletionWorksBeforeArrivalAndWhileSnoozed() {
+        listOf(DeliveryState(), DeliveryState(phase = DeliveryPhase.TRIGGERED, occurrence = 2,
+            notificationVisible = true, notificationPending = true, snoozeUntilMs = 600_000)).forEach { state ->
+            val done = state.completed()
+            assertFalse(done.active)
+            assertFalse(done.notificationVisible)
+            assertFalse(done.notificationPending)
+            assertEquals(0L, done.snoozeUntilMs)
+            assertEquals(state.occurrence, done.occurrence)
+            assertEquals(done, done.onSnoozeDue(900_000))
+        }
+    }
+
     @Test fun alarmStopSnoozeAndDueArePersistentAndRejectStaleTokens() {
         val triggered = DeliveryState().onTransition(ReminderTransition.ENTER, ReminderTransition.ENTER, ReminderRepeat.ONCE, 10, 1)
         assertEquals(triggered, triggered.onAction(OccurrenceAction.SNOOZE, 99, ReminderTransition.ENTER, 1000))

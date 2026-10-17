@@ -16,7 +16,7 @@ fun Reminder.presentStatus(capabilities: DeliveryCapabilities): ReminderStatus =
     delivery.snoozeUntilMs > 0 -> ReminderStatus("Snoozed", "We’ll alert you again in about 10 minutes. Android may delay this.")
     delivery.quiet && delivery.notificationVisible -> ReminderStatus("Sound stopped", "Choose Done or Snooze in your notification.")
     delivery.notificationPending -> ReminderStatus("Reminder ready", "Your notification is waiting to be delivered.")
-    delivery.phase == DeliveryPhase.TRIGGERED -> ReminderStatus("Reminded", "Choose Done or Next time in your notification.")
+    delivery.phase == DeliveryPhase.TRIGGERED -> ReminderStatus("Reminded", "Mark Done here, or choose an action in your notification.")
     delivery.phase == DeliveryPhase.WAITING_NEXT_VISIT -> ReminderStatus("Next visit", if (transition == ro.andrei.ariciu.feature.reminders.model.ReminderTransition.ENTER) "We’ll wait for you to leave and return." else "We’ll wait for you to return and leave again.")
     else -> ReminderStatus("Ready", "Listening for your next ${if (transition == ro.andrei.ariciu.feature.reminders.model.ReminderTransition.ENTER) "arrival" else "departure"}.")
 }

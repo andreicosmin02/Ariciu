@@ -1,6 +1,9 @@
 package ro.andrei.ariciu.feature.reminders.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,10 +19,10 @@ import ro.andrei.ariciu.feature.delivery.model.DeliveryCapabilities
 import ro.andrei.ariciu.feature.reminders.model.*
 import ro.andrei.ariciu.ui.components.*
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities, openedId: String?,
-    onCreate: () -> Unit, onSettings: () -> Unit, onEdit: (Reminder) -> Unit, onDelete: (Reminder) -> Unit) {
+    onCreate: () -> Unit, onSettings: () -> Unit, onEdit: (Reminder) -> Unit, onDelete: (Reminder) -> Unit, onDone: (Reminder) -> Unit = {}) {
     val colors = MaterialTheme.colorScheme
     var completed by rememberSaveable { mutableStateOf(false) }
     val active = state.reminders.filter { it.delivery.active }
@@ -38,10 +41,19 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
     LazyColumn(Modifier.fillMaxSize().testTag("reminders_list"), state = listState,
         contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { ScreenHeading("Your reminders", "The things you want to remember.") }
-        item {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                FilterChip(!completed, { completed = false }, label = { Text("Active · ${active.size}") }, modifier = Modifier.heightIn(min = 48.dp))
-                FilterChip(completed, { completed = true }, label = { Text("Completed · ${finished.size}") }, modifier = Modifier.heightIn(min = 48.dp))
+        stickyHeader {
+            Surface(color = colors.background) {
+            Column(Modifier.padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(false to "Active · ${active.size}", true to "Completed · ${finished.size}").forEach { (value, label) ->
+                        FilterChip(completed == value, { completed = value }, label = { Text(label) },
+                            leadingIcon = if (completed == value) ({ Icon(AriciuIcons.Check, null, Modifier.size(18.dp)) }) else null,
+                            colors = FilterChipDefaults.filterChipColors(selectedContainerColor = colors.primaryContainer, selectedLabelColor = colors.onPrimaryContainer),
+                            modifier = (if (LocalDensity.current.fontScale > 1.3f) Modifier.fillMaxWidth() else Modifier.weight(1f)).heightIn(min = 48.dp))
+                    }
+                }
+                Text(if (completed) "Completed reminders" else "Active reminders", style = MaterialTheme.typography.titleSmall)
+            }
             }
         }
         item {
@@ -70,7 +82,7 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
                 Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(if (reminder.transition == ReminderTransition.ENTER) "ON ARRIVAL" else "ON DEPARTURE",
-                            style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+                            modifier = Modifier.padding(vertical = 6.dp), style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
                         Surface(shape = MaterialTheme.shapes.small, color = if (status.needsAttention) colors.tertiaryContainer else colors.primaryContainer) {
                             Text(status.label, Modifier.padding(horizontal = 10.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium,
                                 color = if (status.needsAttention) colors.onTertiaryContainer else colors.onPrimaryContainer)
@@ -79,13 +91,16 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
                     Text(reminder.title, style = MaterialTheme.typography.titleLarge)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(AriciuIcons.Place, null, Modifier.size(18.dp), tint = colors.onSurfaceVariant)
-                        Text("${reminder.location.radiusMeters} m area · ${if (reminder.repeat == ReminderRepeat.ONCE) "Just once" else "Every visit"} · ${reminder.intensity.label}",
+                        Text("${reminder.location.radiusMeters} m area · ${if (reminder.repeat == ReminderRepeat.ONCE) "Just once" else "Every visit"}",
                             style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                     }
+                    Text("Alert: ${reminder.intensity.label}", style = MaterialTheme.typography.labelLarge, color = colors.primary)
                     reminder.chainName?.let { Text("$it · ${reminder.chainAreas.size} selected stores around your pin", style = MaterialTheme.typography.bodyMedium) }
                     Text(status.description, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                     HorizontalDivider(color = colors.outlineVariant)
-                    Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        if (reminder.delivery.active) FilledTonalButton(onClick = { onDone(reminder) }, enabled = !state.busy,
+                            modifier = Modifier.testTag("done_${reminder.id}")) { Icon(AriciuIcons.Check, null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text("Done") }
                         TextButton(onClick = { onEdit(reminder) }, enabled = !state.busy, contentPadding = PaddingValues(0.dp)) { Text("Edit") }
                         TextButton(onClick = { onDelete(reminder) }, enabled = !state.busy, contentPadding = PaddingValues(0.dp),
                             colors = ButtonDefaults.textButtonColors(contentColor = colors.onSurfaceVariant)) { Text("Delete") }
