@@ -19,3 +19,6 @@ local.properties
 
 # Kotlin compiler session artifacts
 .kotlin/
+
+# Personal Obsidian settings; keep the portable knowledge-base notes tracked.
+.obsidian/

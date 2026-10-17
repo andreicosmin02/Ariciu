@@ -27,17 +27,18 @@ Updated 2026-10-17 for Ariciu 1.1-rc4. Current owner-directed Urgent re-alert po
 
 ## Safe diagnostic commands
 
-Use the SDK `adb` on PATH; add `-s DEVICE_SERIAL` when multiple devices exist.
+Use SDK adb on PATH and explicitly select the authorized test device. Replace the placeholder with its serial; do not default to a daily-use phone.
 
 ```bash
 git status --short --branch
 git log -8 --oneline
 adb devices -l
-adb shell dumpsys package ro.andrei.ariciu
-adb shell cmd appops get ro.andrei.ariciu
-adb logcat -d -s AriciuDelivery:V AndroidRuntime:E
-adb shell dumpsys notification
-adb shell dumpsys jobscheduler
+export ARICIU_TEST_SERIAL="YOUR_TEST_DEVICE_SERIAL"
+adb -s "$ARICIU_TEST_SERIAL" shell dumpsys package ro.andrei.ariciu
+adb -s "$ARICIU_TEST_SERIAL" shell cmd appops get ro.andrei.ariciu
+adb -s "$ARICIU_TEST_SERIAL" logcat -d -s AriciuDelivery:V AndroidRuntime:E
+adb -s "$ARICIU_TEST_SERIAL" shell dumpsys notification
+adb -s "$ARICIU_TEST_SERIAL" shell dumpsys jobscheduler
 ```
 
 `AriciuDelivery` logs enqueue/worker failures, not every event. There is no dedicated debug export/event timeline. Dumps/logs can contain unrelated/private data: inspect locally and retain only a redacted relevant excerpt, never raw databases/signing keys/private coordinates in Git. Android Studio Database Inspector can inspect a debug process; raw `.db` copies can miss WAL transactions. Do not mutate the user's Room data for debugging.
@@ -50,7 +51,7 @@ Inspect reminder generation/phase/position/occurrence, notificationVisible/Pendi
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:lintDebug :app:assembleDebug
 # With a deliberately chosen emulator/test device:
-./gradlew :app:connectedDebugAndroidTest
+ANDROID_SERIAL="$ARICIU_TEST_SERIAL" ./gradlew :app:connectedDebugAndroidTest
 ```
 
 Do not run app-data-writing instrumentation on the owner's daily-use phone without evaluating the fixtures. Use disposable data for kill/reboot/force-stop, clock changes and migrations. Force stop differs from ordinary process death and can suppress work until reopening.

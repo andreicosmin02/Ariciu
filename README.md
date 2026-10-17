@@ -18,7 +18,7 @@ Most reminders ask *when*. Ariciu lets you choose *where*: pick up a parcel when
 
 ## What you can do
 
-- **Remind by place:** arrive/ENTER or leave/EXIT a chosen radius, once or every visit.
+- **Remind by place:** arrive/ENTER or leave/EXIT a custom geographical radius, Once or Every visit, with offline-first local reminder storage.
 - **Choose an alert:** Silent, Normal or Urgent. Swiping Urgent schedules another alert after approximately five minutes until you choose Done or Next time. Waiting status and actions are visible on the reminder card.
 - **Find places locally:** search a bundled Romanian catalogue of 26,065 places, including towns, shops and malls. No remote search API. Selected supermarket chains have map previews and an accessible list.
 - **Keep the map useful:** move the map, use My location, adjust the radius, and expand or collapse place options. Download up to three small, theme-specific map areas for limited offline viewing.
@@ -38,7 +38,7 @@ Saving and monitoring are separate: Settings and reminder cards show registratio
 
 [Release notes: Ariciu 1.1-rc4](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4) · [Download the APK](https://github.com/andreicosmin02/Ariciu/releases/download/v1.1-rc4/Ariciu-1.1-rc4-debug.apk)
 
-The repository is currently private; GitHub repository access is required to view/download the release. Requires **Android 8.0/API 26+**, a compatible map-rendering device and **Google Play services**. This minimum is a build requirement; not every supported Android version has been tested. Location services, appropriate location/background access and notification access are needed for delivery.
+Download access follows repository visibility. Requires **Android 8.0/API 26+**, a compatible map-rendering device and **Google Play services**. This minimum is a build requirement; not every supported Android version has been tested. Location services, appropriate location/background access and notification access are needed for delivery.
 
 Open the downloaded APK and allow installation from that browser/file manager when Android prompts. **Update over the existing Ariciu debug build; do not uninstall or clear storage.** The package is `ro.andrei.ariciu`, version code **5**, with a tested additive Room migration to schema **5**. If installation reports a signature mismatch, stop and preserve your data.
 
@@ -75,22 +75,24 @@ Single-activity Android architecture with local persistence, guarded reminder ge
 
 `master` is the authoritative baseline. Development currently focuses on physical-phone testing, bug fixes, accessibility and stabilization; initial owner feedback is positive, with further Samsung/background and older-runtime checks pending.
 
-Open the project in Android Studio, install **Android SDK Platform 37** and the required build tools, and use the checked-in Gradle wrapper/version catalogue with the requested **JDK 25** Gradle daemon toolchain (Java source compatibility remains 11). Sync, then build:
+Follow [Build and test](docs/DEVELOPMENT.md) for cloning, local SDK configuration and Android Studio sync. Use **SDK Platform 37**, **Build Tools 36.0.0**, the checked-in **Gradle 9.5.0** wrapper and requested **JDK 25** daemon toolchain (Java source compatibility is 11). Then build:
 
 ```bash
 ./gradlew :app:assembleDebug
 ./gradlew :app:testDebugUnitTest :app:lintDebug
 ```
 
-Run instrumentation only on a deliberately selected test emulator, preserving daily-use phone data:
+Run instrumentation only on a deliberately selected disposable test device. Replace the placeholder with its serial; disconnect daily-use devices first:
 
 ```bash
-ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest
+adb devices -l
+export ARICIU_TEST_SERIAL="YOUR_TEST_DEVICE_SERIAL"
+ANDROID_SERIAL="$ARICIU_TEST_SERIAL" ./gradlew :app:connectedDebugAndroidTest
 ```
 
 The rc4 gate passed **97 unit tests, 44 Android 17 emulator tests, lint with 0 errors/39 warnings, and debug assembly**. Signature, version and downloaded-release checksum were verified. Emulator tests do not certify physical GPS, OEM background timing or all Android versions.
 
-Start with [project status](docs/PROJECT_STATUS.md), [contributor guidance](AGENTS.md), [documentation index](docs/README.md), [Urgent evidence](docs/URGENT_RE_ALERTS.md) and the [phone retest checklist](docs/PHONE_VERIFICATION.md).
+Start with [project status](docs/PROJECT_STATUS.md), [contributor guide](CONTRIBUTING.md), [documentation index](docs/README.md), [Urgent evidence](docs/URGENT_RE_ALERTS.md) and the [phone retest checklist](docs/PHONE_VERIFICATION.md).
 
 ## Credits and licences
 
@@ -98,4 +100,4 @@ Start with [project status](docs/PROJECT_STATUS.md), [contributor guidance](AGEN
 - **OpenFreeMap and OpenMapTiles:** hosting, schema and style lineage; bundled [upstream notice](app/src/main/assets/map/LICENSE-openfreemap.md), [light-style licence](app/src/main/assets/map/LICENSE-light-style.md) and [dark-style licence](app/src/main/assets/map/LICENSE-dark-style.md) retain MIT/BSD, CC-BY and source-design attributions as applicable. These notices also credit Noto Sans, Maki and Natural Earth.
 - **MapLibre Compose/Native:** [BSD-3-Clause](https://raw.githubusercontent.com/maplibre/maplibre-compose/v0.13.1/LICENSE)/[BSD-2-Clause](https://raw.githubusercontent.com/maplibre/maplibre-native/main/LICENSE.md) projects. Kotlin, AndroidX and OkHttp retain their respective licences; Google Play services is governed by its SDK terms.
 
-There is currently **no project-wide Ariciu licence declaration**. Third-party licences do not establish a licence for Ariciu’s own source or assets. See the bundled notices for their full terms.
+There is currently **no project-wide Ariciu licence declaration**. Third-party licences do not establish a licence for Ariciu’s own source or assets. See the [licensing review and recommendation awaiting approval](docs/LICENSING.md) and bundled notices. Proper Alarm support and production signing are future work, not features promised by this testing build.
