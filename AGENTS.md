@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Ariciu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Complete the planned functionality and prepare a reliable release candidate for extended physical-phone testing, including supported notification intensities, location/search, limited offline maps, and chain reminders.
+Ariciu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Ariciu 1.1-rc1 implements the agreed release-candidate scope. The current priority is debugging and stabilization from real physical-phone use: reproduce reported problems, fix root causes, improve confusing UX, and prevent regressions while preserving working functionality.
 
 ## Current product priority and visual direction
 
-- Feature completion is authorized (2026-10-16). Implement coherent, verified feature batches while preserving UI/UX quality, accessibility, reliability, offline-first operation, and zero recurring cost.
+- Current priority (2026-10-17): stabilize Ariciu 1.1-rc1 from physical-phone feedback. Feature completion was authorized on 2026-10-16 and produced the candidate; do not resume broad feature expansion by default. Prioritize reported bugs, notification/geofence reliability, confusing UX and focused regressions while preserving accessibility, offline-first operation and zero recurring cost.
 - Ariciu uses a dark-first charcoal/graphite identity with a restrained slate-blue accent; do not use green as the identity color, wallpaper-driven colors, playful decoration, gradients, or generic demo styling.
 - Support locally persisted System / Light / Dark appearance. Keep light mode equally usable and dark mode carefully designed.
 - Primary navigation is Create / Reminders / Settings. Keep the map central to creation, choices explicit, and delivery diagnostics in Settings or contextual help.
@@ -33,7 +33,7 @@ Ariciu is an offline-first Android app for location-based reminders. Reminders c
 ## Development workflow
 
 - Act as the senior Android engineer, architect, and proactive implementation partner. The user owns product direction; own technical execution.
-- Plan and implement complete features or related feature batches toward the MVP. Continue to the next logical task within the authorized scope; do not stop after each file, test, commit, or small milestone or request confirmation just to continue.
+- Own complete debugging and stabilization batches: reproduce, identify the failing boundary/root cause, add focused regression coverage, fix, verify and document. Continue within the authorized scope without stopping after each file, test or commit. Distinguish source-audit hypotheses from reproduced bugs and physical-phone verification; never erase user data to make a reproduction or upgrade succeed.
 - Make routine implementation and architecture decisions independently. Investigate and repair failures, maintain architecture consistency, and refactor when it materially improves maintainability.
 - Record important assumptions and keep documentation synchronized with verified implementation. Keep commits focused and reviewable even across larger feature batches.
 - Inspect relevant files before editing. Do not silently rename packages, classes, fields, or routes.

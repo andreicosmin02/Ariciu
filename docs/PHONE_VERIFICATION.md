@@ -1,10 +1,10 @@
 # Ariciu: first install and a few weeks of phone testing
 
-Use a phone with Google Play services and Android 8 or newer. This is a debug release candidate, not a Play release. No account, key or payment is needed.
+Use a phone with Google Play services and Android 8 or newer. This is the 1.1-rc1 debug release candidate, not a Play release. No dated physical-phone results have been recorded in this repository handoff (2026-10-17). No account, key or payment is needed.
 
 ## Install without losing reminders
 
-1. Copy `app/build/outputs/apk/debug/app-debug.apk` to your phone and open it. Android may ask you to allow installation from the app opening the file. Install over the previous Ariciu build; **do not uninstall or clear storage**. Your reminders are kept only on this phone, without cloud backup. An upgrade must be signed with the same debug key as the previous install. If Android rejects it, keep the installed app and report the error.
+1. Copy `app/build/outputs/apk/debug/Ariciu-1.1-rc1-debug.apk` (or the identical `app-debug.apk`) to your phone and open it. Android may ask you to allow installation from the app opening the file. Install over the previous Ariciu build; **do not uninstall or clear storage**. Your reminders are kept only on this phone, without cloud backup. An upgrade must be signed with the same debug key as the previous install. If Android rejects it, keep the installed app and report the error.
 2. Open Ariciu → Settings. Choose System, Light or Dark. Close/reopen: the choice should remain. Existing reminders should still be present.
 3. Set up location while using the app, precise location, location all the time, notifications and device Location, one step at a time. Declining should still let you create/manage reminders and should show setup help. Saving a reminder alone does not prove monitoring is ready.
 
@@ -23,7 +23,7 @@ Use a phone with Google Play services and Android 8 or newer. This is a debug re
 4. Test all alert types with the phone locked and unlocked:
    - Silent: notification list only, no sound/vibration/pop-up with the default channel; Done/Next time and swipe work.
    - Normal: existing standard alert; sound/pop-ups follow Android settings.
-   - Urgent: prominent ongoing request with Done/Next time. Android 14+ may let you dismiss it; dismissal is Next time and should not immediately reappear.
+   - Urgent: prominent ongoing request with Done/Next time; there is no separate custom stronger tone/vibration than Normal. Android 14+ may let you dismiss it; dismissal is Next time and should not immediately reappear.
    - Alarm: explicitly choose it in the editor. Check repeating system notification sound and strong vibration where allowed. Opening the notification panel may stop repeating sound. Stop should silence while keeping Done/Snooze; Done completes; Snooze should alert again after about ten minutes, possibly later if Android delays work. Close/kill the app after Snooze and test again. There is no automatic full-screen alarm or continuous app audio service. If Android suppresses audio, the notification/actions are the supported fallback.
 5. In Settings → Sound and alert settings, mute/block one intensity channel. That type should show setup help without blocking other enabled types. Restore it. Test Do Not Disturb and lower volume: Ariciu respects the system and cannot guarantee a heads-up alert.
 
@@ -43,3 +43,9 @@ Use a phone with Google Play services and Android 8 or newer. This is a debug re
 - Keep a short log for 2–3 weeks: device/Android version, task/place/radius/intensity, approximate crossing time, actual alert time, locked/unlocked, connectivity/battery mode, and what felt confusing. Include screenshots for UI problems. Log missed or duplicate alerts, and whether reopening Ariciu changed anything.
 
 No physical-phone delivery, reboot recovery, OEM behavior, audible/vibration behavior, TalkBack/Switch Access or older-user usability is claimed verified by emulator tests. See PROJECT_STATUS.md for exactly which automated and emulator checks passed.
+
+## When you find a problem
+
+Keep Ariciu installed and preserve its storage. Record what you expected, what happened, steps to repeat it, date/time, phone/Android version and whether the phone was locked or the app was closed. For alert issues add intensity, Arrive/Leave, Just once/Every visit, radius and relevant Location/notification/DND/battery settings. For UI issues add theme/font/display size and a screenshot if comfortable; do not share private addresses unnecessarily.
+
+The next development session will focus on these reports, reproduce the issue and fix its cause with regression checks. [Stabilization workflow](STABILIZATION.md) explains the developer process; a [copyable issue template](<obsidian-export/Ariciu/Ariciu - Phone Issue Template.md>) is available. A source hypothesis, emulator check and real-phone retest are recorded separately. The current [release note](RELEASE_CANDIDATE.md) identifies the rebuilt APK/hash.

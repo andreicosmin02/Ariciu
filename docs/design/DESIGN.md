@@ -1,6 +1,6 @@
 # Ariciu design direction
 
-Feature completion and a phone-testable release candidate are the current priorities; preserve the established redesign. The aim is a calm, readable app that tells people what to do next, without looking like a component catalogue.
+Real-phone debugging and stabilization of Ariciu 1.1-rc1 are the current priorities (2026-10-17); preserve the established redesign. The earlier redesign record below is retained as history, followed by the current release-candidate and stabilization notes. The aim is a calm, readable app that tells people what to do next, without looking like a component catalogue.
 
 ## Design principles
 
@@ -36,7 +36,7 @@ The three primary destinations are **Create**, **Reminders**, and **Settings**, 
 
 The dark map is a bundled adaptation of the existing provider’s Dark style. It uses graphite land/buildings, clearer roads, and lighter labels. Its JSON references the same OpenFreeMap tiles, fonts, and sprites. The light map retains Positron. No provider switch, API key, billing account, credit card, subscription, paid font, or hosted infrastructure was introduced.
 
-The official OpenFreeMap site and terms were checked on 2026-10-15: the public instance is free without registration/API keys or view/request billing. Offline-download limits are 3,000 tiles or 50MB, four parallel requests, and a unique User-Agent; this redesign does not add offline downloads. Availability and future terms are not guaranteed.
+The official OpenFreeMap site and terms were checked on 2026-10-15: the public instance is free without registration/API keys or view/request billing. Offline-download limits are 3,000 tiles or 50MB, four parallel requests, and a unique User-Agent; the initial redesign did not add offline downloads. The subsequent 1.1-rc1 candidate adds bounded explicit packs; see [feature evidence](../FEATURE_COMPLETION.md). Terms were rechecked on 2026-10-17 with the same allowance. Availability and future terms are not guaranteed.
 
 The original style is derived from CartoDB Basemaps / Dark Matter by Stamen, Paul Norman, CartoDB, MapTiler and OpenMapTiles contributors. Code is BSD 3-Clause; design is CC BY 4.0 with upstream CC BY 3.0 attribution. OpenFreeMap’s MIT notice and the style’s complete license are bundled beside the JSON in `app/src/main/assets/map/`. Ariciu changes the palette/label contrast and credits the sources. Visible OpenMapTiles/OpenStreetMap map credits and the native attribution control are retained. The decorative SDK logo/imperial scale bar are replaced by the simpler map presentation; the radius is expressed in metres.
 
@@ -64,13 +64,13 @@ Screenshots below are actual Android emulator captures. Delivery permissions wer
 - [Light Settings](screenshots/light-settings.png)
 - [Larger-text editor](screenshots/large-text-editor.png)
 
-The most useful next design feedback is about the slate-blue accent, map-to-sheet balance, and whether the path from choosing a place to saving a reminder feels clear. Feature completion proceeds alongside visual refinement and owner feedback.
+At the redesign milestone, feedback focused on the slate-blue accent, map-to-sheet balance and the path from choosing a place to saving. Current design priorities follow actual phone friction/accessibility reports; preserve the established visual direction.
 
-Implementation baseline: `3a2f5a7`. See [the session handoff](../CODEX_HANDOFF.md) for branch, verification, and continuation guidance.
+Historical redesign implementation baseline: `3a2f5a7`; current application implementation baseline: `011746c`. See [the session handoff](../CODEX_HANDOFF.md) for branch, verification, and continuation guidance.
 
 ## Release candidate (2026-10-16)
 
-Feature completion is authorized. Current source/status and supported fallbacks are described in [project status](../PROJECT_STATUS.md) and [implementation evidence](../FEATURE_COMPLETION.md). The original screenshots above document the redesign baseline; the following captures document the candidate.
+Feature completion was authorized on 2026-10-16 and produced this candidate. Current source/status and supported fallbacks are described in [project status](../PROJECT_STATUS.md) and [implementation evidence](../FEATURE_COMPLETION.md). The original screenshots above document the redesign baseline; the following captures document the candidate.
 
 Settings now uses inline setup actions at ordinary text sizes and stacked controls for large text. Sound/channel settings are collapsed. The editor has tighter group spacing, explicit alert selection, contextual chain explanations, selected-store review and a fixed Save action. Chain and intensity dialogs clear text focus. Shared headings expose accessibility heading semantics. No new brand color, gradient, decorative asset or external design service was introduced.
 
@@ -85,3 +85,9 @@ Actual Android 17 emulator review captures (sample data; not golden tests):
 - [Real downloaded light area with emulator Wi-Fi/mobile data disabled](screenshots/rc/rc-offline-light.png)
 
 Reviewed text/controls remained readable and reachable; native map rendering was separately inspected after resources loaded. Physical-phone TalkBack/Switch Access, Android font/display scaling, different screen sizes, audible/vibration behavior and observed usability remain on the phone checklist. Offline testing covers one actual area, not provider-wide availability or positioning.
+
+## Phone stabilization phase (2026-10-17)
+
+Ariciu 1.1-rc1 now supplies the feature-complete supported candidate baseline described in [PROJECT_STATUS.md](../PROJECT_STATUS.md). The next design work responds to real-phone confusion, accessibility barriers, clipping or frustrating interactions. Preserve the established identity and navigation; do not launch a speculative redesign or add complexity merely to expose advanced mechanics.
+
+The RC screenshots above are dated emulator evidence, not physical-phone accessibility validation. Source review identifies possible Alarm/status wording and notification-setup navigation debt; see [STABILIZATION_AUDIT.md](../STABILIZATION_AUDIT.md). Prioritize actual user reports, compare both themes and enlarged text after relevant fixes, and record device/font/keyboard context with new screenshots. Detailed tokens/components/scaling guidance is in the [design knowledge note](<../obsidian-export/Ariciu/Ariciu - Design and Accessibility.md>).
