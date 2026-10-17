@@ -7,7 +7,7 @@ Documentation and non-runtime ignore housekeeping from clean master **77ee6c9896
 - Root README retains the fox and three actual reviewed emulator captures, accurate features, release/checksum/signing/upgrade instructions and privacy/platform limits. It links ordinary contributor setup rather than requiring Codex.
 - DEVELOPMENT documents actual SDK 37, Build Tools 36.0.0, Gradle 9.5.0, JDK 25 (distinct from Java source compatibility 11), local SDK configuration, sync/build/test/report paths and explicit disposable test-device selection.
 - CONTRIBUTING covers focused branches/PRs, regression testing, data/migrations, Android restrictions, offline-first/zero-cost architecture and redacted bug reports.
-- Personal `.obsidian/` settings are ignored so opening the tracked notes as a vault does not invite accidental settings commits.
+- Personal `.obsidian/` settings and optional `.venv-catalog/` tools are ignored so opening the tracked notes as a vault does not invite accidental settings commits.
 - The normal documentation index separates current implementation, tests/known limits, historical evidence, future plans and optional automation/knowledge-base material.
 - Publication/cleanup records now distinguish visibility at publication from a permanent restriction and record the completed approved eight-branch deletion. Historical measurements and commit/version context are retained.
 
@@ -17,7 +17,7 @@ All **29 notes and 54 PNG attachments** remain; no technical note, diagram or sc
 
 Four missing private-note links were replaced by included review/technical chronology. Internal wikilinks remain; a standard Markdown index, related-reading links and ordinary image embeds support GitHub readers. Online source/document links use repository-relative path labels and survive copying notes; internal notes/images remain local. No actual personal vault was accessed or modified.
 
-Removed/generalized: the personal Desktop-vault destination; assumptions about pre-existing planning/review notes; personal synchronization/hash-copy outcomes; session filesystem/escalation permissions; old “never start from master” guidance; stale schema/file counts; current four-intensity wording; obsolete cleanup/private-only instructions. Exact emulator serials in dated executed reports remain historical evidence; current runnable examples select the contributor’s own test-device serial.
+Removed/generalized: the personal Desktop-vault destination; assumptions about pre-existing planning/review notes; personal synchronization/hash-copy outcomes; session filesystem/escalation permissions; old “never start from master” guidance; stale schema/file counts; current four-intensity wording; obsolete cleanup/private-only instructions. Exact emulator serials in dated executed reports remain historical evidence; current runnable examples select the contributor’s own test-device serial. Optional catalogue-tool commands use an ignored checkout-relative environment instead of a fixed temporary directory.
 
 ## Verification
 

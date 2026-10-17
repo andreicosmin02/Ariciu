@@ -22,3 +22,6 @@ local.properties
 
 # Personal Obsidian settings; keep the portable knowledge-base notes tracked.
 .obsidian/
+
+# Optional Python environment for catalogue regeneration.
+.venv-catalog/

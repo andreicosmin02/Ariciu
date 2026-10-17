@@ -35,12 +35,12 @@ Seven recognized chains and shipped counts: Kaufland 200, Lidl 390, Carrefour 37
 
 ## Regeneration workflow
 
-Development-only PyOsmium parses a lawful free regional PBF. The app never downloads/imports that large extract at runtime.
+Development-only PyOsmium parses a lawful free regional PBF. The app never downloads/imports that large extract at runtime. Run from the repository root, replacing ROMANIA_PBF_PATH with your downloaded extract’s path. The environment is ignored by Git; on Windows use its Scripts/python.exe instead of bin/python.
 
 ```bash
-python3 -m venv /tmp/ariciu-catalog-tools
-/tmp/ariciu-catalog-tools/bin/pip install osmium
-/tmp/ariciu-catalog-tools/bin/python tools/build_place_catalog.py /path/to/romania.osm.pbf app/src/main/assets/places/romania.tsv
+python3 -m venv .venv-catalog
+.venv-catalog/bin/python -m pip install osmium
+.venv-catalog/bin/python tools/build_place_catalog.py ROMANIA_PBF_PATH app/src/main/assets/places/romania.tsv
 ```
 
 Before shipping regenerated data: verify provider/licence terms, source timestamp/hash, row/chain counts, coordinate bounds, duplication heuristic, file encoding and representative searches. Update NOTICE.md, UI date strings in picker/editor/Settings and status/evidence docs together. The script prints counts/hash and puts the UTC generation date in the header; it does not automatically update all these other metadata locations. Do not check the huge raw extract, temporary virtualenv or personal files into Git.
