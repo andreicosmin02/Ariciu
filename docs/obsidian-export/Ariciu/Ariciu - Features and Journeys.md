@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Features and user journeys
@@ -13,7 +13,7 @@ Related: [[Ariciu - Reminder Lifecycle]], [[Ariciu - Notifications and Alarm]], 
 
 1. Create opens the map around Brașov by default (45.6579, 25.6012, zoom 14), or restores the selection.
 2. Search Romanian towns/shops/store addresses, use My location, or move the map. Search results centre the map; they do not save a named address into the reminder.
-3. Choose 100/200/500m, or More distances for 100–1000m in 100m increments. The centre pin is the selected point; the boundary is approximate visual geometry.
+3. Expand the draggable place sheet and choose 100/200/500m, or More distances for 100–1000m in 100m increments. The centre pin is the selected point; the boundary is approximate visual geometry.
 4. Use this place opens the editor. It is disabled during native camera movement.
 5. Enter text, choose Arrive/Leave and Just once/Every visit; Alert opens explicit Silent/Normal/Urgent/Alarm choices. Save requires valid nonblank text/location and a valid selected chain if applicable.
 6. Save persists locally, clears the draft and opens Reminders. Monitoring is synchronized separately; read the card status and Settings.
@@ -22,7 +22,7 @@ My location accepts approximate foreground access for centring. Actual reminders
 
 ## Use a chain
 
-Choose a pin near the area of interest, then Use a supermarket chain instead. Selecting a supported chain records up to 40 nearest listed stores. View selected stores shows available name/address, fallback coordinates and distance from the pin. Change place and refresh when travelling. This is a stored selection, not live detection of all national branches.
+Choose Single place or Supermarket chain on Create before search/confirmation, or change it in the editor. New selections record up to 40 listed stores within 25 km. View selected stores shows a real map and an accessible name/address/distance list. Change place and refresh when travelling. This is a stored selection, not live detection of all national branches.
 
 ## Manage saved work
 
@@ -50,3 +50,6 @@ Download this area lives under Create → Location details. Confirm a small pack
 ## Failure and empty states
 
 The app presents initial empty lists, loading reminders, save/load/delete errors, unavailable catalogue/map/positioning, denied setup and registration failure/capacity statuses. Save failures preserve draft identity. Error handling is implemented; not every provider/OS/device failure path has automated or physical coverage. Known copy weaknesses are listed in [[Ariciu - Risks and Technical Debt]].
+
+
+Phone review changes and current evidence: [[Ariciu - Phone Review 1]].

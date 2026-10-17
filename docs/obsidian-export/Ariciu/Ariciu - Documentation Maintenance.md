@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Keeping the knowledge base accurate
@@ -11,7 +11,7 @@ Related: [[Ariciu]], [[Ariciu - Current Status]], [[Ariciu - Maintenance and Ext
 
 ## Authority and scope
 
-Source shows implemented behavior; dated executed reports establish test evidence; device observations establish only the scenario actually tried. Owner decisions define product scope. Planning prose alone proves none of these. Every note is reviewed against the 1.1-rc1 source baseline, with dated YAML metadata; future editors should update metadata only after checking relevant source.
+Source shows implemented behavior; dated executed reports establish test evidence; device observations establish only the scenario actually tried. Owner decisions define product scope. Planning prose alone proves none of these. Notes changed for the first phone review are marked 1.1-rc2; unchanged mechanism notes retain their historical rc1 metadata. Future editors should update metadata only after checking relevant source.
 
 Repository essentials: `AGENTS.md` gives working rules/current priority; `docs/PROJECT_STATUS.md` gives evidence and state; `docs/CODEX_HANDOFF.md` gives next-session instructions; `docs/STABILIZATION.md` and `STABILIZATION_AUDIT.md` preserve debugging methods/limits without requiring the vault.
 
@@ -34,4 +34,4 @@ When copying newer exports into an existing vault, compare/merge same-named note
 
 ## Access note
 
-The registered existing vault and project folder were found unambiguously, but are outside the sandbox's writable roots. The safe deliverable is `docs/obsidian-export/Ariciu/`; direct vault installation remains blocked by filesystem permissions. The README beside the export explains the destination/import. Original note hashes were checked locally before/after; hashes and unrelated vault information are not committed.
+The existing vault is outside the sandbox's writable roots; synchronization uses explicit filesystem escalation. Compare same-named notes against the previous repository export and refuse conflicts before writing. Preserve all original planning notes, private phone review/screenshots and unrelated files. The portable repository copy remains authoritative for handoff if the vault is unavailable. See docs/obsidian-export/README.md for the recorded synchronization outcome.

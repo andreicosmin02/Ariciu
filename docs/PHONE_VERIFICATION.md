@@ -1,10 +1,10 @@
 # Ariciu: first install and a few weeks of phone testing
 
-Use a phone with Google Play services and Android 8 or newer. This is the 1.1-rc1 debug release candidate, not a Play release. No dated physical-phone results have been recorded in this repository handoff (2026-10-17). No account, key or payment is needed.
+Use a phone with Google Play services and Android 8 or newer. This is the 1.1-rc2 debug release candidate, not a Play release. The first rc1 phone UX review is recorded in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md); rc2 fixes await phone retest. Start with that targeted checklist. No account, key or payment is needed.
 
 ## Install without losing reminders
 
-1. Copy `app/build/outputs/apk/debug/Ariciu-1.1-rc1-debug.apk` (or the identical `app-debug.apk`) to your phone and open it. Android may ask you to allow installation from the app opening the file. Install over the previous Ariciu build; **do not uninstall or clear storage**. Your reminders are kept only on this phone, without cloud backup. An upgrade must be signed with the same debug key as the previous install. If Android rejects it, keep the installed app and report the error.
+1. Copy `app/build/outputs/apk/debug/Ariciu-1.1-rc2-debug.apk` (or the identical `app-debug.apk`) to your phone and open it. Android may ask you to allow installation from the app opening the file. Install over the previous Ariciu build; **do not uninstall or clear storage**. Your reminders are kept only on this phone, without cloud backup. An upgrade must be signed with the same debug key as the previous install. If Android rejects it, keep the installed app and report the error.
 2. Open Ariciu → Settings. Choose System, Light or Dark. Close/reopen: the choice should remain. Existing reminders should still be present.
 3. Set up location while using the app, precise location, location all the time, notifications and device Location, one step at a time. Declining should still let you create/manage reminders and should show setup help. Saving a reminder alone does not prove monitoring is ready.
 
@@ -29,7 +29,7 @@ Use a phone with Google Play services and Android 8 or newer. This is the 1.1-rc
 
 ## Chains and offline maps
 
-- Choose a pin near your usual shopping area, then “Use a supermarket chain instead”. Review the selected store list. This selects **up to 40 nearest listed stores around that pin**, not every Romanian store. Missing/outdated shops are possible. Change the pin and refresh stores when travelling.
+- Choose a pin near your usual shopping area, then “Use a supermarket chain instead”. Review the selected store list. This selects **up to 40 listed stores within 25 km of that pin for new/refreshed selections; existing selections stay intact until refreshed**, not every Romanian store. Missing/outdated shops are possible. Change the pin and refresh stores when travelling.
 - Visit two selected stores on different occasions. Done completes the whole chain reminder. Every visit rearms after leaving all selected store areas; overlapping stores count as one visit. Missed exits can delay rearming. If many reminders consume the 100-area limit, some stores may be on hold; the app should say so and activate more when capacity becomes available.
 - In Create → Location details → Download this area, explicitly download a small area. Keep Create open until complete, or go to Settings → Offline maps and Resume. Check the theme, MB/resource usage, progress and pause/delete controls. Leaving the screen or backgrounding the app pauses unfinished work; a process restart retains the incomplete pack for Resume.
 - Turn off Wi-Fi and mobile data. In the downloaded theme, reopen the area at neighbourhood detail: roads/labels and location selection should work. Unvisited areas/other themes or detail levels may be blank. Search still works. Offline maps **do not guarantee offline Google Play services positioning**.

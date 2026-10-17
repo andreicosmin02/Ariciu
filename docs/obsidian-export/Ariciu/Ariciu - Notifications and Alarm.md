@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Notifications and Alarm
@@ -45,3 +45,8 @@ Boot restoration of an already-delivered alarm is quiet. A pending alert that wa
 The supported Alarm fallback is an actionable prominent notification. If app-wide notification access or the Alarm channel itself is disabled, no such alert can be posted; reminders show blocked setup help until access is restored. Full-screen special access is not requested; the app's location-reminder purpose is not treated as an automatic alarm-clock eligibility exemption. If Android limits audio, Ariciu keeps supported notification/actions rather than adding prohibited workarounds.
 
 Automatically tested: channel defaults/flags/actions on an emulator, injected worker crossing, swipe/Next time/Done and persisted Alarm Stop/Snooze; lifecycle/token guards are unit tested. Not verified: real-phone audio/vibration, heads-up, locked-screen behavior, full background timing, DND/OEM differences. Original planning notes proposing stronger/non-dismissible Urgent and full-screen Alarm are historical; see [[Ariciu - Historical Notes]].
+
+
+## Phone review update (17 October)
+
+Urgent still requests high importance and ongoing=true. Android 14+ permits individual unlocked swipes; the delete intent persists Next time through the real receiver/worker. No automatic repost or false call/media exemption. Help now states this directly. Only Android 17 runtime was available in this environment; older runtime and Samsung locked/Clear all behavior need phone testing. See [[Ariciu - Phone Review 1]].

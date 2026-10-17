@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Data, persistence and migrations
@@ -61,3 +61,8 @@ Deletion removes the reminder row immediately. The ledger intentionally remains 
 Appearance: SharedPreferences file `appearance`, key `theme`. Draft/route/edit/save identity: SavedStateHandle, not Room. Map screen selection: saveable Compose state. Offline map resources/regions: MapLibre Native database, separate from Room. WorkManager maintains its own job database. Do not assume one transaction or backup covers all of these.
 
 Cloud backup/device transfer are excluded in manifest/XML. There is no in-app user-data export; uninstalling or clearing storage loses local reminders.
+
+
+## Phone review update (17 October)
+
+`ReminderDao.complete(id, occurrence)` is transactional: retain current row data, check occurrence, mark completed/inactive, clear alert/snooze state and rotate generation. Older worker writes cannot undo it. Repository invokes the existing reconciliation callback for notification/registration cleanup. Room remains version 4. See [[Ariciu - Phone Review 1]].

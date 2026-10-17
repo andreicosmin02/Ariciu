@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Reminder lifecycle and action semantics
@@ -59,3 +59,8 @@ When due, `onSnoozeDue` clears the deadline, increments occurrence, clears quiet
 Editing preserves completion/occurrence and replaces the generation. An already-inside registration/re-registration does not invent an arrival. Missing crossings during restrictions cannot be reconstructed. Recovery may therefore conservatively require another opposite crossing rather than create duplicate reminders.
 
 Automatically tested: duplicate/old events, new boot epoch, Once/Every visit/EXIT cycles, stale actions, Stop/Snooze token behavior and persistence models. Physical boundary detection, timing, clock changes and process-kill/reboot delivery are not established by these tests.
+
+
+## Phone review update (17 October)
+
+Card Done also works before a crossing and while snoozed. `DeliveryState.completed()` clears visible/pending/snooze state. Notification Done keeps its visible-token guard; card completion is a distinct explicit task intent. See [[Ariciu - Phone Review 1]].

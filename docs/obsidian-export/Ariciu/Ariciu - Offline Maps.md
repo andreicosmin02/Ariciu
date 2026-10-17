@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Offline map packs and provider limits
@@ -52,3 +52,8 @@ A map pack does not cache all countries, arbitrary overview/deep zooms or both t
 Emulator verified 2026-10-16: one real light region completed with 31 protected vector tiles and 396 protected style/font/sprite resources; roads/labels and pin selection rendered with Wi-Fi/mobile data disabled. This was not a native download golden test, proof for all regions/themes, or a physical-phone positioning test.
 
 ![[Attachments/rc-offline-light.png]]
+
+
+## Phone review update (17 October)
+
+The download explanation now distinguishes roads/labels/basemap from the bundled offline search catalogue. Packs do not add searchable stores or change geofence coverage. Settings explains explicit resume and the monitoring retry action separately. See [[Ariciu - Phone Review 1]].

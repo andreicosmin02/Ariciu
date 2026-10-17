@@ -1,21 +1,13 @@
 # Obsidian knowledge-base export
 
-Prepared 2026-10-17 from Ariciu 1.1-rc1 source, schemas, resources/assets, tests, Git and stored verification reports. Start at [Ariciu.md](Ariciu/Ariciu.md). The export contains **25 focused linked notes and 8 copied RC emulator screenshots**; it is project documentation, not an export of the owner's personal vault.
+Updated 2026-10-17 for **Ariciu 1.1-rc2 / code 3**, first phone-review stabilization. Start at [Ariciu.md](Ariciu/Ariciu.md). **26 focused linked notes and 27 emulator screenshots** (8 historical rc1, 19 review-1). Only project-owned documentation and emulator images are exported, never the owner's private review/phone screenshots.
 
-## Destination found and access limitation
+## Existing vault synchronization
 
-The registered existing Obsidian vault is `Desktop/obsidian/obsidian_vault` under the owner's home directory. Its existing **Personal Projects/Ariciu** folder contains three project planning notes. This is an unambiguous existing destination; no new vault was created.
+Destination: the existing `Desktop/obsidian/obsidian_vault/Personal Projects/Ariciu` folder under the owner's home. Before synchronization, existing export filenames were compared with the previous repository export at 62557c5; no user-edit conflicts were found. Direct synchronization requires environment filesystem approval because the vault is outside writable roots. The three original planning notes, private rc1 review/eight screenshots, vault settings and unrelated notes must remain unchanged.
 
-The destination is outside this environment's writable roots and is **read-only**. Direct installation could not be completed safely. The originals were read only for project context and left unchanged. No vault settings/plugins or unrelated notes were accessed for content or modified.
+Synchronization completed on 17 October using filesystem approval: all 26 notes/27 images match; all original planning/review/phone captures remain unchanged. See docs/CODEX_HANDOFF.md and PHONE_REVIEW_1.md. There is no background/bidirectional synchronization or new plugin. Future copies must compare same-named notes before overwriting user edits. Copy the contents into the existing Ariciu folder, including Attachments; do not create a nested duplicate folder.
 
-## Import when write access is available
+## Repository handoff
 
-Copy/merge the **contents** of `docs/obsidian-export/Ariciu/` into the existing vault's `Personal Projects/Ariciu/`, including `Attachments/`. Do not create a second nested Ariciu folder. These new filenames do not replace the three original notes; if a later copy already exists, compare/merge edits before overwriting anything.
-
-Open `Ariciu.md` in Obsidian. Wikilinks resolve among the new notes; Historical Notes intentionally links the three existing planning notes, which are not copied into Git. Screenshots are local attachments. Code references are repository-relative paths, not copies of source or sensitive local data. No new plugin is required; diagrams use ordinary Mermaid blocks.
-
-## Repository handoff remains independent
-
-[Codex handoff](../CODEX_HANDOFF.md), [project status](../PROJECT_STATUS.md), [stabilization](../STABILIZATION.md) and [audit/limits](../STABILIZATION_AUDIT.md) remain the essential next-session guide even if the vault is unavailable. The next session prioritizes real-phone problem reproduction, root causes, reliability, UX fixes and regression prevention.
-
-Stored Oct 16 results were inspected, not rerun during this documentation task. No physical-phone success is claimed and no application behavior was changed. Future documentation updates should follow the export's Documentation Maintenance note and keep this copy and any imported vault notes deliberately reconciled.
+[Codex handoff](../CODEX_HANDOFF.md), [project status](../PROJECT_STATUS.md), [review evidence/retest](../PHONE_REVIEW_1.md) and [stabilization](../STABILIZATION.md) remain independent of vault access. Current verification: 68 unit/23 Android17 connected tests passed, lint 0 errors/39 warnings, assembly/install/signature verification passed. Phone retest on Samsung S26 Ultra / One UI8.5 / Android16 remains pending. Unchanged mechanism notes retain dated historical rc1 metadata; changed notes identify rc2.

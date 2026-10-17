@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Risks, limitations and technical debt
@@ -14,13 +14,13 @@ Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Current Status]]. Essential
 - Android/GMS/background positioning and WorkManager can be delayed/suppressed. Force-stop recovery requires reopening. Missed crossings cannot be reconstructed; no exact/immediate/exactly-once guarantee.
 - Silent/Normal/Urgent/Alarm respect user channels/DND/OS. Urgent requests ongoing presentation but does not configure a stronger custom sound/vibration than Normal. Modern Android may allow dismissing it.
 - Alarm is a system notification with requested repeating sound/vibration; opening the panel can end sound. No full-screen activity, continuous app playback, exact alarm or FGS. Snooze is Alarm-only and inexact.
-- Search is an incomplete dated Romania towns/shops catalogue. Chain selection is a fixed nearest-40 snapshot around the chosen pin, not worldwide coverage or automatic roaming. The app-wide limit is 100 areas.
+- Search is an incomplete dated Romania towns/shops catalogue. Chain selection is a fixed snapshot of up to 40 listed stores within 25 km of the pin (older snapshots remain until refreshed), not worldwide coverage or automatic roaming. The app-wide limit is 100 areas.
 - Offline packs cover limited bounds/zoom/theme, at most three, with foreground/user-driven bounded downloads. Resource MB is not total disk footprint; delete may leave shared/ambient cache. Map downloads do not guarantee offline positioning.
-- Completed reminders cannot currently be restarted by editing and have no in-app Done/reopen controls. No backup, import/export, scheduled refresh, cloud sync, mandatory account or non-GMS implementation.
+- Completed reminders cannot currently be restarted by editing and have no reopen control. Active cards now have Done. No backup, import/export, scheduled refresh, cloud sync, mandatory account or non-GMS implementation.
 
 ## Confirmed copy/maintenance debt in inspected source
 
-- Generic triggered status can say “Choose Done or Next time” for Alarm, whose controls are Stop/Done/Snooze. Snooze status can describe ten minutes without calculating remaining time; partial-chain status can take precedence over snooze.
+- Triggered status now offers card Done and refers to the notification’s available actions. Snooze status can describe ten minutes without calculating remaining time; partial-chain status can take precedence over snooze.
 - Generic notification setup opens the Normal channel even when app-wide notification access is blocked. Per-intensity links exist in expanded alert settings. Reproduction should establish the confusing route on the reported Android version before changing it.
 - Catalogue date/attribution wording appears in multiple UI/NOTICE/generator locations and must be updated together. Strict chain encoding can fail decoding rather than tolerate malformed stored data; no such corrupt user row is reported.
 - There are 39 lint warnings, unused legacy resources and large combined platform/database files. Refactor only when it materially supports a fix; do not redesign working layers or bulk-upgrade dependencies.
@@ -38,3 +38,6 @@ Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Current Status]]. Essential
 | Snooze/time/queue recovery | Wall-clock changes, delayed jobs and old-generation wake jobs need device scenarios beyond model tests. | Forward/backward clock, reboot, edit/delete while snoozed and stale wake execution. |
 
 These are **audit hypotheses, not reproduced critical bugs**. The documentation task deliberately leaves production behavior untouched. Prioritize an actual user report over speculative hardening; reproduce before fixing, then add focused regressions.
+
+
+Phone review changes and current evidence: [[Ariciu - Phone Review 1]].

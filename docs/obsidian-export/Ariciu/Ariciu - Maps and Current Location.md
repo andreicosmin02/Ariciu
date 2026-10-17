@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Maps, radius selection and current position
@@ -37,4 +37,7 @@ The picker scope cancels on leaving composition. No continuous update subscripti
 
 ## Compact screens
 
-At height <620dp or fontScale >1.3, the picker uses a scrollable layout with a 280dp map. Otherwise the map takes remaining height above the persistent selection sheet. Advanced details can shrink the ordinary map; review that balance on the reporting phone rather than assuming emulator dimensions generalize.
+Create uses a draggable Material 3 standard bottom sheet over the map, with an explicit expand/collapse action. Its summary height follows scaled content; expanded content scrolls within the available viewport. The primary action is outside the sheet. Coordinates are secondary behind Show coordinates. Search and a labeled 52dp My location icon share a padded row, bounded to 640dp.
+
+
+Phone review changes and current evidence: [[Ariciu - Phone Review 1]].

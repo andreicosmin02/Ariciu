@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Design and accessibility
@@ -22,7 +22,7 @@ Dark-first graphite, warm restrained light mode and slate-blue accent. No green 
 
 Dark container is `#1D1F23`. Amber communicates warnings, not identity. Use semantic theme roles rather than copying raw colors into new screens. Legacy resource purple/teal values are unused by Compose; they do not define the current palette.
 
-Sans-serif typography: headings approximately 24–32sp, main headline 32sp/39sp line height, body 15–17sp, secondary 13sp, labels 12–16sp depending on role. Shapes use 8/12/18/24/28dp radii. Typical page/card/editor spacing is 24/20/18dp; primary controls are at least 56dp high and ordinary touch controls at least 48dp. Verify actual screen context rather than forcing every component to one measurement.
+Sans-serif typography: headings approximately 24–32sp, shared screen heading 24sp/31sp line height, body 15–17sp, secondary 13sp, labels 12–16sp depending on role. Shapes use 8/12/18/24/28dp radii. Typical page/card/editor spacing is 24/20/12dp; primary controls are at least 56dp high and ordinary touch controls at least 48dp. Verify actual screen context rather than forcing every component to one measurement.
 
 ## Screen responsibilities
 
@@ -60,3 +60,6 @@ Offline native rendering is in [[Ariciu - Offline Maps]]. Earlier redesign image
 ## Next UX work
 
 Prioritize reported confusion, clipped/unreachable controls and accessibility barriers. Source review suggests checking Alarm wording that still mentions Next time, snooze status accuracy, partial-chain explanations and app-wide notification-settings navigation. These are documented in [[Ariciu - Risks and Technical Debt]]; do not treat speculative redesign as a reported user problem.
+
+
+Phone review changes and current evidence: [[Ariciu - Phone Review 1]].

@@ -1,15 +1,17 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Ariciu
 
-Ariciu is a local Android app that reminds you when a place becomes relevant. This knowledge base describes **1.1-rc1, version code 2**, checked against source on 17 October 2026. The current phase is **debugging and stabilization from real-phone use**.
+Ariciu is a local Android app that reminds you when a place becomes relevant. This knowledge base describes **1.1-rc2, version code 3**, checked against source on 17 October 2026. The current phase is **debugging and stabilization from real-phone use**.
 
 ## Start here
+
+- [[Ariciu - Phone Review 1]] — dispositions, verification and phone retest checklist.
 
 - [[Ariciu - Current Status]] — branch, commits, evidence and immediate priorities.
 - [[Ariciu - Product and Decisions]] — purpose, constraints and owner decisions.
@@ -40,7 +42,7 @@ Ariciu is a local Android app that reminds you when a place becomes relevant. Th
 | Implemented | Present in inspected source; not a claim that every device scenario works. |
 | Automatically tested | A named test and a recorded passing result cover the stated behavior. |
 | Emulator verified | An interaction/rendering observation was recorded on an emulator. |
-| Physical-phone verified | A dated device observation establishes that specific case. **None supplied at this handoff.** |
+| Physical-phone verified | A dated device observation establishes that specific case. **The rc1 review establishes observed UX; post-fix phone retest remains pending.** |
 | Not verified | No supporting executed check or device observation is recorded. |
 | Planned | A possible future change, not current behavior or automatically authorized scope. |
 | Known limitation | A documented implementation/platform boundary, not necessarily a defect. |

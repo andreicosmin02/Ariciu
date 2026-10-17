@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Chain reminders and shared geofence allocation
@@ -13,7 +13,7 @@ Sources: `feature/delivery/model/ChainLifecycle.kt`, `DeliveryEngine.kt`, `featu
 
 ## Product contract
 
-“Near any Kaufland store” means **any of the selected listed stores**, not every branch in Romania/worldwide. The editor chooses at most 40 nearest catalogue entries around the selected pin, with no explicit maximum distance filter. View selected stores exposes available addresses/coordinates and distances. Refresh/change the anchor when travelling. No continuous GPS or automatic roaming allocation exists.
+“Near any Kaufland store” means **any of the selected listed stores**, not every branch in Romania/worldwide. Create offers Place/Chain before selection. New or explicitly refreshed snapshots choose at most 40 listed stores within 25 km of the pin. View selected stores opens a real map, with an accessible list of addresses/distances. Existing snapshots remain unchanged until refreshed and distant selections show a warning. Refresh/change the anchor when travelling. No continuous GPS or automatic roaming allocation exists.
 
 The parent Reminder stores chainName, anchor/radius and the selected ChainArea list. A ChainArea carries OSM ID, coordinates, last known position, elapsed time and boot epoch. Every store uses the parent's radius, transition/repeat and intensity. One parent lifecycle, occurrence counter and notification tag represent the task.
 
@@ -38,3 +38,6 @@ No selected capacity → LIMIT_REACHED; some areas fit → PARTIAL; all successf
 Selection is stored with the reminder; dataset updates alone do not mutate it. Changing the pin clears draft chain areas, and the editor repopulates after loading the local catalogue. Saving/refreshing changes the parent generation, journals/adds current areas and removes obsolete IDs. Existing completion/occurrence state is preserved. Strict encoded area state survives Room recreation.
 
 Automatically tested: union overlap, duplicate/out-of-order store events, Once/Done across stores, fair capacity/partial promotion, one notification identity and DB reopening/title edits. Not verified: real trips between stores, stale catalogue correction, missing exit recovery, actual 100-area Play services stress and automatic travel behavior (which is not implemented).
+
+
+Phone review changes and current evidence: [[Ariciu - Phone Review 1]].

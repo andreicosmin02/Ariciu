@@ -1,6 +1,6 @@
 # Real-phone debugging and stabilization
 
-Updated 2026-10-17 for Ariciu 1.1-rc1. Start with [handoff](CODEX_HANDOFF.md), [status](PROJECT_STATUS.md) and [audit/limits](STABILIZATION_AUDIT.md). The owner has not yet supplied a concrete phone issue or dated phone-verification result. Do not manufacture a bug list from hypotheses.
+Updated 2026-10-17 for Ariciu 1.1-rc2. Start with [handoff](CODEX_HANDOFF.md), [status](PROJECT_STATUS.md) and [audit/limits](STABILIZATION_AUDIT.md). The first owner phone review and its implemented rc2 fixes are recorded in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md). Post-fix phone results are pending. Do not manufacture a bug list from hypotheses.
 
 ## Workflow
 

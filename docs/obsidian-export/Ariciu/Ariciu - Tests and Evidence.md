@@ -1,17 +1,23 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Tests and evidence
 
 Related: [[Ariciu - Development and Builds]], [[Ariciu - Current Status]], [[Ariciu - Debugging Playbook]].
 
+## First phone-review rc2 gate — 17 October
+
+**68 unit / 23 connected Android 17 emulator tests passed**, zero failures/errors/skips. Lint 0 errors/39 warnings; debug assembly/install/signature verification passed. Command: `./gradlew :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:lintDebug :app:assembleDebug`.
+
+See [[Ariciu - Phone Review 1]] for regression scope, actual native screenshots, intermediate failures corrected and phone retest. Swiftshader software GPU, Medium_Phone API37.2; older Android runtimes and Samsung S26 Ultra/One UI8.5/Android16 behavior remain unverified. No physical phone/data modified. The following rc1 evidence is historical and is not proof for rc2 changes.
+
 ## Last executed baseline
 
-On **2026-10-16**, the recorded full unit + connected emulator + lint + debug assembly command passed. On **2026-10-17**, this documentation audit read the stored XML/lint reports and compared source; it did **not** rerun application checks or phone tests.
+On **2026-10-16**, the recorded full unit + connected emulator + lint + debug assembly command passed. On **2026-10-17**, the earlier documentation audit read the stored XML/lint reports and compared source; it did **not** rerun application checks or phone tests.
 
 | Layer | Recorded result | What it establishes |
 | --- | --- | --- |

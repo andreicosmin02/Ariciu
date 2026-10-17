@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Product and decisions
@@ -34,10 +34,13 @@ The product should feel calm, polished and predictable, including for older and 
 
 Implemented: all four intensity choices, current map positioning, private local search, limited theme-specific offline map packs and selected-store chain reminders. See the feature note for their boundaries rather than reading this list as a guarantee.
 
-Not implemented: complete/worldwide address search, automatic roaming chain coverage, user-importable store catalogues, editable snooze duration, full-screen alarm UI, custom continuous playback, completed-reminder restart, in-app Done/Snooze controls, data export/backup and a non-Play-services positioning engine. These are not assumed next tasks.
+Not implemented: complete/worldwide address search, automatic roaming chain coverage, user-importable store catalogues, editable snooze duration, full-screen alarm UI, custom continuous playback, completed-reminder restart, in-app Snooze controls, data export/backup and a non-Play-services positioning engine. These are not assumed next tasks.
 
 Creating a separate reminder is currently the restart path for a completed task. Catalogue updates ship with app updates. The phone is the sole copy of user reminders; uninstall/clear-data is destructive. External maps disclose requests to their provider/CDN even though text/search queries stay local.
 
 ## Owner/engineer responsibilities
 
 The owner decides material UX/product trade-offs, coverage and privacy/cost changes. The engineer owns routine implementation, diagnosis, verification and reviewable commits. Preserve working semantics and data; no merge into master, force-push, branch deletion or release publication without authorization. New functionality should support a reported problem or a separately agreed objective during stabilization.
+
+
+Phone review changes and current evidence: [[Ariciu - Phone Review 1]].

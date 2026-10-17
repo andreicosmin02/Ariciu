@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Code map
@@ -52,3 +52,8 @@ One Gradle module: `:app`. Main package root: `app/src/main/java/ro/andrei/arici
 - `.gitignore`: generated outputs, local settings, signing/sensitive files and requested IDE file exclusions. Do not add local SDK configuration or signing keys to documentation.
 
 Tests mirror these packages in `app/src/test/java/` and `app/src/androidTest/java/`; release-flow instrumentation also lives in `feature/release/`. Generated KSP classes, build outputs and native caches are not source to edit. See [[Ariciu - Maintenance and Extension]] for extension boundaries.
+
+
+## Phone review update (17 October)
+
+`feature/places/StorePreviewScreen.kt` renders persisted chain areas on MapLibre with a List alternative. `ReminderRepository.complete`, `ReminderDao.complete` and `RemindersViewModel.complete` own card completion; shared `ExpandableSection` contains expanded help. See [[Ariciu - Phone Review 1]].

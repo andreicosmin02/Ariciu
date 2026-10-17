@@ -1,6 +1,6 @@
 # Ariciu documentation
 
-Current baseline: **1.1-rc1**, branch `feat/phone-release-candidate`. Current phase: **real-phone debugging and stabilization**, updated 2026-10-17. These documents describe inspected implementation and dated evidence; no physical-phone success is implied.
+Current baseline: **1.1-rc2**, branch `fix/phone-review-1`. Current phase: **real-phone debugging and stabilization**, updated 2026-10-17. These documents describe inspected implementation and dated evidence; no physical-phone success is implied.
 
 ## Start a development session
 
@@ -11,6 +11,7 @@ Current baseline: **1.1-rc1**, branch `feat/phone-release-candidate`. Current ph
 
 ## Product, implementation and testing
 
+- [First phone review: dispositions and retest](PHONE_REVIEW_1.md)
 - [Release candidate and APK](RELEASE_CANDIDATE.md)
 - [Nontechnical phone checklist](PHONE_VERIFICATION.md)
 - [Feature scope, provider/platform evidence and licensing](FEATURE_COMPLETION.md)
@@ -19,4 +20,4 @@ Current baseline: **1.1-rc1**, branch `feat/phone-release-candidate`. Current ph
 
 ## Full knowledge base
 
-[Obsidian export instructions](obsidian-export/README.md) and the [Ariciu index](obsidian-export/Ariciu/Ariciu.md) provide 25 focused notes with code references, diagrams, test inventories, user journeys and maintenance guidance. The existing personal vault was found but is read-only in this environment. Essential handoff information remains here in ordinary repository Markdown; the personal vault and its original notes are not committed.
+[Obsidian export instructions](obsidian-export/README.md) and the [Ariciu index](obsidian-export/Ariciu/Ariciu.md) provide 26 focused notes with code references, diagrams, test inventories, user journeys and maintenance guidance. The existing personal vault was synchronized with filesystem approval on 17 October; original planning/review notes and phone screenshots remain unchanged. Essential handoff information remains here in ordinary repository Markdown; the personal vault and its original notes are not committed.

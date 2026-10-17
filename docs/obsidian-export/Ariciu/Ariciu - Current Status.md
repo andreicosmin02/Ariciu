@@ -1,53 +1,26 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
-# Current status — stabilization handoff
+# Current status — first phone review
 
-Source/documentation audit: **2026-10-17**. Related: [[Ariciu - Tests and Evidence]], [[Ariciu - Risks and Technical Debt]], [[Ariciu - Debugging Playbook]].
+Current candidate: **1.1-rc2 / code 3**, branch **fix/phone-review-1**, based on feat/phone-release-candidate at 62557c5. No merge or publication. Source is authoritative; related: [[Ariciu - Phone Review 1]], [[Ariciu - Tests and Evidence]], [[Ariciu - Risks and Technical Debt]].
 
-## Baseline and Git history
+The owner's full rc1 review and all eight accompanying screenshots were inspected before implementation. Reporting phone: Samsung S26 Ultra, One UI 8.5, Android 16. **Post-fix physical-phone retesting is pending.**
 
-Current app: **Ariciu 1.1-rc1, version code 2**, Android 8+/Google Play services. Development branch: **feat/phone-release-candidate**, based on the completed redesign at `de9644e`; nothing merged into master. At audit start the worktree was clean and HEAD was `42f77a3`.
+Implemented: safe Done on cards; clearer Active/Completed and intensity; token-ranked local search with 231 malls added from the original source; draggable Create sheet and early Place/Chain choice; dedicated full-screen store map/list; new/refreshed snapshots bounded to 25 km; compact scalable editor; clearer Settings/offline explanations; original adaptive/monochrome vector fox. Urgent individual unlocked swiping is permitted by Android 14+ and means Next time.
 
-| Commit | Meaning |
-| --- | --- |
-| 42f77a3 | Release-candidate evidence and extended phone checklist; pre-audit documentation baseline. |
-| 011746c | Latest application implementation: Romania search, current location, bounded offline maps and UI polish. |
-| 4e959b9 | Alert intensities, snooze, Room 4 and multi-store lifecycle/allocation. |
-| 92ba3e9 | Feature-completion authorization and owner-requested IDE ignore rules. |
-| de9644e | Prior redesign handoff/base. |
+Room remains version 4, migrations unchanged. Existing data, notification identities and geofence recovery remain; all original 25,834 catalogue rows remain unchanged. No dependency/service/permission/backend/cost added. Older saved chain snapshots stay intact until explicit refresh. Android monitors at most 100 areas across reminders.
 
-The documentation-only handoff commit is discoverable with `git log -5 --oneline`; do not embed its own hash into files before it exists. Reinspect branch/worktree/history at the next session rather than assuming the repository never changes.
+## Evidence and next action
 
-## What is implemented
+See [[Ariciu - Phone Review 1]] for the executed checks, screenshots and focused phone checklist. Repository docs/RELEASE_CANDIDATE.md owns the current APK checksum; rebuilding can change bytes. Install with the same signing key over the existing app; never uninstall or clear the owner's data to test an upgrade.
 
-Single-place and selected-chain reminders, ENTER/EXIT, Once/Every visit, Room persistence/additive upgrades, creation/edit/delete/drafts, Active/Completed, four intensities and Alarm Stop/ten-minute Snooze, generation/occurrence-safe actions, registration journal/outbox/recovery. Current-location selection, private Romania town/shop search, seven chains, fair 100-area allocation and small theme-specific offline packs. System/Light/Dark, graphite/slate identity, accessible labeled controls and enlarged-text adaptations.
+Prioritize the owner's phone retest, background lifecycle/notification recovery, actual sound and OEM restrictions. No speculative feature expansion, master merge, force-push or release publication is authorized.
 
-See [[Ariciu - Features and Journeys]] for supported journeys and limitations rather than treating this inventory as an all-device guarantee.
+Repository handoff remains independent of the vault: AGENTS.md, docs/CODEX_HANDOFF.md, PROJECT_STATUS.md, STABILIZATION.md and PHONE_REVIEW_1.md. The export mirrors focused project notes; original planning notes and the private rc1 review are preserved.
 
-## Evidence and artifact
-
-Last full checks **2026-10-16**: 64 unit tests and 19 Android 17 emulator tests passed; lint 0 errors/39 warnings; debug assembly/install passed. Both themes/enlarged text reviewed and one small map area rendered with emulator networking disabled. Reports re-read on 17 October; no app checks rerun during documentation-only work. No dated physical-phone verification or field bug report has been supplied.
-
-Current local rebuilt APK, inspected 2026-10-17: `app/build/outputs/apk/debug/Ariciu-1.1-rc1-debug.apk` (same bytes as `app-debug.apk`), **74,463,275 bytes**.
-
-SHA256: `cc8c447b52ea8a9ab5afb10d01a24d0dfeecf97217b0bab1154dcb10a5d0567e`.
-
-This is the 16 October rebuild/signature-verified debug artifact; the older `e67b…` hash recorded in the previous release note identified an earlier build snapshot. Same version/source does not imply byte-identical APKs after rebuilding. Generated APKs/reports are not committed or guaranteed available in another environment. Rebuild and verify an artifact if absent; update installation requires the same signing key. No release published.
-
-## Next priorities
-
-1. Reproduce the owner's actual phone issue, isolate the failing boundary and preserve their installed data.
-2. Add focused regressions and fix root causes without weakening generation/occurrence/registration protections.
-3. Validate notification/geofence recovery, real audio/vibration and confusing UX on the reported device; use emulator evidence honestly.
-4. Keep both themes, accessibility, local operation and zero recurring cost intact. Update handoff/evidence after each meaningful fix.
-
-Do not resume broad feature expansion by default. Current permitted work centers on stabilization; significant new features/services/coverage changes require product direction. The documented Romania scope and supported Alarm fallback need no repeated approval. No merge, force-push, branch deletion or publication.
-
-## Knowledge transfer destination
-
-An existing vault and Ariciu project folder were found; the sandbox makes them read-only. New focused notes/screenshots are provided under `docs/obsidian-export/Ariciu/`, ready to merge into the existing folder. The three original notes remain untouched; see [[Ariciu - Historical Notes]]. Essential next-session instructions remain in repository `AGENTS.md`, `docs/CODEX_HANDOFF.md`, `docs/PROJECT_STATUS.md` and `docs/STABILIZATION.md`, independent of Obsidian access.
+Synchronization completed 17 October with filesystem approval: 26 notes/27 emulator images match the portable export. Original planning/review notes and phone screenshots remain unchanged.

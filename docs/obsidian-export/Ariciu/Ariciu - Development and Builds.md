@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-1
+version: 1.1-rc2
 ---
 
 # Development environment and builds
@@ -11,7 +11,7 @@ Related: [[Ariciu - Tests and Evidence]], [[Ariciu - Maintenance and Extension]]
 
 ## Reproducible configuration
 
-One Android application module `:app`, namespace/application ID `ro.andrei.ariciu`, Kotlin/Compose/Material 3. Minimum SDK 26 (Android 8); compile/target SDK 37; version `1.1-rc1`, code 2. Android SDK/platform/build tools and a compatible Android Studio installation are required.
+One Android application module `:app`, namespace/application ID `ro.andrei.ariciu`, Kotlin/Compose/Material 3. Minimum SDK 26 (Android 8); compile/target SDK 37; version `1.1-rc2`, code 3. Android SDK/platform/build tools and a compatible Android Studio installation are required.
 
 Use the checked-in wrapper: Gradle **9.5.0**, with distribution SHA configured. `gradle/gradle-daemon-jvm.properties` requests **JDK 25**. Java source/target compatibility is **11**; that is not the Gradle daemon JDK. Follow the existing toolchain rather than changing versions to resolve a local IDE mismatch. Android Gradle Plugin **9.3.1** uses built-in Kotlin; there is no separate kotlin-android plugin.
 
@@ -47,7 +47,7 @@ When no device is available, run unit/lint/assembly and explicitly report connec
 
 ## APK and installation
 
-Output: `app/build/outputs/apk/debug/app-debug.apk`. A convenience copy `Ariciu-1.1-rc1-debug.apk` currently exists alongside it; it is generated/local, not committed. Check [[Ariciu - Current Status]] for the recorded rebuilt artifact hash.
+Output: `app/build/outputs/apk/debug/app-debug.apk`. A convenience copy `Ariciu-1.1-rc2-debug.apk` currently exists alongside it; it is generated/local, not committed. Check [[Ariciu - Current Status]] for the recorded rebuilt artifact hash.
 
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
@@ -57,3 +57,6 @@ sha256sum app/build/outputs/apk/debug/app-debug.apk
 Install updates with the **same signing key** and application ID. If Android reports a signature/version incompatibility, preserve the installed app and investigate. Do not uninstall or clear storage to force an update: reminders have no cloud backup/export. Do not copy debug signing keys into Git or the vault.
 
 Release optimization is disabled in the current Gradle release type. This is an installable **debug candidate**, not a signed/published Play release. No release publication, production signing setup or merge is authorized by the handoff. Future distributable release work needs deliberate signing/version/policy review.
+
+
+Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
