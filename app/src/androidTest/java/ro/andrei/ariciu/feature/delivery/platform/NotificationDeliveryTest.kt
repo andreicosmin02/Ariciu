@@ -71,6 +71,7 @@ class NotificationDeliveryTest {
                         it.extras.getString("ariciu_occurrence") == "${record.generation}:1" } != true) delay(100) }
                 val n = manager.activeNotifications.single { it.tag == "reminder:$id" }.notification
                 assertEquals(AndroidReminderNotifications.channelId(intensity), n.channelId)
+                assertEquals(ro.andrei.ariciu.R.drawable.ic_reminder_notification, n.smallIcon.resId)
                 assertEquals(intensity in setOf(NotificationIntensity.URGENT, NotificationIntensity.ALARM),
                     n.flags and android.app.Notification.FLAG_ONGOING_EVENT != 0)
                 if (intensity == NotificationIntensity.SILENT) {
@@ -131,11 +132,20 @@ class NotificationDeliveryTest {
             assertEquals(1, manager.activeNotifications.count { it.tag == "reminder:$id" })
 
             // Android sends this exact PendingIntent when the user swipes the notification away.
+            assertEquals(first.deleteIntent,first.actions.first { it.title == "Next time" }.actionIntent)
+            assertNotEquals(first.deleteIntent,first.actions.first { it.title == "Done" }.actionIntent)
             first.deleteIntent.send()
             awaitCondition { record().phase == DeliveryPhase.WAITING_NEXT_VISIT.name && notification() == null }
             crossing("EXIT", 20); crossing("ENTER", 30)
             awaitCondition { record().occurrence == 2 && notification() != null }
-            requireNotNull(notification()).notification.actions.first { it.title == "Next time" }.actionIntent.send()
+            val second = requireNotNull(notification()).notification
+            assertNotEquals(first.deleteIntent,second.deleteIntent)
+            first.deleteIntent.send() // An old swipe cannot dismiss this new occurrence.
+            DeliveryWork.command(context,workDataOf("command" to "dispatch")).result.get()
+            awaitCondition { androidx.work.WorkManager.getInstance(context).getWorkInfosForUniqueWork("delivery-events").get().all { it.state.isFinished } }
+            assertEquals(DeliveryPhase.TRIGGERED.name,record().phase)
+            assertEquals(2,record().occurrence)
+            second.actions.first { it.title == "Next time" }.actionIntent.send()
             awaitCondition { record().phase == DeliveryPhase.WAITING_NEXT_VISIT.name && notification() == null }
             crossing("EXIT", 40); crossing("ENTER", 50)
             awaitCondition { record().occurrence == 3 && notification() != null }
