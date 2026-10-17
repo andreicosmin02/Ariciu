@@ -7,9 +7,11 @@ version: 1.1-rc2
 
 # Maps, radius selection and current position
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Search Catalogue]], [[Ariciu - Offline Maps]], [[Ariciu - Design and Accessibility]].
 
-Sources: `feature/locationpicker/ui/LocationPickerScreen.kt`, `CurrentPosition.kt`, `RadiusSelection.kt`, `geometry/RadiusGeometry.kt`, `map/RadiusMapGeometry.kt`.
+Sources: [feature/locationpicker/ui/LocationPickerScreen.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/locationpicker/ui/LocationPickerScreen.kt), [CurrentPosition.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/locationpicker/ui/CurrentPosition.kt), [RadiusSelection.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/locationpicker/ui/RadiusSelection.kt), `geometry/RadiusGeometry.kt`, `map/RadiusMapGeometry.kt`.
 
 ## Display boundary
 
@@ -41,3 +43,7 @@ Create uses a draggable Material 3 standard bottom sheet over the map, with an e
 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
+
+## Related reading
+
+[Search Catalogue](Ariciu%20-%20Search%20Catalogue.md) · [Offline Maps](Ariciu%20-%20Offline%20Maps.md) · [Design and Accessibility](Ariciu%20-%20Design%20and%20Accessibility.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md)

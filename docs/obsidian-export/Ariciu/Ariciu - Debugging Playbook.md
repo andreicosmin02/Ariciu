@@ -7,7 +7,9 @@ version: 1.1-rc1
 
 # Debugging playbook
 
-Related: [[Ariciu - Phone Issue Template]], [[Ariciu - Risks and Technical Debt]], [[Ariciu - Code Map]]. Repository-independent essential version: `docs/STABILIZATION.md`.
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
+Related: [[Ariciu - Phone Issue Template]], [[Ariciu - Risks and Technical Debt]], [[Ariciu - Code Map]]. Repository-independent essential version: [docs/STABILIZATION.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/STABILIZATION.md).
 
 ## Begin with the reported experience
 
@@ -63,4 +65,8 @@ For Alarm, compare channel sound, alarm volume, DND, lock state and panel openin
 
 ## Close a fix with evidence
 
-Record root cause, changed paths, regression case, executed counts, screenshots if relevant and what the phone must retest. Keep `docs/PROJECT_STATUS.md`, `docs/CODEX_HANDOFF.md` and [[Ariciu - Current Status]] consistent. Do not mark a user issue resolved solely because compilation succeeds.
+Record root cause, changed paths, regression case, executed counts, screenshots if relevant and what the phone must retest. Keep [docs/PROJECT_STATUS.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/PROJECT_STATUS.md), [docs/CODEX_HANDOFF.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/CODEX_HANDOFF.md) and [[Ariciu - Current Status]] consistent. Do not mark a user issue resolved solely because compilation succeeds.
+
+## Related reading
+
+[Phone Issue Template](Ariciu%20-%20Phone%20Issue%20Template.md) · [Risks and Technical Debt](Ariciu%20-%20Risks%20and%20Technical%20Debt.md) · [Code Map](Ariciu%20-%20Code%20Map.md) · [Current Status](Ariciu%20-%20Current%20Status.md)

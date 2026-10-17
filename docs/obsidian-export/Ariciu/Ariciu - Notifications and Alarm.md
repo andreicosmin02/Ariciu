@@ -7,9 +7,11 @@ version: 1.1-rc4
 
 # Notifications and Alarm
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Reminder Lifecycle]], [[Ariciu - Background Work and Recovery]], [[Ariciu - Geofencing and Permissions]].
 
-Source: `feature/delivery/platform/AndroidDelivery.kt` (`AndroidReminderNotifications`, `quietNotificationAction`) and `DeliveryWork.kt` (`NotificationActionReceiver`).
+Source: [feature/delivery/platform/AndroidDelivery.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/platform/AndroidDelivery.kt) (`AndroidReminderNotifications`, `quietNotificationAction`) and [DeliveryWork.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/platform/DeliveryWork.kt) (`NotificationActionReceiver`).
 
 ## Actual channels and behavior
 
@@ -62,3 +64,7 @@ Urgent still requests high importance and ongoing=true. Android 14+ permits indi
 ## Historical second phone review — rc3
 
 The notification small-icon resource now contains a dedicated transparent white 24dp fox, independent of the unchanged adaptive launcher. Actual Android 17 light/dark shades reviewed; Samsung rendering awaits rc3 retest. Read-only rc2 Samsung ADB confirmed HIGH/ongoing/deleteIntent. Owner swipe produced WAITING_NEXT_VISIT, INSIDE, occurrence 1, no visible/pending notification and REGISTERED monitoring. Android 14+ permits individual unlocked dismissal; locked/Clear all remain phone-test items. No repost/exemption workaround. [[Ariciu - Phone Review 2]] records limits without private content.
+
+## Related reading
+
+[Reminder Lifecycle](Ariciu%20-%20Reminder%20Lifecycle.md) · [Background Work and Recovery](Ariciu%20-%20Background%20Work%20and%20Recovery.md) · [Geofencing and Permissions](Ariciu%20-%20Geofencing%20and%20Permissions.md) · [Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md) · [Historical Notes](Ariciu%20-%20Historical%20Notes.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md)

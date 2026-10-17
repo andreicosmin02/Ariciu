@@ -7,12 +7,14 @@ version: 1.1-rc4
 
 # Design and accessibility
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 ## Current rc4 update
 
 Only Silent/Normal/Urgent are offered, with the five-minute swipe explanation before selection. Pending cards retain due/waiting status and outlined Mark done/Next time; legacy Alarm editors explain explicit conversion. Both themes/larger text remain supported. See [[Ariciu - Urgent Re-alerts]].
 
 
-Related: [[Ariciu - Features and Journeys]], [[Ariciu - Risks and Technical Debt]]. Canonical repository design record: `docs/design/DESIGN.md`. Sources: `ui/theme/`, `ui/components/`, and feature UI files in [[Ariciu - Code Map]].
+Related: [[Ariciu - Features and Journeys]], [[Ariciu - Risks and Technical Debt]]. Canonical repository design record: [docs/design/DESIGN.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/design/DESIGN.md). Sources: `ui/theme/`, `ui/components/`, and feature UI files in [[Ariciu - Code Map]].
 
 ## Identity and tokens
 
@@ -46,19 +48,19 @@ Automated evidence includes palette contrast checks, selected Compose semantics 
 These are copies of actual emulator captures collected on 16 October, not new screenshots from this documentation audit. Original files remain in `docs/design/screenshots/rc/`.
 
 Dark Create:
-![[Attachments/rc-dark-create.png]]
+![Ariciu emulator capture: rc-dark-create](Attachments/rc-dark-create.png)
 
 Light Create and editor:
-![[Attachments/rc-light-create.png]]
-![[Attachments/rc-light-editor.png]]
+![Ariciu emulator capture: rc-light-create](Attachments/rc-light-create.png)
+![Ariciu emulator capture: rc-light-editor](Attachments/rc-light-editor.png)
 
 Settings in both themes:
-![[Attachments/rc-dark-settings.png]]
-![[Attachments/rc-light-settings.png]]
+![Ariciu emulator capture: rc-dark-settings](Attachments/rc-dark-settings.png)
+![Ariciu emulator capture: rc-light-settings](Attachments/rc-light-settings.png)
 
 Enlarged alerts and reminders:
-![[Attachments/rc-large-alerts.png]]
-![[Attachments/rc-large-reminders.png]]
+![Ariciu emulator capture: rc-large-alerts](Attachments/rc-large-alerts.png)
+![Ariciu emulator capture: rc-large-reminders](Attachments/rc-large-reminders.png)
 
 Offline native rendering is in [[Ariciu - Offline Maps]]. Earlier redesign images remain historical in the repository. Compare future fixes against the appropriate RC baseline and capture new evidence with the issue/device/font settings recorded.
 
@@ -72,3 +74,7 @@ Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
 ## Historical second phone review — rc3
 
 rc3 uses horizontal traditional tabs joined to the bordered reminder panel, with counts, Tab/selection semantics and fixed visibility while content scrolls. Redundant headings/empty spacing removed. Mark done is outlined and has no checkmark. Settings status belongs beside Review, with stacked larger text; Create map gap: 8dp. Search has inline progress/polite announcements; new single arrivals have an off-by-default notify-on-save choice. Actual emulator evidence: [[Ariciu - Phone Review 2]].
+
+## Related reading
+
+[Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md) · [Features and Journeys](Ariciu%20-%20Features%20and%20Journeys.md) · [Risks and Technical Debt](Ariciu%20-%20Risks%20and%20Technical%20Debt.md) · [Code Map](Ariciu%20-%20Code%20Map.md) · [Offline Maps](Ariciu%20-%20Offline%20Maps.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md)

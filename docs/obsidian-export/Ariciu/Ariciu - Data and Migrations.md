@@ -7,9 +7,11 @@ version: 1.1-rc4
 
 # Data, persistence and migrations
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Reminder Lifecycle]], [[Ariciu - Chain Reminders]], [[Ariciu - Tests and Evidence]].
 
-Source: `app/src/main/java/ro/andrei/ariciu/feature/reminders/data/ReminderDatabase.kt`. Exported schemas: `app/schemas/ro.andrei.ariciu.feature.reminders.data.ReminderDatabase/{1,2,3,4,5}.json`.
+Source: [app/src/main/java/ro/andrei/ariciu/feature/reminders/data/ReminderDatabase.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/reminders/data/ReminderDatabase.kt). Exported schemas: `app/schemas/ro.andrei.ariciu.feature.reminders.data.ReminderDatabase/{1,2,3,4,5}.json`.
 
 ## Domain contracts
 
@@ -74,3 +76,7 @@ Cloud backup/device transfer are excluded in manifest/XML. There is no in-app us
 Room remains4 with schemas/migrations unchanged. save returns the exact committed generation; optional foreground arrival targets that identity and the first occurrence only. Choice remains draft/SavedState, not a new column. Existing snapshots/data are preserved. Actual phone DB/WAL diagnostics were checksum-consistent read-only snapshots, never committed or mutated. See [[Ariciu - Phone Review 2]].
 
 Card Next time transaction checks current unresolved Urgent/occurrence, clears retry state and rotates generation, preventing interrupted workers from restoring it. [[Ariciu - Urgent Re-alerts]] records migration/reopen/interleaving/upgrade evidence.
+
+## Related reading
+
+[Reminder Lifecycle](Ariciu%20-%20Reminder%20Lifecycle.md) · [Chain Reminders](Ariciu%20-%20Chain%20Reminders.md) · [Tests and Evidence](Ariciu%20-%20Tests%20and%20Evidence.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md) · [Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md)

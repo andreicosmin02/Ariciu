@@ -7,6 +7,8 @@ version: 1.1-rc4
 
 # Tests and evidence
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 ## Current rc4 update
 
 Current rc4 gate: **97 unit / 44 emulator tests passed**, lint **0 errors/39 warnings**, assembly/install/signature passed. Native system-font 2.0 UI passed 1/1 separately; actual shipping five-minute retry survived process death/reboot/APK replacement, queued safely with denied permission, and posted once on restore. Actual blocked Urgent channel/card resolution also checked. Failure diagnosis and phone limits are in the current record. Earlier counts below remain dated historical results. See [[Ariciu - Urgent Re-alerts]].
@@ -20,7 +22,7 @@ Related: [[Ariciu - Development and Builds]], [[Ariciu - Current Status]], [[Ari
 
 See [[Ariciu - Phone Review 1]] for regression scope, actual native screenshots, intermediate failures corrected and phone retest. Swiftshader software GPU, Medium_Phone API37.2; older Android runtimes and Samsung S26 Ultra/One UI 8.5/Android 16 behavior remain unverified. No physical phone/data modified. The following rc1 evidence is historical and is not proof for rc2 changes.
 
-## Last executed baseline
+## Historical rc1 gate — 16 October
 
 On **2026-10-16**, the recorded full unit + connected emulator + lint + debug assembly command passed. On **2026-10-17**, the earlier documentation audit read the stored XML/lint reports and compared source; it did **not** rerun application checks or phone tests.
 
@@ -35,7 +37,7 @@ On **2026-10-16**, the recorded full unit + connected emulator + lint + debug as
 
 Local report paths: `app/build/test-results/testDebugUnitTest/`, `app/build/outputs/androidTest-results/connected/`, `app/build/reports/lint-results-debug.xml` and the corresponding HTML reports. They are generated and may be replaced by later runs. Unit XML timestamps begin `2026-10-16T18:56:53`; connected aggregate begins `2026-10-16T18:57:32`. Do not treat an old report as proof for newly edited code.
 
-## Unit inventory
+## Historical rc1 unit inventory
 
 All are under `app/src/test/java/ro/andrei/ariciu/`.
 
@@ -56,7 +58,7 @@ All are under `app/src/test/java/ro/andrei/ariciu/`.
 | PaletteContrastTest | 1 | Selected foreground/background contrast pairs. |
 | ThemePreferenceTest | 2 | Appearance choice resolution. |
 
-## Instrumentation inventory
+## Historical rc1 instrumentation inventory
 
 All are under `app/src/androidTest/java/ro/andrei/ariciu/`.
 
@@ -74,18 +76,22 @@ All are under `app/src/androidTest/java/ro/andrei/ariciu/`.
 
 Migration/concurrency tests use controlled/sequential interleavings; they are not a live multi-process stress test. Snooze/model restoration checks are not a full reboot/process-kill audio test. Download-budget unit tests do not prove all native requests obey a budget across pauses/retries. No golden-image test or real remote tile assertion is invented.
 
-## Manual evidence and remaining work
+## Historical rc1 manual evidence and remaining work
 
 RC screenshots are checked in; see [[Ariciu - Design and Accessibility]]. One light pack recorded 31 protected vector tiles and 396 protected style/font/sprite resources and rendered roads/labels with emulator Wi-Fi/mobile disabled. Attribution and pin selection were visible. This does not prove other regions/themes or fully offline positioning.
 
-Still not verified: actual arrivals/departures while locked/backgrounded, force stop/reboot/update recovery on a phone, audio/vibration/DND, OEM battery restrictions, wall-clock changes during snooze, TalkBack/Switch Access, external keyboard and large display scaling usability. Follow `docs/PHONE_VERIFICATION.md` and record results with [[Ariciu - Phone Issue Template]].
+Still not verified: actual arrivals/departures while locked/backgrounded, force stop/reboot/update recovery on a phone, audio/vibration/DND, OEM battery restrictions, wall-clock changes during snooze, TalkBack/Switch Access, external keyboard and large display scaling usability. Follow [docs/PHONE_VERIFICATION.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/PHONE_VERIFICATION.md) and record results with [[Ariciu - Phone Issue Template]].
 
 Lint warning groups include dependency/version advisories, LogNotTimber, ModifierParameter, RedundantLabel, UnusedResources and UseKtx. The audit does not convert those 39 warnings into runtime bug reports or authorize bulk upgrades.
 
 ## Second phone review
 
-Current rc3 gate: **82 unit / 35 emulator instrumentation tests passed**, lint **0 errors / 39 warnings**, assembly/install/signature passed. Both raw and Gradle connected runners passed. Current checks, 19 new screenshots, actual foreground provider/manual simulated-position outcomes and limits are in [[Ariciu - Phone Review 2]]. Historical sections above do not prove new code. Actual Samsung rc2 swipe lifecycle was inspected read-only; all rc3 instrumentation targets only the emulator.
+Historical rc3 gate: **82 unit / 35 emulator instrumentation tests passed**, lint **0 errors / 39 warnings**, assembly/install/signature passed. Both raw and Gradle connected runners passed. Current checks, 19 new screenshots, actual foreground provider/manual simulated-position outcomes and limits are in [[Ariciu - Phone Review 2]]. Historical sections above do not prove new code. Actual Samsung rc2 swipe lifecycle was inspected read-only; all rc3 instrumentation targets only the emulator.
 
 ## rc4 consolidation and pre-release
 
-Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility remains private; no production key or app-wide licence was introduced. Earlier dated implementation/source evidence above retains its own scope.
+Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility is unchanged by documentation work; no production key or app-wide licence was introduced. Earlier dated implementation/source evidence above retains its own scope.
+
+## Related reading
+
+[Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md) · [Development and Builds](Ariciu%20-%20Development%20and%20Builds.md) · [Current Status](Ariciu%20-%20Current%20Status.md) · [Debugging Playbook](Ariciu%20-%20Debugging%20Playbook.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md) · [Design and Accessibility](Ariciu%20-%20Design%20and%20Accessibility.md) · [Phone Issue Template](Ariciu%20-%20Phone%20Issue%20Template.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md) · [Releases and Signing](Ariciu%20-%20Releases%20and%20Signing.md)

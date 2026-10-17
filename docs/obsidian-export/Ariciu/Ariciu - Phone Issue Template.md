@@ -7,6 +7,8 @@ version: 1.1-rc1
 
 # Phone issue report template
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Tests and Evidence]]. No actual phone issue/result is filled in here. Copy this template into a new issue note; keep personal locations private.
 
 ## What happened
@@ -51,3 +53,7 @@ Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Tests and Evidence]]. No ac
 - Phone retest outcome and remaining uncertainty:
 
 Do not uninstall/clear storage to troubleshoot an update. Do not attach a raw database, signing key, full log dump or personal address to a public repository. A compilation success is not a physical retest result.
+
+## Related reading
+
+[Debugging Playbook](Ariciu%20-%20Debugging%20Playbook.md) · [Tests and Evidence](Ariciu%20-%20Tests%20and%20Evidence.md)

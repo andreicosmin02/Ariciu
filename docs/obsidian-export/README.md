@@ -1,15 +1,31 @@
-# Obsidian knowledge-base export
+# Optional Ariciu knowledge base
 
-Updated 2026-10-17 for **Ariciu 1.1-rc4 / code 5**, authoritative master and the first verified GitHub pre-release, retaining the Urgent stabilization policy. Start at [Ariciu.md](Ariciu/Ariciu.md). **29 focused notes and 54 emulator screenshots** (8 historical rc1, 19 review1, 19 review2, 8 Urgent). Only project-owned documentation and dummy emulator captures are exported, never private owner reviews, phone images, logs or database snapshots.
+This portable collection explains Ariciu’s architecture, reminder lifecycle, Room migrations, geofence recovery, notifications, maps/search, design and testing. It contains **29 notes and 54 real emulator screenshots**, including dated release/review evidence. Obsidian is optional: it is not needed to build, test or contribute.
 
-## Existing vault synchronization
+## Read on GitHub or in a checkout
 
-Destination: existing `Desktop/obsidian/obsidian_vault/Personal Projects/Ariciu`. Managed files were compared with the preceding export at `525b609`; conflicts are checked again before copying. Authorized direct filesystem synchronization maintains the same existing folder; no nested duplicate or background/bidirectional plugin.
+Start at [Ariciu.md](Ariciu/Ariciu.md). Its standard Markdown links work on GitHub and in Obsidian. Notes retain internal `[[wikilinks]]` and have ordinary related-reading links; images use relative `Attachments/` links. Historical reports identify their version/date rather than describing old behavior as current.
 
-Synchronization completed on 17 October: all 29 notes/54 images match, and all 12 unmanaged original planning/review/phone files remain byte-for-byte unchanged; vault settings and unrelated folders are outside this copy. Historical private wiki targets intentionally resolve only in the existing vault, not the export.
+The [ordinary documentation index](../README.md), [developer setup](../DEVELOPMENT.md), [current status](../PROJECT_STATUS.md) and [source code](../../app/src/main/java/ro/andrei/ariciu) live in the same repository. Source code is authoritative for implementation; dated tests and device observations establish only the cases actually checked. The knowledge base complements these documents rather than replacing them.
 
-## Repository handoff
+## Open with Obsidian
 
-[Codex handoff](../CODEX_HANDOFF.md), [status](../PROJECT_STATUS.md) and [current Urgent policy/evidence/retest](../URGENT_RE_ALERTS.md) remain independent of vault access. Current gate: 97 unit/44 connected tests passed, lint 0 errors/39 warnings, debug assembly/install/signature; an additional native font-scale 2.0 test passed 1/1. Actual emulator default-five-minute recovery, real permission denial/restoration, channel blocking and card resolution were observed. Samsung checks remain pending; no phone operation occurred in this batch.
+1. Clone or download this repository.
+2. In Obsidian, choose **Open folder as vault** and select **`docs/obsidian-export/Ariciu`** inside your checkout. Select the folder containing `Ariciu.md` and `Attachments/`, not `docs/obsidian-export` or the repository root.
+3. Open **Ariciu.md** and follow the topic links. Diagrams use built-in Mermaid support; no community plugin, account or synchronization tool is required.
 
-Publication/signing/cleanup evidence: [Releases and Signing](Ariciu/Ariciu%20-%20Releases%20and%20Signing.md). The public root README references only inspected emulator screenshots, not private vault files. The current source tag is v1.1-rc4 on the verified source merge; subsequent README/docs commits do not alter the binary.
+Obsidian may create a local `.obsidian/` settings folder. Keep personal settings outside commits; no settings folder is needed to share the notes.
+
+## Incorporate into another vault
+
+Copy the entire **`Ariciu/`** directory into a location of your choice in an existing vault, retaining note filenames and the `Attachments/` directory together. All note/attachment targets are included. Review same-named files before copying to avoid overwriting your own notes; no pre-existing Ariciu notes are assumed.
+
+Internal navigation and screenshots remain available offline after copying. Source/document references inside the notes use GitHub links with repository-relative path labels, so moving the collection does not break them; those online links need internet and repository access where applicable. The outer README’s relative links to the checkout assume the original repository layout. The note index also links to online repository documentation for standalone copies.
+
+## Organization and maintenance
+
+- Current implementation: architecture, data/migrations, lifecycle, recovery, notifications, maps, catalogue and UI.
+- Engineering: code map, setup, maintenance, tests, bug-report template and known limitations.
+- History: included review/release records, with older behavior explicitly dated and linked to current policy.
+
+Update the relevant focused note when verified behavior changes, and retain the date/scope of historical evidence. See [Documentation Maintenance](Ariciu/Ariciu%20-%20Documentation%20Maintenance.md). Never copy private phone data, credentials or an unrelated personal vault into this repository.

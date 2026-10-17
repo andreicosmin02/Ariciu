@@ -7,9 +7,11 @@ version: 1.1-rc2
 
 # Chain reminders and shared geofence allocation
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Search Catalogue]], [[Ariciu - Reminder Lifecycle]], [[Ariciu - Geofencing and Permissions]].
 
-Sources: `feature/delivery/model/ChainLifecycle.kt`, `DeliveryEngine.kt`, `feature/remindereditor/ui/ReminderEditorScreen.kt`, Room saveEdited.
+Sources: [feature/delivery/model/ChainLifecycle.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/model/ChainLifecycle.kt), [DeliveryEngine.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/model/DeliveryEngine.kt), [feature/remindereditor/ui/ReminderEditorScreen.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/remindereditor/ui/ReminderEditorScreen.kt), Room saveEdited.
 
 ## Product contract
 
@@ -41,3 +43,7 @@ Automatically tested: union overlap, duplicate/out-of-order store events, Once/D
 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
+
+## Related reading
+
+[Search Catalogue](Ariciu%20-%20Search%20Catalogue.md) · [Reminder Lifecycle](Ariciu%20-%20Reminder%20Lifecycle.md) · [Geofencing and Permissions](Ariciu%20-%20Geofencing%20and%20Permissions.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md)

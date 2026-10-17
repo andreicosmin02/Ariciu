@@ -7,9 +7,11 @@ version: 1.1-rc4
 
 # Background commands, synchronization and recovery
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Architecture]], [[Ariciu - Notifications and Alarm]], [[Ariciu - Data and Migrations]].
 
-Source: `feature/delivery/platform/DeliveryWork.kt` and `UrgentRetryWork.kt`, with plain orchestration in `feature/delivery/model/DeliveryEngine.kt`.
+Source: [feature/delivery/platform/DeliveryWork.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/platform/DeliveryWork.kt) and [UrgentRetryWork.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/platform/UrgentRetryWork.kt), with plain orchestration in [feature/delivery/model/DeliveryEngine.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/model/DeliveryEngine.kt).
 
 ## Persistent work queues
 
@@ -76,3 +78,7 @@ No blanket exactly-once, immediate delivery or complete missed-event reconstruct
 Normal registration keeps initialTrigger0. The explicit immediate arrival is never replayed on reconcile/restart. Only a validated occurrence already committed to the normal outbox can recover dispatch. The shared runtime mutex serializes it with workers; exact generation and first-occurrence guard reject stale/duplicate attempts. Room/WorkManager/Android side effects remain separate commits. See [[Ariciu - Phone Review 2]].
 
 Current Urgent policy and executed recovery checks: [[Ariciu - Urgent Re-alerts]]. Final Urgent post revalidates inside a Room transaction; card Done/Next time rotate generation. Missing old-version swipe markers refresh only existing visible Urgent notifications quietly.
+
+## Related reading
+
+[Architecture](Ariciu%20-%20Architecture.md) · [Notifications and Alarm](Ariciu%20-%20Notifications%20and%20Alarm.md) · [Data and Migrations](Ariciu%20-%20Data%20and%20Migrations.md) · [Risks and Technical Debt](Ariciu%20-%20Risks%20and%20Technical%20Debt.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md) · [Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md)

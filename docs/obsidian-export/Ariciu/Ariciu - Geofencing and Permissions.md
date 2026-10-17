@@ -7,9 +7,11 @@ version: 1.1-rc1
 
 # Location, geofencing and staged permissions
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Background Work and Recovery]], [[Ariciu - Maps and Current Location]], [[Ariciu - Debugging Playbook]].
 
-Sources: `feature/delivery/platform/AndroidDelivery.kt`, `DeliveryWork.kt`, `feature/delivery/ui/DeliverySetupScreen.kt`, `app/src/main/AndroidManifest.xml`.
+Sources: [feature/delivery/platform/AndroidDelivery.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/platform/AndroidDelivery.kt), [DeliveryWork.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/platform/DeliveryWork.kt), [feature/delivery/ui/DeliverySetupScreen.kt](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/java/ro/andrei/ariciu/feature/delivery/ui/DeliverySetupScreen.kt), [app/src/main/AndroidManifest.xml](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/AndroidManifest.xml).
 
 ## Capabilities
 
@@ -45,3 +47,7 @@ The engine, not the platform adapter, selects up to 100 actual areas in fair det
 ## Reliability limits
 
 Android/Play services can delay or miss crossings; Wi-Fi/network assistance, weak signals, device settings, OEM battery restrictions and force stop matter. Reopening repairs what can be synchronized, not crossings that were never observed. No real-phone timing, reception or battery behavior is established at this handoff. Recheck official current documentation before changing these platform boundaries; source links are in [[Ariciu - Sources and Licensing]].
+
+## Related reading
+
+[Background Work and Recovery](Ariciu%20-%20Background%20Work%20and%20Recovery.md) · [Maps and Current Location](Ariciu%20-%20Maps%20and%20Current%20Location.md) · [Debugging Playbook](Ariciu%20-%20Debugging%20Playbook.md) · [Sources and Licensing](Ariciu%20-%20Sources%20and%20Licensing.md)

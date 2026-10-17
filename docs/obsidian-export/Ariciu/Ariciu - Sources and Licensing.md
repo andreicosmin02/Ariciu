@@ -7,9 +7,11 @@ version: 1.1-rc1
 
 # Sources, licensing, cost and privacy
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Maintenance and Extension]], [[Ariciu - Maps and Current Location]], [[Ariciu - Search Catalogue]], [[Ariciu - Notifications and Alarm]].
 
-These references preserve the official-source review recorded on **2026-10-15/16** in repository `docs/DELIVERY_ARCHITECTURE.md` and `docs/FEATURE_COMPLETION.md`. This documentation audit checked local implementation/provenance. OpenFreeMap terms and MapLibre licence files were also rechecked live on 2026-10-17; the other references retain their earlier review dates, rather than implying a fresh verification of every external term. Recheck current official sources before changing services, permissions or provider usage.
+These references preserve the official-source review recorded on **2026-10-15/16** in repository [docs/DELIVERY_ARCHITECTURE.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/DELIVERY_ARCHITECTURE.md) and [docs/FEATURE_COMPLETION.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/FEATURE_COMPLETION.md). This documentation audit checked local implementation/provenance. OpenFreeMap terms and MapLibre licence files were also rechecked live on 2026-10-17; the other references retain their earlier review dates, rather than implying a fresh verification of every external term. Recheck current official sources before changing services, permissions or provider usage.
 
 ## Cost boundary
 
@@ -40,7 +42,7 @@ MapLibre licence evidence rechecked on 17 October: [Compose 0.13.1 licence](http
 - [OSM attribution/copyright](https://www.openstreetmap.org/copyright), [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/)
 - [PyOsmium](https://osmcode.org/pyosmium/), [OkHttp licence at 4.12](https://raw.githubusercontent.com/square/okhttp/parent-4.12.0/LICENSE.txt)
 
-Local evidence: `app/src/main/assets/map/LICENSE-openfreemap.md`, `LICENSE-dark-style.md`, `LICENSE-light-style.md`; `app/src/main/assets/places/NOTICE.md`; full TSV and generator. Do not replace required legal notices with this summary.
+Local evidence: [app/src/main/assets/map/LICENSE-openfreemap.md](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/assets/map/LICENSE-openfreemap.md), [LICENSE-dark-style.md](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/assets/map/LICENSE-dark-style.md), [LICENSE-light-style.md](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/assets/map/LICENSE-light-style.md); [app/src/main/assets/places/NOTICE.md](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/assets/places/NOTICE.md); full TSV and generator. Do not replace required legal notices with this summary.
 
 ## Android/Play official references
 
@@ -60,4 +62,8 @@ Catalogue queries, reminders, lifecycle and theme are local; no analytics/backen
 
 ## rc4 consolidation and pre-release
 
-Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility remains private; no production key or app-wide licence was introduced. Earlier dated implementation/source evidence above retains its own scope.
+Authoritative baseline is now master, tag v1.1-rc4, with an actual verified attached debug APK. [[Ariciu - Releases and Signing]] records the authorized merge, asset download/checksum/certificate, fresh 97-unit/44-emulator gate, signing/licensing limits and pending phone checks. Repository visibility is unchanged by documentation work; no production key or app-wide licence was introduced. Earlier dated implementation/source evidence above retains its own scope.
+
+## Related reading
+
+[Maintenance and Extension](Ariciu%20-%20Maintenance%20and%20Extension.md) · [Maps and Current Location](Ariciu%20-%20Maps%20and%20Current%20Location.md) · [Search Catalogue](Ariciu%20-%20Search%20Catalogue.md) · [Notifications and Alarm](Ariciu%20-%20Notifications%20and%20Alarm.md) · [Releases and Signing](Ariciu%20-%20Releases%20and%20Signing.md)

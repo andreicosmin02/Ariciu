@@ -7,11 +7,13 @@ version: 1.1-rc1
 
 # Maintenance and safe extension
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 Related: [[Ariciu - Architecture]], [[Ariciu - Data and Migrations]], [[Ariciu - Sources and Licensing]], [[Ariciu - Documentation Maintenance]].
 
 ## Stabilization workflow
 
-Inspect current Git/source before edits; preserve unrelated changes. Work on the latest feature branch or a focused branch from it, never restart from master. Reproduce a reported issue, use TDD for application-owned behavior, keep changes coherent and inspect the exact diff. For Android implementation apply the repository android-milestone skill; for code/test/manifest/build changes apply android-verification before declaring completion. Documentation-only work does not require a new feature implementation cycle.
+Inspect current Git/source before edits; preserve unrelated changes. Create a focused branch from the latest clean master; do not revive obsolete release branches. Reproduce a reported issue, use TDD for application-owned behavior, keep changes coherent and inspect the exact diff. Ordinary contributors follow CONTRIBUTING.md and docs/DEVELOPMENT.md. Codex users can optionally use the repository android-milestone/android-verification skills; no agent or skill installation is needed to contribute. Documentation-only work does not require a new feature implementation cycle.
 
 Run focused tests first, then relevant full gates and assembly; record unexecuted device checks. Commit/push authorized verified changes without routine approval pauses. No force push, merge, branch deletion, data discard or release publication. Keep credentials, phone databases, APKs and unrelated personal notes out of Git.
 
@@ -35,9 +37,9 @@ Do not clear user storage or add destructive fallback to make migration tests pa
 
 ## Catalogue maintenance
 
-`tools/build_place_catalog.py` accepts input PBF and output TSV paths; uses development-only PyOsmium. Run in an isolated development environment, not Android. Download a free Geofabrik Romania extract deliberately, retain source replication timestamp and SHA, regenerate the ODbL derivative, review counts/bounds/dedup/chain recognition and run catalogue tests.
+[tools/build_place_catalog.py](https://github.com/andreicosmin02/Ariciu/blob/master/tools/build_place_catalog.py) accepts input PBF and output TSV paths; uses development-only PyOsmium. Run in an isolated development environment, not Android. Download a free Geofabrik Romania extract deliberately, retain source replication timestamp and SHA, regenerate the ODbL derivative, review counts/bounds/dedup/chain recognition and run catalogue tests.
 
-Update together: `assets/places/romania.tsv`, NOTICE/source hash/date/counts, hardcoded UI catalogue wording, relevant tests and docs. The script writes a generation date but does not update all provenance/UI. Store coordinates approximate ways and can change. Existing reminders persist snapshots; an app data update is not automatic chain refresh. Test same store ID/new coordinates and selection/generation behavior before shipping data refreshes.
+Update together: [assets/places/romania.tsv](https://github.com/andreicosmin02/Ariciu/blob/master/app/src/main/assets/places/romania.tsv), NOTICE/source hash/date/counts, hardcoded UI catalogue wording, relevant tests and docs. The script writes a generation date but does not update all provenance/UI. Store coordinates approximate ways and can change. Existing reminders persist snapshots; an app data update is not automatic chain refresh. Test same store ID/new coordinates and selection/generation behavior before shipping data refreshes.
 
 Never substitute paid Places/geocoder or unrestricted public Nominatim/Overpass endpoints. Broader countries, completeness promises or a new provider are meaningful product decisions.
 
@@ -54,3 +56,7 @@ Use the existing version catalogue; avoid unrelated upgrades. Verify official pr
 ## Release maintenance
 
 Increment version deliberately for a new candidate, rebuild/test, preserve signing identity and provide a checksum plus date. Update phone checklist and evidence separately from claims of phone success. Keep screenshots dated and tied to the source version. Public release/signing/policy preparation is separate authorized work, not implied by a debug APK.
+
+## Related reading
+
+[Architecture](Ariciu%20-%20Architecture.md) · [Data and Migrations](Ariciu%20-%20Data%20and%20Migrations.md) · [Sources and Licensing](Ariciu%20-%20Sources%20and%20Licensing.md) · [Documentation Maintenance](Ariciu%20-%20Documentation%20Maintenance.md)

@@ -1,11 +1,13 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: master
+version: 1.1-rc4
 ---
 
 # Keeping the knowledge base accurate
+
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
 
 Related: [[Ariciu]], [[Ariciu - Current Status]], [[Ariciu - Maintenance and Extension]].
 
@@ -13,13 +15,13 @@ Related: [[Ariciu]], [[Ariciu - Current Status]], [[Ariciu - Maintenance and Ext
 
 Source shows implemented behavior; dated executed reports establish test evidence; device observations establish only the scenario actually tried. Owner decisions define product scope. Planning prose alone proves none of these. Notes changed for the first phone review are marked 1.1-rc2; unchanged mechanism notes retain their historical rc1 metadata. Future editors should update metadata only after checking relevant source.
 
-Repository essentials: `AGENTS.md` gives working rules/current priority; `docs/PROJECT_STATUS.md` gives evidence and state; `docs/CODEX_HANDOFF.md` gives next-session instructions; `docs/STABILIZATION.md` and `STABILIZATION_AUDIT.md` preserve debugging methods/limits without requiring the vault.
+Repository essentials: [AGENTS.md](https://github.com/andreicosmin02/Ariciu/blob/master/AGENTS.md) gives working rules/current priority; [docs/PROJECT_STATUS.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/PROJECT_STATUS.md) gives evidence and state; [docs/CODEX_HANDOFF.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/CODEX_HANDOFF.md) gives next-session instructions; [docs/STABILIZATION.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/STABILIZATION.md) and [STABILIZATION_AUDIT.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/STABILIZATION_AUDIT.md) preserve debugging methods/limits without requiring the vault.
 
 ## Organization
 
-`Ariciu.md` is the entry point. Focused notes link by Obsidian wikilinks and refer to repository-relative code paths. The Code Map locates implementation; Tests and Evidence owns the detailed test inventory; Sources and Licensing owns external references; Current Status owns the dated baseline. Avoid copying every detail into every note.
+[Ariciu.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/obsidian-export/Ariciu/Ariciu.md) is the entry point. Focused notes link by Obsidian wikilinks and refer to repository-relative code paths. The Code Map locates implementation; Tests and Evidence owns the detailed test inventory; Sources and Licensing owns external references; Current Status owns the dated baseline. Avoid copying every detail into every note.
 
-`Attachments/` contains only copied project emulator screenshots. The three pre-existing vault planning notes remain historical and are linked by [[Ariciu - Historical Notes]]. No plugins/settings, new vault or unrelated personal files are required.
+`Attachments/` contains project emulator screenshots. Historical decisions are summarized in [[Ariciu - Historical Notes]] using included records; there are no external private-note dependencies. Opening/copying instructions are in the export README.
 
 ## Update protocol
 
@@ -30,8 +32,8 @@ Repository essentials: `AGENTS.md` gives working rules/current priority; `docs/P
 5. Check wikilinks, local file links, headings and screenshot references; retain required attribution/licensing.
 6. Review the documentation diff and commit only project-owned material. Never commit the personal vault itself.
 
-When copying newer exports into an existing vault, compare/merge same-named notes first; do not overwrite user edits blindly. Keep the original planning notes. There is no automatic bidirectional sync or new maintenance automation in this handoff.
+When incorporating a newer copy into another vault, compare same-named notes first and preserve your own edits. This is an optional manual import; no synchronization service, filesystem permission arrangement or personal directory is assumed. Work on repository files when contributing, without accessing anyone else’s vault.
 
-## Access note
+## Related reading
 
-The current session has authorized filesystem access to the existing vault; no background sync/plugin is used. Future sessions must check their actual permissions rather than assuming escalation is required. Compare same-named notes against the previous repository export and refuse conflicts before writing. Preserve all original planning notes, private phone review/screenshots and unrelated files. The portable repository copy remains authoritative for handoff if the vault is unavailable. See docs/obsidian-export/README.md for the recorded synchronization outcome.
+[Ariciu](Ariciu.md) · [Current Status](Ariciu%20-%20Current%20Status.md) · [Maintenance and Extension](Ariciu%20-%20Maintenance%20and%20Extension.md) · [Historical Notes](Ariciu%20-%20Historical%20Notes.md)

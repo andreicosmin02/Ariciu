@@ -7,12 +7,14 @@ version: 1.1-rc4
 
 # Risks, limitations and technical debt
 
+[Knowledge-base index](Ariciu.md) · [Repository docs](https://github.com/andreicosmin02/Ariciu/blob/master/docs/README.md) · [Developer setup](https://github.com/andreicosmin02/Ariciu/blob/master/README.md#development)
+
 ## Current rc4 update
 
 Urgent re-alert deadlines are durable and inexact; Android/Doze/OEM/channel/DND can delay or suppress them. Room/WorkManager/platform commits remain separate. The final Urgent post now revalidates within a transaction; this fixes the controlled completion-between-snapshot-and-post case, not every previously hypothesized race. See [[Ariciu - Urgent Re-alerts]].
 
 
-Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Current Status]]. Essential repository record: `docs/STABILIZATION_AUDIT.md`. Reviewed source on 2026-10-17; **no field bug report has yet been supplied**. The recorded automated suite is green. Items below distinguish established boundaries from hypotheses.
+Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Current Status]]. Essential repository record: [docs/STABILIZATION_AUDIT.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/STABILIZATION_AUDIT.md). Reviewed source on 2026-10-17; two phone reviews have supplied field feedback; their confirmed findings and fixes are recorded separately. The recorded automated suite is green. Items below distinguish established boundaries from hypotheses.
 
 ## Established limitations
 
@@ -26,7 +28,7 @@ Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Current Status]]. Essential
 ## Confirmed copy/maintenance debt in inspected source
 
 - Triggered status now offers card Done and refers to the notification’s available actions. Snooze status can describe ten minutes without calculating remaining time; partial-chain status can take precedence over snooze.
-- Generic notification setup opens the Normal channel even when app-wide notification access is blocked. Per-intensity links exist in expanded alert settings. Reproduction should establish the confusing route on the reported Android version before changing it.
+- Historical setup routing debt was fixed in rc2: the generic notification setup opens app-wide settings; per-intensity links remain in expanded alert settings. See [[Ariciu - Phone Review 1]].
 - Catalogue date/attribution wording appears in multiple UI/NOTICE/generator locations and must be updated together. Strict chain encoding can fail decoding rather than tolerate malformed stored data; no such corrupt user row is reported.
 - There are 39 lint warnings, unused legacy resources and large combined platform/database files. Refactor only when it materially supports a fix; do not redesign working layers or bulk-upgrade dependencies.
 
@@ -50,3 +52,7 @@ Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
 ## Historical second phone review — rc3
 
 Actual Samsung unlocked swipe/Next time was observed for rc2; it is an Android limitation rather than a missing ongoing flag. Locked/Clear all/new fox/immediate precise-fix behavior still need rc3 phone retest. Location accuracy is estimated; conservative margins are not a physical-boundary guarantee. Initial check may be skipped when backgrounded/timed out; saved reminder/outbox/recovery remain. Earlier unrelated source hypotheses remain unclaimed. [[Ariciu - Phone Review 2]].
+
+## Related reading
+
+[Urgent Re-alerts](Ariciu%20-%20Urgent%20Re-alerts.md) · [Debugging Playbook](Ariciu%20-%20Debugging%20Playbook.md) · [Current Status](Ariciu%20-%20Current%20Status.md) · [Phone Review 1](Ariciu%20-%20Phone%20Review%201.md) · [Phone Review 2](Ariciu%20-%20Phone%20Review%202.md)
