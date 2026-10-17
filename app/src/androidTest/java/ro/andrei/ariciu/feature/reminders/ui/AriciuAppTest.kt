@@ -34,7 +34,8 @@ class AriciuAppTest {
         compose.onNodeWithText("Ariciu").assertIsDisplayed()
         compose.onNodeWithTag("location_picker_confirm_button").performClick()
         compose.onNodeWithTag("reminder_editor_title_field").performTextInput("Buy bread")
-        compose.onNodeWithText("Leave").performScrollTo().performClick()
+        // Exercise the accessible choice action without racing Android's native keyboard resize.
+        compose.onNodeWithText("Leave").performScrollTo().performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick) { it() }
         compose.onNodeWithText("Leave").assertIsSelected()
         compose.runOnIdle { assertEquals(ReminderTransition.EXIT, vm.draft.value.transition) }
         compose.onNodeWithTag("reminder_save").performClick()
@@ -50,6 +51,10 @@ class AriciuAppTest {
             assertEquals(1, repo.rows.value.size)
             assertEquals(ReminderTransition.EXIT, repo.rows.value.single().transition)
         }
+        compose.onNodeWithText("Done", substring = false).performScrollTo().performClick()
+        compose.onNodeWithText("Completed · 1").performScrollTo().performClick().assertIsSelected()
+        compose.onNodeWithText("Buy milk").assertIsDisplayed()
+        compose.onNodeWithText("Completed reminders").assertIsDisplayed()
     }
 
     @Test fun tabsPreserveDraftAndAppearanceSelectionIsExplicit() {
@@ -72,6 +77,7 @@ class AriciuAppTest {
         compose.runOnIdle { assertEquals(ThemePreference.DARK, appearance) }
         compose.onNodeWithTag("theme_LIGHT").performClick().assertIsSelected()
         compose.onNodeWithTag("nav_Create").performClick()
+        compose.onNodeWithTag("place_sheet_toggle").performClick()
         compose.onNodeWithText("500 m").performClick()
         compose.onNodeWithTag("location_picker_confirm_button").performClick()
         compose.onNodeWithTag("reminder_editor_title_field").performTextInput("Prescription")

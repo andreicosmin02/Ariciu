@@ -21,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -48,18 +49,25 @@ import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Position
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LocationPickerScreen(
     onLocationSelected: (SelectedLocation) -> Unit,
     initialLocation: SelectedLocation? = null,
     onCancel: (() -> Unit)? = null,
+    chainName: String? = null,
+    onChainSelected: (String?) -> Unit = {},
 ) {
     var selectedCoordinates by rememberSaveable(stateSaver = listSaver(
         save = { listOf(it.latitude, it.longitude) }, restore = { SelectedCoordinates(it[0], it[1]) },
     )) { mutableStateOf(SelectedCoordinates(initialLocation?.latitude ?: 45.6579, initialLocation?.longitude ?: 25.6012)) }
     var radiusMeters by rememberSaveable { mutableIntStateOf(initialLocation?.radiusMeters ?: DEFAULT_RADIUS_METERS) }
     var moreRadius by rememberSaveable { mutableStateOf(false) }
+    var coordinatesVisible by rememberSaveable { mutableStateOf(false) }
+    var preview by remember { mutableStateOf(false) }
+    var choosingChain by rememberSaveable { mutableStateOf(false) }
+    var catalog by remember { mutableStateOf<List<CatalogPlace>>(emptyList()) }
+    var catalogFailed by remember { mutableStateOf(false) }
     var details by rememberSaveable { mutableStateOf(false) }
     val cameraState = rememberCameraState(firstPosition = CameraPosition(
         target = Position(latitude = selectedCoordinates.latitude, longitude = selectedCoordinates.longitude), zoom = 14.0))
@@ -69,6 +77,20 @@ fun LocationPickerScreen(
     val context = LocalContext.current
     val baseStyle = remember(dark) { BaseStyle.Uri(OfflineMaps.styleUri(dark)) }
     val scope = rememberCoroutineScope()
+    LaunchedEffect(context) { try { catalog = LocalPlaces.load(context) } catch (e: CancellationException) { throw e } catch (_: Exception) { catalogFailed = true } }
+    val nearbyStores = remember(catalog, chainName, selectedCoordinates) {
+        if (chainName == null) emptyList() else chainPlaces(catalog, chainName, selectedCoordinates.latitude, selectedCoordinates.longitude)
+    }
+    val sheetState = rememberStandardBottomSheetState(initialValue = SheetValue.PartiallyExpanded)
+    val density = LocalDensity.current
+    var sheetPeek by remember { mutableStateOf(88.dp) }
+    val sheetScaffold = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
+    LaunchedEffect(details, moreRadius, coordinatesVisible) {
+        if (details || moreRadius || coordinatesVisible) {
+            withFrameNanos { }
+            sheetState.expand()
+        }
+    }
     val offlineMaps = remember(context) { OfflineMaps.get(context) }
     val offlineError by offlineMaps.error.collectAsState()
     val downloadedAreas by offlineMaps.areas.collectAsState()
@@ -101,23 +123,92 @@ fun LocationPickerScreen(
             if (!moving) selectedCoordinates = SelectedCoordinates(cameraState.position.target.latitude, cameraState.position.target.longitude)
         }
     }
-    BoxWithConstraints(Modifier.fillMaxSize()) {
-        val compact = maxHeight < 620.dp || LocalDensity.current.fontScale > 1.3f
-        Column(Modifier.fillMaxSize().then(if (compact) Modifier.verticalScroll(rememberScrollState()) else Modifier)) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 18.dp),
-                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("Ariciu", style = MaterialTheme.typography.titleMedium, color = colors.onSurfaceVariant)
-                    Text("Choose a place", style = MaterialTheme.typography.headlineMedium)
+    if (preview && chainName != null) {
+        ro.andrei.ariciu.feature.places.StorePreviewScreen(
+            nearbyStores.map { ro.andrei.ariciu.feature.delivery.model.ChainArea(it.id, it.latitude, it.longitude) }, catalog,
+            SelectedLocation(selectedCoordinates.latitude, selectedCoordinates.longitude, radiusMeters), { preview = false })
+        return
+    }
+    Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text("Ariciu", style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+                Text("Choose a place", style = MaterialTheme.typography.titleLarge)
+            }
+            if (onCancel != null) TextButton(onClick = onCancel) { Text("Back") }
+        }
+        Row(Modifier.widthIn(max = 640.dp).fillMaxWidth().align(Alignment.CenterHorizontally).padding(horizontal = 20.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { showSearch = true }, modifier = Modifier.weight(1f).heightIn(min = 52.dp),
+                shape = MaterialTheme.shapes.medium, contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)) {
+                Text("Search places", modifier = Modifier.weight(1f))
+                Icon(AriciuIcons.Search, null, Modifier.size(20.dp))
+            }
+            FilledTonalIconButton(onClick = { if (context.hasMapLocationPermission()) locate() else locationExplanation = true },
+                enabled = !locating, modifier = Modifier.size(52.dp)) {
+                if (locating) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+                else Icon(AriciuIcons.Locate, "My location", Modifier.size(24.dp))
+            }
+        }
+        FlowRow(Modifier.fillMaxWidth().padding(horizontal = 20.dp).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterChip(chainName == null, { onChainSelected(null) }, label = { Text("Single place") }, modifier = Modifier.heightIn(min = 48.dp))
+            FilterChip(chainName != null, { choosingChain = true }, label = { Text(chainName ?: "Supermarket chain") }, modifier = Modifier.heightIn(min = 48.dp))
+        }
+        BoxWithConstraints(Modifier.weight(1f)) {
+        val sheetBodyHeight = (maxHeight - sheetPeek).coerceAtLeast(48.dp)
+        BottomSheetScaffold(modifier = Modifier.fillMaxSize(), scaffoldState = sheetScaffold,
+            sheetPeekHeight = sheetPeek, sheetContainerColor = colors.surface,
+            sheetDragHandle = null, sheetContent = {
+                Column(Modifier.fillMaxWidth().onSizeChanged { sheetPeek = with(density) { it.height.toDp() } }, horizontalAlignment = Alignment.CenterHorizontally) {
+                    Surface(Modifier.padding(top = 8.dp).size(width = 32.dp, height = 4.dp), shape = MaterialTheme.shapes.small, color = colors.outlineVariant) {}
+                    TextButton(onClick = { scope.launch { if (sheetState.currentValue == SheetValue.Expanded) sheetState.partialExpand() else sheetState.expand() } },
+                        modifier = Modifier.fillMaxWidth().testTag("place_sheet_toggle"), contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)) {
+                        Column(Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
+                            Text(if (chainName == null) "Around this spot" else "Around selected stores", style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
+                            Text(if (sheetState.currentValue == SheetValue.Expanded) "Collapse place options" else "Expand place options", style = MaterialTheme.typography.bodySmall)
+                        }
+                        Text("$radiusMeters m", style = MaterialTheme.typography.titleSmall, modifier = Modifier.testTag("location_picker_radius_value"))
+                    }
                 }
-                if (onCancel != null) TextButton(onClick = onCancel) { Text("Back") }
-            }
-            FlowRow(Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(onClick = { showSearch = true }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Search places") }
-                TextButton(onClick = { if (context.hasMapLocationPermission()) locate() else locationExplanation = true },
-                    enabled = !locating, modifier = Modifier.heightIn(min = 48.dp)) { Text(if (locating) "Finding you…" else "My location") }
-            }
-            Box(Modifier.fillMaxWidth().then(if (compact) Modifier.height(280.dp) else Modifier.weight(1f))
+                Column(Modifier.fillMaxWidth().heightIn(max = sheetBodyHeight).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FlowRow(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(100, 200, 500).forEach { radius ->
+                            FilterChip(selected = radiusMeters == radius, onClick = { radiusMeters = radius },
+                                leadingIcon = if (radiusMeters == radius) ({ Icon(AriciuIcons.Check, null, Modifier.size(16.dp)) }) else null,
+                                label = { Text("$radius m") }, modifier = (if (density.fontScale > 1.3f) Modifier.fillMaxWidth() else Modifier.weight(1f)).heightIn(min = 48.dp), shape = MaterialTheme.shapes.small)
+                        }
+                    }
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = { moreRadius = !moreRadius; scope.launch { sheetState.expand() } }) { Text(if (moreRadius) "Less" else "More distances") }
+                        TextButton(onClick = { details = !details; scope.launch { sheetState.expand() } }) { Text("Location details") }
+                    }
+                    if (moreRadius) Slider(value = radiusMeters.toFloat(), onValueChange = { radiusMeters = snapRadiusMeters(it) },
+                        valueRange = MIN_RADIUS_METERS.toFloat()..MAX_RADIUS_METERS.toFloat(), steps = RADIUS_SLIDER_STEPS,
+                        modifier = Modifier.testTag("location_picker_radius_slider").semantics { contentDescription = "Reminder radius in metres" })
+                    if (chainName != null) {
+                        Text("${nearbyStores.size} listed stores within 25 km of this pin. Move the map to change the area. At most 40 stores; coverage may be incomplete.", style = MaterialTheme.typography.bodySmall)
+                        if (nearbyStores.isEmpty()) Text(if (catalogFailed) "Catalogue unavailable. Try a single place." else "No nearby stores. Move the map or choose another chain.", color = colors.error)
+                        TextButton(onClick = { preview = true }, enabled = nearbyStores.isNotEmpty()) { Text("Preview stores on map") }
+
+                    }
+                    if (details) Surface(color = colors.surfaceContainer, shape = MaterialTheme.shapes.medium) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Keep the map available offline", style = MaterialTheme.typography.titleSmall)
+                            Text("Saves roads, labels and map detail for about 4 × 4 km in this theme. It does not add stores to search or change which places trigger reminders. Search is already offline. Other areas and zoom levels may need internet.", style = MaterialTheme.typography.bodySmall)
+                            downloadedAreas.lastOrNull()?.let { area -> Text(if (area.complete) "Map area saved. Manage in Settings → Offline maps." else if (area.active) "Downloading ${(area.progress * 100).toInt()}%" else "Download paused. Resume in Settings → Offline maps.", style = MaterialTheme.typography.bodySmall) }
+                            TextButton(onClick = { downloadConfirm = true }) { Text("Download this area") }
+                            TextButton(onClick = { coordinatesVisible = !coordinatesVisible }) { Text(if (coordinatesVisible) "Hide coordinates" else "Show coordinates") }
+                            if (coordinatesVisible) {
+                                Text(selectedCoordinates.formatLatitude(), Modifier.testTag("location_picker_latitude"), style = MaterialTheme.typography.bodySmall)
+                                Text(selectedCoordinates.formatLongitude(), Modifier.testTag("location_picker_longitude"), style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(16.dp))
+                }
+            }) { _ ->
+            Box(Modifier.fillMaxSize().padding(bottom = sheetPeek)
                 .testTag("location_picker_map_area"), contentAlignment = Alignment.Center) {
                 MaplibreMap(Modifier.fillMaxSize(), baseStyle = baseStyle,
                     cameraState = cameraState, onMapLoadFailed = { mapFailed = true }, onMapLoadFinished = { mapFailed = false },
@@ -125,6 +216,12 @@ fun LocationPickerScreen(
                     val source = rememberGeoJsonSource(data = GeoJsonData.Features(boundary))
                     FillLayer(id = "reminder-radius-fill", source = source, color = const(colors.primary), opacity = const(0.14f))
                     LineLayer(id = "reminder-radius-outline", source = source, color = const(colors.primary), width = const(2.dp))
+                    nearbyStores.forEach { place ->
+                        val storeBoundary = remember(place, radiusMeters) { buildRadiusBoundary(SelectedCoordinates(place.latitude, place.longitude), radiusMeters).toGeoJsonPolygon() }
+                        val storeSource = rememberGeoJsonSource(data = GeoJsonData.Features(storeBoundary))
+                        FillLayer(id = "store-${place.id}", source = storeSource, color = const(colors.primary), opacity = const(0.4f))
+                        LineLayer(id = "store-outline-${place.id}", source = storeSource, color = const(colors.primary), width = const(2.dp))
+                    }
                 }
                 CenterSelectionMarker()
                 Surface(Modifier.align(Alignment.BottomStart).padding(12.dp).widthIn(max = 300.dp),
@@ -138,46 +235,24 @@ fun LocationPickerScreen(
                         style = MaterialTheme.typography.bodyMedium)
                 }
             }
-            Surface(shape = androidx.compose.foundation.shape.RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                color = colors.surface, shadowElevation = 6.dp) {
-                Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text("Around this spot", style = MaterialTheme.typography.titleLarge)
-                        Text("$radiusMeters m", style = MaterialTheme.typography.titleMedium, color = colors.primary,
-                            modifier = Modifier.testTag("location_picker_radius_value"))
-                    }
-                    Text("How close should you be?", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
-                    Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf(100, 200, 500).forEach { radius ->
-                            FilterChip(selected = radiusMeters == radius, onClick = { radiusMeters = radius },
-                                leadingIcon = if (radiusMeters == radius) ({ Icon(AriciuIcons.Check, null, Modifier.size(16.dp)) }) else null,
-                                label = { Text("$radius m") }, modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                                shape = MaterialTheme.shapes.small,
-                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = colors.primaryContainer,
-                                    selectedLabelColor = colors.onPrimaryContainer))
-                        }
-                    }
-                    if (moreRadius) Slider(value = radiusMeters.toFloat(), onValueChange = { radiusMeters = snapRadiusMeters(it) },
-                        valueRange = MIN_RADIUS_METERS.toFloat()..MAX_RADIUS_METERS.toFloat(), steps = RADIUS_SLIDER_STEPS,
-                        modifier = Modifier.testTag("location_picker_radius_slider").semantics { contentDescription = "Reminder radius in metres" })
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = { moreRadius = !moreRadius }, modifier = Modifier.heightIn(min = 48.dp)) { Text(if (moreRadius) "Less" else "More distances") }
-                        TextButton(onClick = { details = !details }, modifier = Modifier.heightIn(min = 48.dp)) { Text("Location details") }
-                    }
-                    if (details) {
-                        Text(selectedCoordinates.formatLatitude(), Modifier.testTag("location_picker_latitude"), style = MaterialTheme.typography.bodyMedium)
-                        Text(selectedCoordinates.formatLongitude(), Modifier.testTag("location_picker_longitude"), style = MaterialTheme.typography.bodyMedium)
-                        downloadedAreas.lastOrNull()?.let { area -> Text(if (area.complete) "Offline ${area.name.substringAfter(" · ").lowercase(java.util.Locale.ROOT)} area saved. Manage in Settings." else if (area.active) "Downloading ${(area.progress * 100).toInt()}%" else "Download paused. Resume in Settings.", style = MaterialTheme.typography.bodySmall) }
-                        TextButton(onClick = { downloadConfirm = true }) { Text("Download this area") }
-                        Text("Download a small area for this theme; new areas need internet. Offline packs are in Settings.", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
-                    }
-                    PrimaryAction("Use this place", onClick = { onLocationSelected(SelectedLocation(
-                        selectedCoordinates.latitude, selectedCoordinates.longitude, radiusMeters)) },
-                        enabled = !cameraState.isCameraMoving, modifier = Modifier.testTag("location_picker_confirm_button"))
-                }
-            }
+        }
+        }
+        Surface(color = colors.surface) {
+            PrimaryAction(if (chainName == null) "Use this place" else "Use these stores", onClick = {
+                onLocationSelected(SelectedLocation(selectedCoordinates.latitude, selectedCoordinates.longitude, radiusMeters))
+            }, enabled = !cameraState.isCameraMoving && (chainName == null || nearbyStores.isNotEmpty()),
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp).testTag("location_picker_confirm_button"))
         }
     }
+    if (choosingChain) AlertDialog(onDismissRequest = { choosingChain = false }, title = { Text("Choose a supermarket chain") }, text = {
+        Column(Modifier.verticalScroll(rememberScrollState())) {
+            Text("Up to 40 listed stores within 25 km of your pin. Romania catalogue; missing stores are possible. Review the map before saving.", style = MaterialTheme.typography.bodyMedium)
+            if (catalogFailed) Text("Could not load stores. A single place still works.")
+            catalog.map { it.chain }.filter { it.isNotBlank() }.distinct().sorted().forEach { chain ->
+                TextButton(onClick = { onChainSelected(chain); choosingChain = false }, modifier = Modifier.fillMaxWidth()) { Text(chain) }
+            }
+        }
+    }, confirmButton = { TextButton(onClick = { choosingChain = false }) { Text("Close") } })
     if (showSearch) PlaceSearchDialog(selectedCoordinates, onDismiss = { showSearch = false }, onSelect = { place ->
         showSearch = false
         scope.launch { cameraState.animateTo(CameraPosition(target = Position(latitude = place.latitude, longitude = place.longitude), zoom = 15.0)) }
@@ -191,7 +266,7 @@ fun LocationPickerScreen(
         }) { Text(if (permissionAsked) "Open settings" else "Allow location") } },
         dismissButton = { TextButton(onClick = { locationExplanation = false }) { Text("Not now") } })
     if (downloadConfirm) AlertDialog(onDismissRequest = { downloadConfirm = false }, title = { Text("Keep this area offline?") },
-        text = { Text("Download about 4 × 4 km around your pin, for the ${if (dark) "dark" else "light"} map, at neighbourhood detail. Uses internet and up to 45 MB; up to three areas. Keep Create open while downloading. Manage or delete areas in Settings. Offline maps don’t guarantee offline location detection. Map requests are sent to OpenFreeMap and its CDN.") },
+        text = { Text("Download about 4 × 4 km around your pin, for the ${if (dark) "dark" else "light"} map, at neighbourhood detail. Saves the basemap (roads and labels), not extra searchable shops or reminder coverage. Search already works offline. Uses internet and up to 45 MB; up to three areas. Keep Create open while downloading. Manage or delete areas in Settings. Offline maps don’t guarantee offline location detection. Map requests are sent to OpenFreeMap and its CDN.") },
         confirmButton = { TextButton(onClick = { downloadConfirm = false; offlineMaps.download(selectedCoordinates.latitude, selectedCoordinates.longitude, dark); message = "Preparing the area. View progress or resume it in Settings → Offline maps." }) { Text("Download area") } },
         dismissButton = { TextButton(onClick = { downloadConfirm = false }) { Text("Cancel") } })
     offlineError?.let { error -> AlertDialog(onDismissRequest = { offlineMaps.error.value = null }, title = { Text("Offline maps") }, text = { Text(error) },
@@ -223,8 +298,8 @@ private fun PlaceSearchDialog(centre: SelectedCoordinates, onDismiss: () -> Unit
     }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Find a place") }, text = {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(query, { query = it }, label = { Text("Town, store or store address") }, singleLine = true, modifier = Modifier.fillMaxWidth().testTag("place_search"))
-            Text("Romania · offline · OpenStreetMap. Selected shops and towns, not every address. Dataset: 16 Oct 2026.", style = MaterialTheme.typography.bodySmall)
+            OutlinedTextField(query, { query = it }, label = { Text("Town, mall, store or store address") }, singleLine = true, modifier = Modifier.fillMaxWidth().testTag("place_search"))
+            Text("Romania · offline · OpenStreetMap. Selected malls, shops and towns, not every address. OSM source: 15 Oct 2026.", style = MaterialTheme.typography.bodySmall)
             when {
                 failed -> Text("Could not open the local catalogue. You can still choose a pin on the map.")
                 places == null -> Text("Opening local places…")
@@ -234,7 +309,7 @@ private fun PlaceSearchDialog(centre: SelectedCoordinates, onDismiss: () -> Unit
                     TextButton(onClick = { onSelect(place) }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                         Column(Modifier.fillMaxWidth()) {
                             Text(place.name, style = MaterialTheme.typography.titleMedium)
-                            Text(place.address.ifBlank { "Town or village in Romania" }, style = MaterialTheme.typography.bodySmall)
+                            Text(place.address.ifBlank { if (place.kind == "town") "Town or village in Romania" else "${if (place.kind == "mall") "Shopping centre" else "Shop"} · Address not listed" }, style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 } }

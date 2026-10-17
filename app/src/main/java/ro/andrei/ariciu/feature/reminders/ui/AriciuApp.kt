@@ -70,6 +70,7 @@ fun AriciuApp(viewModel: RemindersViewModel,
                 ReminderRoute.DELIVERY -> DeliverySetupScreen(capabilities, { viewModel.navigate(ReminderRoute.MAP) }, themePreference, onThemeChange)
                 ReminderRoute.MAP -> stateHolder.SaveableStateProvider("map_${draft.location}") {
                     LocationPickerScreen(onLocationSelected = viewModel::chooseLocation, initialLocation = draft.location,
+                        chainName = draft.chainName, onChainSelected = { viewModel.updateDraft(draft.copy(chainName = it, chainAreas = emptyList())) },
                         onCancel = if (draft.location != null) ({ viewModel.navigate(ReminderRoute.EDITOR) }) else null)
                 }
                 ReminderRoute.EDITOR -> ReminderEditorScreen(draft, viewModel::updateDraft,

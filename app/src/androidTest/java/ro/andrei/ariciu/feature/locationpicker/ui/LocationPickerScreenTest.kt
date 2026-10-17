@@ -1,9 +1,11 @@
 package ro.andrei.ariciu.feature.locationpicker.ui
 
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.semantics.SemanticsActions
@@ -30,26 +32,34 @@ class LocationPickerScreenTest {
     @Test
     fun locationPickerScreen_showsTitleAndMapArea() {
         composeTestRule.setContent {
-            LocationPickerScreen(onLocationSelected = { })
+            ro.andrei.ariciu.ui.theme.AriciuTheme { LocationPickerScreen(onLocationSelected = { }) }
         }
 
         composeTestRule.onNodeWithText("Choose a place").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_map_area").assertIsDisplayed()
         composeTestRule.onNodeWithTag("location_picker_center_pin").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("place_sheet_toggle").performClick()
         composeTestRule.onNodeWithText("Location details").performClick()
+        composeTestRule.onNodeWithText("Show coordinates").performScrollTo().performClick()
+        composeTestRule.onNodeWithTag("location_picker_latitude").performScrollTo()
+        composeTestRule.waitForIdle()
+        val instrumentation = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+        val capture = java.io.File(instrumentation.targetContext.filesDir, "review/review-coordinates.png").apply { parentFile!!.mkdirs() }
+        instrumentation.uiAutomation.takeScreenshot().let { bitmap ->
+            capture.outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
+        }
         composeTestRule.onNodeWithTag("location_picker_latitude").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("location_picker_longitude").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("location_picker_radius_value").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("location_picker_radius_value").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("location_picker_longitude").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("location_picker_radius_value", useUnmergedTree = true).assertTextEquals("200 m")
 
-        composeTestRule.onNodeWithText("More distances").performClick()
+        composeTestRule.onNodeWithText("More distances").performScrollTo().performClick()
         composeTestRule.onNodeWithTag("location_picker_radius_slider")
             .assertIsDisplayed()
             .performSemanticsAction(SemanticsActions.SetProgress) { setProgress ->
                 setProgress(500f)
             }
 
-        composeTestRule.onNodeWithTag("location_picker_radius_value").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("location_picker_radius_value", useUnmergedTree = true).assertTextEquals("500 m")
     }
 
     @Test
@@ -57,7 +67,7 @@ class LocationPickerScreenTest {
         var selectedLocation: SelectedLocation? = null
 
         composeTestRule.setContent {
-            LocationPickerScreen(onLocationSelected = { selectedLocation = it })
+            ro.andrei.ariciu.ui.theme.AriciuTheme { LocationPickerScreen(onLocationSelected = { selectedLocation = it }) }
         }
 
         composeTestRule.onNodeWithTag("location_picker_confirm_button")
@@ -81,10 +91,11 @@ class LocationPickerScreenTest {
         var selectedLocation: SelectedLocation? = null
 
         composeTestRule.setContent {
-            LocationPickerScreen(onLocationSelected = { selectedLocation = it })
+            ro.andrei.ariciu.ui.theme.AriciuTheme { LocationPickerScreen(onLocationSelected = { selectedLocation = it }) }
         }
 
-        composeTestRule.onNodeWithText("More distances").performClick()
+        composeTestRule.onNodeWithTag("place_sheet_toggle").performClick()
+        composeTestRule.onNodeWithText("More distances").performScrollTo().performClick()
         composeTestRule.onNodeWithTag("location_picker_radius_slider")
             .performSemanticsAction(SemanticsActions.SetProgress) { setProgress ->
                 setProgress(500f)

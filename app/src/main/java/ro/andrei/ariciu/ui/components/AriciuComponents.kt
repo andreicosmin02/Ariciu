@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.Role
@@ -39,6 +40,8 @@ object AriciuIcons {
         moveTo(4f, 6f); lineTo(20f, 6f); moveTo(4f, 12f); lineTo(20f, 12f); moveTo(4f, 18f); lineTo(20f, 18f)
         moveTo(8f, 3f); lineTo(8f, 9f); moveTo(16f, 9f); lineTo(16f, 15f); moveTo(10f, 15f); lineTo(10f, 21f)
     }
+    val Search = icon("Search") { moveTo(17f, 10f); curveTo(17f, 19f, 3f, 19f, 3f, 10f); curveTo(3f, 1f, 17f, 1f, 17f, 10f); moveTo(15f, 15f); lineTo(21f, 21f) }
+    val Locate = icon("My location") { moveTo(19f, 12f); curveTo(19f, 21f, 5f, 21f, 5f, 12f); curveTo(5f, 3f, 19f, 3f, 19f, 12f); moveTo(12f, 2f); lineTo(12f, 7f); moveTo(12f, 17f); lineTo(12f, 22f); moveTo(2f, 12f); lineTo(7f, 12f); moveTo(17f, 12f); lineTo(22f, 12f) }
     val Back = icon("Back") { moveTo(14f, 5f); lineTo(7f, 12f); lineTo(14f, 19f) }
     val Arrow = icon("Arrow") { moveTo(5f, 12f); lineTo(19f, 12f); moveTo(13f, 6f); lineTo(19f, 12f); lineTo(13f, 18f) }
     val Check = icon("Check") { moveTo(5f, 12f); lineTo(10f, 17f); lineTo(19f, 7f) }
@@ -47,8 +50,8 @@ object AriciuIcons {
 @Composable
 fun ScreenHeading(title: String, subtitle: String? = null, modifier: Modifier = Modifier) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })
-        if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodyLarge,
+        Text(title, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
+        if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
@@ -66,7 +69,7 @@ fun ChoiceCard(title: String, description: String? = null, selected: Boolean, on
         shape = MaterialTheme.shapes.medium,
         color = if (selected) colors.primaryContainer else colors.surface,
         border = BorderStroke(if (selected) 1.5.dp else 1.dp, if (selected) colors.primary else colors.outlineVariant)) {
-        Row(Modifier.heightIn(min = 64.dp).padding(16.dp), verticalAlignment = Alignment.Top,
+        Row(Modifier.heightIn(min = 56.dp).padding(12.dp), verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(title, style = MaterialTheme.typography.titleMedium,
@@ -84,5 +87,22 @@ fun PrimaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
     Button(onClick, modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = enabled,
         shape = MaterialTheme.shapes.medium, contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)) {
         Text(text, style = MaterialTheme.typography.labelLarge)
+    }
+}
+
+/** Disclosure content stays inside the surface that owns its accessible toggle. */
+@Composable
+fun ExpandableSection(title: String, expanded: Boolean, onToggle: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = MaterialTheme.shapes.medium) {
+        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            TextButton(onClick = onToggle, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).semantics {
+                stateDescription = if (expanded) "Expanded" else "Collapsed"
+            }, contentPadding = PaddingValues(horizontal = 4.dp)) {
+                Text(title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.labelLarge)
+                Spacer(Modifier.width(8.dp))
+                Text(if (expanded) "−" else "+", style = MaterialTheme.typography.titleMedium)
+            }
+            if (expanded) content()
+        }
     }
 }

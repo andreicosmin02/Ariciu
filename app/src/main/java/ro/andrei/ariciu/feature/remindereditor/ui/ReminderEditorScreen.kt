@@ -54,6 +54,11 @@ fun ReminderEditorScreen(
     LaunchedEffect(draft.chainName, draft.location, catalog) {
         if (draft.chainName != null && draft.chainAreas.isEmpty() && catalog.isNotEmpty()) selectChain(draft.chainName)
     }
+    val editorScroll = rememberScrollState()
+    if (viewingStores && draft.location != null) {
+        StorePreviewScreen(draft.chainAreas, catalog, draft.location, { viewingStores = false })
+        return
+    }
     Scaffold(modifier = Modifier.imePadding(), contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             Surface(color = colors.surface) {
@@ -65,21 +70,21 @@ fun ReminderEditorScreen(
                 }
             }
         }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(editorScroll).padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)) {
             TextButton(onClick = onCancel, enabled = !busy, contentPadding = PaddingValues(0.dp)) {
                 Icon(AriciuIcons.Back, null, Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp)); Text("Cancel")
             }
-            ScreenHeading(if (editing) "Edit reminder" else "What should you remember?",
+            ScreenHeading(if (editing) "Edit reminder" else "New reminder",
                 if (editing) "Make it right for your next visit." else "Add a note and choose when to hear it.")
             OutlinedTextField(value = draft.title, onValueChange = { onDraftChange(draft.copy(title = it)) },
                 label = { Text("Reminder") }, placeholder = { Text("For example, pick up a prescription") },
                 enabled = !busy, minLines = 1, maxLines = 3,
-                textStyle = MaterialTheme.typography.titleLarge, shape = MaterialTheme.shapes.medium,
+                textStyle = MaterialTheme.typography.bodyLarge, shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.fillMaxWidth().testTag("reminder_editor_title_field"))
             Surface(shape = MaterialTheme.shapes.medium, color = colors.surfaceContainer) {
-                Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Icon(AriciuIcons.Place, null, tint = colors.primary, modifier = Modifier.size(24.dp))
                         Column(Modifier.weight(1f)) {
@@ -98,29 +103,16 @@ fun ReminderEditorScreen(
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(draft.chainName?.let { "$it · ${draft.chainAreas.size} selected stores" } ?: "Use a supermarket chain instead") }
             if (catalogError) Text("Store catalogue unavailable. A single map pin still works.", color = colors.error)
             if (draft.chainName != null) {
+                if (draft.chainAreas.isEmpty()) Text("No listed stores within 25 km. Change the pin, choose another chain, or use a single place.", color = colors.error)
                 var chainHelp by rememberSaveable { mutableStateOf(false) }
-                Text("${draft.chainAreas.size} nearest listed stores. Change the pin and refresh when travelling.", style = MaterialTheme.typography.bodyMedium)
-                TextButton(onClick = { chainHelp = !chainHelp }) { Text("How chain reminders work") }
-                if (chainHelp) Text("This is an incomplete Romania catalogue. Done completes the whole reminder. Every visit waits until you leave all selected store areas. Missing crossings can delay rearming. Store data updates with the app; refresh picks the nearest stores from its current catalogue.", style = MaterialTheme.typography.bodyMedium)
+                Text("${draft.chainAreas.size} selected stores. Refresh within 25 km of your pin when travelling.", style = MaterialTheme.typography.bodyMedium)
+                ExpandableSection("How chain reminders work", chainHelp, { chainHelp = !chainHelp }) { Text("This is an incomplete Romania catalogue. Done completes the whole reminder. Every visit waits until you leave all selected store areas. Missing crossings can delay rearming. Store data updates with the app; refresh picks listed stores within 25 km from its current catalogue.", style = MaterialTheme.typography.bodySmall) }
                 TextButton(onClick = { viewingStores = true; focus.clearFocus() }) { Text("View selected stores") }
                 TextButton(onClick = { selectChain(draft.chainName) }, enabled = !busy && catalog.isNotEmpty()) { Text("Refresh stores around this pin") }
             }
-            if (viewingStores) AlertDialog(onDismissRequest = { viewingStores = false }, title = { Text("Selected ${draft.chainName} stores") }, text = {
-                androidx.compose.foundation.lazy.LazyColumn(Modifier.heightIn(max = 400.dp)) {
-                    items(draft.chainAreas.size) { index ->
-                        val area = draft.chainAreas[index]
-                        val place = catalog.firstOrNull { it.id == area.id }
-                        Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                            Text(place?.name ?: "Store ${index + 1}", style = MaterialTheme.typography.titleMedium)
-                            Text(place?.address?.ifBlank { null } ?: "%.4f, %.4f".format(java.util.Locale.ROOT, area.latitude, area.longitude), style = MaterialTheme.typography.bodyMedium)
-                            draft.location?.let { Text("%.1f km from your pin".format(java.util.Locale.ROOT, distanceMeters(it.latitude,it.longitude,area.latitude,area.longitude)/1000), style = MaterialTheme.typography.bodySmall) }
-                        }
-                    }
-                }
-            }, confirmButton = { TextButton(onClick = { viewingStores = false }) { Text("Close") } })
             if (choosingChain) AlertDialog(onDismissRequest = { choosingChain = false }, title = { Text("Choose places") }, text = {
                 Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Romania · OpenStreetMap, 16 Oct 2026. Store coverage may be incomplete or outdated. Choose a pin near the area you visit; refresh stores when you travel.")
+                    Text("Up to 40 listed stores within 25 km of your pin. Romania · OpenStreetMap source: 15 Oct 2026. Coverage may be incomplete. Refresh when travelling.")
                     TextButton(onClick = { selectChain(null); choosingChain = false }) { Text("Only my map pin") }
                     catalog.map { it.chain }.filter { it.isNotBlank() }.distinct().sorted().forEach { chain ->
                         TextButton(onClick = { selectChain(chain); choosingChain = false }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(chain) }

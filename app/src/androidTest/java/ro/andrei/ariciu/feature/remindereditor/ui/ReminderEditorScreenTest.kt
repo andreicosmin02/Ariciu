@@ -33,7 +33,7 @@ class ReminderEditorScreenTest {
             ReminderEditorScreen()
         }
 
-        composeTestRule.onNodeWithText("What should you remember?").assertIsDisplayed()
+        composeTestRule.onNodeWithText("New reminder").assertIsDisplayed()
         composeTestRule.onNodeWithTag("reminder_editor_title_field")
             .assertIsDisplayed()
             .assertTextEquals("Reminder", "", includeEditableText = true)

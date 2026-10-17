@@ -85,9 +85,9 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
     val colors = MaterialTheme.colorScheme
     var showExplanation by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        verticalArrangement = Arrangement.spacedBy(16.dp)) {
         ScreenHeading("Settings", "Appearance and reminder delivery.")
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SettingsPanel {
             SectionLabel("Appearance")
             if (LocalDensity.current.fontScale > 1.3f) Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 ThemePreference.entries.forEach { preference ->
@@ -104,7 +104,7 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
             }
             Text("System follows your phone’s appearance.", style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
         }
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SettingsPanel {
             SectionLabel("Reminder delivery")
             Surface(color = colors.surfaceContainer, shape = MaterialTheme.shapes.medium) {
                 Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -129,20 +129,22 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
             }
             if (current.blockedIntensities.isNotEmpty()) Text("Alerts turned off: ${current.blockedIntensities.joinToString { it.label }}. Review notification channels below.", color = colors.error)
             var showChannels by rememberSaveable { mutableStateOf(false) }
-            TextButton(onClick = { showChannels = !showChannels }) { Text(if (showChannels) "Hide alert settings" else "Sound and alert settings") }
-            if (showChannels) ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.entries.forEach { intensity ->
-                TextButton(onClick = { context.startActivity(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                    .putExtra(Settings.EXTRA_CHANNEL_ID, AndroidReminderNotifications.channelId(intensity))) }) {
-                    Text("${intensity.label} alert settings")
+            ExpandableSection("Sound and alert settings", showChannels, { showChannels = !showChannels }) {
+                ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.entries.forEach { intensity ->
+                    TextButton(onClick = { context.startActivity(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        .putExtra(Settings.EXTRA_CHANNEL_ID, AndroidReminderNotifications.channelId(intensity))) }, modifier = Modifier.fillMaxWidth()) {
+                        Text("${intensity.label} alert settings", modifier = Modifier.weight(1f))
+                    }
                 }
             }
+            Text("Retry monitoring after changing permissions or phone settings. This re-registers eligible reminder areas; it does not trigger an alert or replay a missed visit.", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
             OutlinedButton(onClick = { DeliveryWork.reconcile(context, force = true) }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
                 shape = MaterialTheme.shapes.medium) { Text("Check reminders again") }
         }
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SettingsPanel {
             SectionLabel("Offline maps")
-            Text("Download a small area from Create → Location details. Packs include the theme used when downloaded. Downloads pause when leaving this screen or Create.", style = MaterialTheme.typography.bodyMedium)
+            Text("Keeps roads, labels and map detail available without internet for about 4 × 4 km in the downloaded theme. It does not download extra searchable stores or change reminder coverage; search already works offline. Start in Create → Location details. Resume partial downloads here. Leaving Settings or Create pauses downloads.", style = MaterialTheme.typography.bodyMedium)
             if (offlineAreas.isEmpty()) Text("No downloaded areas yet.", color = colors.onSurfaceVariant)
             offlineError?.let { Text(it, color = colors.error) }
             offlineAreas.forEach { area ->
@@ -160,12 +162,13 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
             }
             Text("Sizes show map resources; shared cache and database overhead are additional. Android app storage shows the total.", style = MaterialTheme.typography.bodySmall)
             TextButton(onClick = { appSettings() }) { Text("Phone storage settings") }
-            Text("Place search: Romania catalogue © OpenStreetMap contributors, ODbL 1.0. Geofabrik extract, 16 Oct 2026. Shops and addresses may be missing or outdated. Searches stay on this phone.", style = MaterialTheme.typography.bodySmall)
+            Text("Place search: Romania catalogue © OpenStreetMap contributors, ODbL 1.0. Geofabrik source: 15 Oct 2026; catalogue rebuilt 17 Oct 2026. Shops and addresses may be missing or outdated. Searches stay on this phone.", style = MaterialTheme.typography.bodySmall)
         }
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = { showExplanation = !showExplanation }, contentPadding = PaddingValues(0.dp)) { Text("How reminders work") }
-            if (showExplanation) Text("Your reminders stay on this phone. Android uses Google Play services to notice when you enter or leave an area. Alerts can take a few minutes, and battery restrictions or weak location signals can delay or prevent them. Location may need a network connection. Sound and pop-ups follow your phone’s notification settings.",
-                style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+        SettingsPanel {
+            ExpandableSection("How reminders work", showExplanation, { showExplanation = !showExplanation }) {
+                Text("Your reminders stay on this phone. Android uses Google Play services to notice when you enter or leave an area. Alerts can take a few minutes, and battery restrictions or weak location signals can delay or prevent them. Location may need a network connection. Sound and pop-ups follow your phone’s notification settings.",
+                    style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+            }
             Text("Private by design. No account. No subscription.", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
             Text("Maps © OpenFreeMap · OpenMapTiles · OpenStreetMap contributors. Basemap design © CARTO, Stamen & Paul Norman.",
                 style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
@@ -191,8 +194,8 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
                     "notifications" -> if (Build.VERSION.SDK_INT >= 33 && !requestedNotifications &&
                         androidx.core.content.ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                         requestedNotifications = true; permission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    } else context.startActivity(Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                        .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName).putExtra(Settings.EXTRA_CHANNEL_ID, REMINDER_CHANNEL))
+                    } else context.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                        .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName))
                     "location" -> context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
                     "play" -> {
                         val api = GoogleApiAvailability.getInstance()
@@ -214,7 +217,7 @@ private fun SetupStep(title: String, ready: Boolean, description: String, enable
     }
     val descriptionContent: @Composable (Modifier) -> Unit = { modifier ->
         Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                 Text(title, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 if (ready) Icon(AriciuIcons.Check, "Allowed", tint = colors.primary, modifier = Modifier.size(20.dp))
             }
@@ -226,5 +229,12 @@ private fun SetupStep(title: String, ready: Boolean, description: String, enable
     } else Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         descriptionContent(Modifier.weight(1f)); action()
+    }
+}
+
+@Composable
+private fun SettingsPanel(content: @Composable ColumnScope.() -> Unit) {
+    Surface(color = MaterialTheme.colorScheme.surface, shape = MaterialTheme.shapes.medium) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
     }
 }
