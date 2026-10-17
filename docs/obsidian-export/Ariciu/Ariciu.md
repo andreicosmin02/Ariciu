@@ -1,7 +1,7 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/urgent-realerts
+implementation_baseline: master
 version: 1.1-rc4
 ---
 
@@ -10,6 +10,8 @@ version: 1.1-rc4
 Ariciu is a local Android app that reminds you when a place becomes relevant. This knowledge base describes **1.1-rc4, version code 5**, checked against source on 17 October 2026. The current phase is **debugging and stabilization from real-phone use**.
 
 ## Start here
+
+- [[Ariciu - Releases and Signing]] — authoritative master, first GitHub pre-release, verified APK and safe branch cleanup.
 
 - [[Ariciu - Urgent Re-alerts]] — current rc4 behavior, Alarm retirement, migration, verification and retest.
 
@@ -45,7 +47,7 @@ Ariciu is a local Android app that reminds you when a place becomes relevant. Th
 | Implemented | Present in inspected source; not a claim that every device scenario works. |
 | Automatically tested | A named test and a recorded passing result cover the stated behavior. |
 | Emulator verified | An interaction/rendering observation was recorded on an emulator. |
-| Physical-phone verified | A dated device observation establishes that specific case. The rc2 Samsung unlocked swipe was inspected through read-only ADB; rc3 post-fix phone retest remains pending. |
+| Physical-phone verified | A dated device observation establishes that specific case. The rc2 Samsung unlocked swipe was inspected through read-only ADB; rc4 initial owner feedback is positive without detailed scenarios; targeted checks remain pending. |
 | Not verified | No supporting executed check or device observation is recorded. |
 | Planned | A possible future change, not current behavior or automatically authorized scope. |
 | Known limitation | A documented implementation/platform boundary, not necessarily a defect. |

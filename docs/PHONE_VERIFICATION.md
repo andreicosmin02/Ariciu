@@ -1,5 +1,7 @@
 # Ariciu: first install and a few weeks of phone testing
 
+Current testing build: [v1.1-rc4 pre-release](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4), from authoritative `master`. [APK/signing/upgrade instructions](RELEASE_CANDIDATE.md). Initial owner feedback is positive; the checks below remain targeted verification, not certified results.
+
 Use a phone with Google Play services and Android 8 or newer. This is the 1.1-rc4 debug release candidate, not a Play release. The first rc1 phone UX review is recorded in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md); the second review and rc3 targeted retest are in [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md); actual rc2 swipe handling was observed, while rc3 phone checks remain pending. Current Urgent policy supersedes rc3 swipe behavior: start with [the rc4 checklist](URGENT_RE_ALERTS.md#physical-phone-retest). No account, key or payment is needed.
 
 ## Install without losing reminders

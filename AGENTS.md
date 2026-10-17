@@ -4,6 +4,10 @@
 
 Ariciu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Ariciu 1.1-rc4 adds owner-requested delayed Urgent re-alerts and temporarily retires Alarm from new choices, retaining legacy Alarm compatibility. The current priority is debugging and stabilization from real physical-phone use: reproduce reported problems, fix root causes, improve confusing UX, and prevent regressions while preserving working functionality.
 
+## Authoritative baseline and distribution
+
+`master` is the authoritative baseline for **1.1-rc4 / code 5 / Room 5**. The owner-authorized consolidation and first GitHub **pre-release** are recorded in [docs/GITHUB_RELEASE_RC4.md](docs/GITHUB_RELEASE_RC4.md). The downloadable APK retains debug signing; no Google Play publication or production key. Repository visibility remains private. Branch deletion still requires the owner’s final confirmation. Future merge/publication actions require session authorization.
+
 ## Current product priority and visual direction
 
 - Current priority (2026-10-17): stabilize Ariciu 1.1-rc4 from physical-phone feedback; see docs/URGENT_RE_ALERTS.md and the historical docs/PHONE_REVIEW_2.md. Feature completion was authorized on 2026-10-16 and produced the candidate; do not resume broad feature expansion by default. Prioritize reported bugs, notification/geofence reliability, confusing UX and focused regressions while preserving accessibility, offline-first operation and zero recurring cost.

@@ -1,7 +1,7 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/urgent-realerts
+implementation_baseline: master
 version: 1.1-rc4
 ---
 
@@ -34,13 +34,13 @@ Use the checked-in wrapper: Gradle **9.5.0**, with distribution SHA configured. 
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:lintDebug :app:assembleDebug
 adb devices -l
-./gradlew :app:connectedDebugAndroidTest
+ANDROID_SERIAL=emulator-5554 ./gradlew :app:connectedDebugAndroidTest
 ```
 
 Run connected tests only on a deliberately selected emulator/test device; do not run app-data-writing instrumentation against the user's daily-use phone without understanding its fixtures. Full relevant gate after production changes:
 
 ```bash
-./gradlew :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:lintDebug :app:assembleDebug
+ANDROID_SERIAL=emulator-5554 ./gradlew :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:lintDebug :app:assembleDebug
 ```
 
 When no device is available, run unit/lint/assembly and explicitly report connected tests unexecuted. After build/catalog changes, Android Studio may require **Sync Project with Gradle Files**. Do not default to deleting caches. Network/sandbox/SDK/JDK failures are environment issues to identify, not justification for unrelated dependency churn.
@@ -56,7 +56,7 @@ sha256sum app/build/outputs/apk/debug/app-debug.apk
 
 Install updates with the **same signing key** and application ID. If Android reports a signature/version incompatibility, preserve the installed app and investigate. Do not uninstall or clear storage to force an update: reminders have no cloud backup/export. Do not copy debug signing keys into Git or the vault.
 
-Release optimization is disabled in the current Gradle release type. This is an installable **debug candidate**, not a signed/published Play release. No release publication, production signing setup or merge is authorized by the handoff. Future distributable release work needs deliberate signing/version/policy review.
+Release optimization is disabled in the current Gradle release type. This is an installable **debug candidate**, not a signed/published Play release. The owner authorized the completed normal master consolidation and first GitHub pre-release with the existing debug APK. See [[Ariciu - Releases and Signing]] for verified asset/checksum/certificate and private-repository access. No production key or Play release. Future production distribution requires signing/licensing/data-preserving transition review. Branch deletion still requires final confirmation.
 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
