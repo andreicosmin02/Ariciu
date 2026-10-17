@@ -6,6 +6,7 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ fun ReminderEditorScreen(
     onCancel: () -> Unit,
     editing: Boolean = false,
     busy: Boolean = false,
+    checkingArrival: Boolean = false,
 ) {
     val colors = MaterialTheme.colorScheme
     val context = LocalContext.current
@@ -63,7 +65,8 @@ fun ReminderEditorScreen(
         bottomBar = {
             Surface(color = colors.surface) {
                 Column(Modifier.padding(horizontal = 24.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    PrimaryAction(if (busy) "Saving…" else "Save reminder", onSave, enabled = draft.canSave && !busy,
+                    if (checkingArrival) Text("Your reminder is saved. Checking whether you’re already here…", style = MaterialTheme.typography.bodySmall)
+                    PrimaryAction(if (checkingArrival) "Checking location…" else if (busy) "Saving…" else "Save reminder", onSave, enabled = draft.canSave && !busy,
                         modifier = Modifier.testTag("reminder_save"))
                     Text("Only on this phone. No account needed.", style = MaterialTheme.typography.bodySmall,
                         color = colors.onSurfaceVariant, modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -146,6 +149,19 @@ fun ReminderEditorScreen(
             OutlinedButton(onClick = { focus.clearFocus(); choosingIntensity = true }, enabled = !busy,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                 Text("Alert: ${draft.intensity.label}")
+            }
+            if (!editing && draft.canCheckArrival) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(
+                        value = draft.notifyOnSave, enabled = !busy, role = androidx.compose.ui.semantics.Role.Checkbox,
+                        onValueChange = { onDraftChange(draft.copy(notifyOnSave = it)) }).testTag("notify_on_save"),
+                        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Checkbox(draft.notifyOnSave,onCheckedChange = null,enabled = !busy)
+                        Text("Notify me now if I’m already here",style = MaterialTheme.typography.bodyMedium)
+                    }
+                    if (draft.notifyOnSave) Text("On save, check your precise location once while Ariciu is open. If you’re clearly inside, request your chosen alert. An uncertain or unavailable location won’t stop the reminder being saved.",
+                        style = MaterialTheme.typography.bodySmall,color = colors.onSurfaceVariant)
+                }
             }
             if (choosingIntensity) AlertDialog(onDismissRequest = { choosingIntensity = false },
                 title = { Text("How should we alert you?") },

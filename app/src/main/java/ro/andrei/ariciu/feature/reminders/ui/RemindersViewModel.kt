@@ -1,6 +1,8 @@
 package ro.andrei.ariciu.feature.reminders.ui
 
 import androidx.lifecycle.SavedStateHandle
+import ro.andrei.ariciu.feature.delivery.model.ImmediateArrivalAttempt
+import ro.andrei.ariciu.feature.delivery.model.ImmediateArrivalResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import java.util.UUID
@@ -22,6 +24,8 @@ data class RemindersUiState(
     val loading: Boolean = true,
     val busy: Boolean = false,
     val error: String? = null,
+    val notice: String? = null,
+    val checkingArrival: Boolean = false,
 )
 
 class RemindersViewModel(
@@ -33,7 +37,7 @@ class RemindersViewModel(
     val route = savedState.getStateFlow("route", ReminderRoute.MAP.name)
     private val mutableDraft = MutableStateFlow(restoreDraft())
     val draft = mutableDraft.asStateFlow()
-    val editing: Boolean get() = savedState.get<String>("editingId") != null
+    val editing: Boolean get() = savedState.get<String>("editingId") != null && savedState.get<Boolean>("newSave") != true
 
     private var loadStarted = false
     private var loadJob: kotlinx.coroutines.Job? = null
@@ -58,8 +62,9 @@ class RemindersViewModel(
         }
     }
 
-    fun updateDraft(value: ReminderDraft) {
+    fun updateDraft(incoming: ReminderDraft) {
         if (state.value.busy) return
+        val value = incoming.copy(notifyOnSave = incoming.notifyOnSave && incoming.canCheckArrival && !editing)
         mutableDraft.value = value
         savedState["title"] = value.title
         savedState["latitude"] = value.location?.latitude
@@ -69,6 +74,7 @@ class RemindersViewModel(
         savedState["repeat"] = value.repeat.name
         savedState["intensity"] = value.intensity.name
         savedState["chainName"] = value.chainName
+        savedState["notifyOnSave"] = value.notifyOnSave
         savedState["chainAreas"] = ro.andrei.ariciu.feature.delivery.model.encodeChainAreas(value.chainAreas)
     }
 
@@ -79,6 +85,7 @@ class RemindersViewModel(
 
     fun edit(reminder: Reminder) {
         if (state.value.busy) return
+        savedState["newSave"] = false
         savedState["editingId"] = reminder.id
         updateDraft(reminder.toDraft())
         navigate(ReminderRoute.EDITOR)
@@ -99,20 +106,32 @@ class RemindersViewModel(
     fun discard() {
         if (state.value.busy) return
         savedState["editingId"] = null
+        savedState["newSave"] = null
         updateDraft(ReminderDraft())
         navigate(ReminderRoute.MAP)
     }
 
-    fun save() {
+    fun save(immediateArrival: ImmediateArrivalAttempt? = null) {
         if (state.value.busy || !draft.value.canSave) return
         // Reuse this ID on retries and after recreation; an interrupted save cannot duplicate a row.
+        val checkArrival = !editing && draft.value.notifyOnSave && draft.value.canCheckArrival
         val id = savedState.get<String>("editingId") ?: UUID.randomUUID().toString().also {
+            savedState["newSave"] = true
             savedState["editingId"] = it
         }
         val reminder = draft.value.toReminder(id)
         perform("Could not save reminder. Your draft is preserved; please retry.") {
-            repository.save(reminder)
+            val generation = repository.save(reminder)
+            if (checkArrival) {
+                mutableState.value = state.value.copy(checkingArrival = true)
+                val result = try {
+                    immediateArrival?.check("$id:$generation",reminder) ?: ImmediateArrivalResult.UNAVAILABLE
+                } catch (e: CancellationException) { throw e
+                } catch (_: Exception) { ImmediateArrivalResult.UNAVAILABLE }
+                mutableState.value = state.value.copy(notice = result.message, checkingArrival = false)
+            }
             savedState["editingId"] = null
+            savedState["newSave"] = null
             mutableState.value = state.value.copy(busy = false)
             updateDraft(ReminderDraft())
             navigate(ReminderRoute.LIST)
@@ -127,16 +146,18 @@ class RemindersViewModel(
         perform("Could not delete reminder. Please retry.") { repository.delete(reminder.id) }
     }
 
+    fun clearNotice() { mutableState.value = state.value.copy(notice = null) }
+
     fun clearError() { mutableState.value = state.value.copy(error = null) }
 
     private fun perform(errorMessage: String, action: suspend () -> Unit) {
         if (state.value.busy) return
-        mutableState.value = state.value.copy(busy = true, error = null)
+        mutableState.value = state.value.copy(busy = true, error = null, notice = null)
         viewModelScope.launch {
             try { action()
             } catch (e: CancellationException) { throw e
             } catch (_: Exception) { mutableState.value = state.value.copy(error = errorMessage)
-            } finally { mutableState.value = state.value.copy(busy = false) }
+            } finally { mutableState.value = state.value.copy(busy = false, checkingArrival = false) }
         }
     }
 
@@ -152,6 +173,7 @@ class RemindersViewModel(
             repeat = ReminderRepeat.valueOf(savedState["repeat"] ?: ReminderRepeat.ONCE.name),
             intensity = ro.andrei.ariciu.feature.reminders.model.NotificationIntensity.valueOf(savedState["intensity"] ?: "NORMAL"),
             chainName = savedState["chainName"],
+            notifyOnSave = savedState["notifyOnSave"] ?: false,
             chainAreas = ro.andrei.ariciu.feature.delivery.model.decodeChainAreas(savedState["chainAreas"] ?: ""),
         )
     }

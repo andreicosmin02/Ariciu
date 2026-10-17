@@ -21,10 +21,20 @@ import androidx.compose.ui.platform.LocalDensity
 fun AriciuApp(viewModel: RemindersViewModel,
     themePreference: ThemePreference = ThemePreference.SYSTEM, onThemeChange: (ThemePreference) -> Unit = {}) {
     val capabilities = rememberDeliveryCapabilities()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    val arrivalCheck = remember(context,lifecycle) { ro.andrei.ariciu.feature.delivery.platform.ForegroundArrivalCheck(context.applicationContext,lifecycle) }
+    val snackbar = remember { SnackbarHostState() }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val draft by viewModel.draft.collectAsStateWithLifecycle()
     val routeName by viewModel.route.collectAsStateWithLifecycle()
     val route = ReminderRoute.valueOf(routeName)
+    LaunchedEffect(state.notice) {
+        state.notice?.let {
+            snackbar.showSnackbar(it,actionLabel = "Dismiss",duration = SnackbarDuration.Indefinite)
+            viewModel.clearNotice()
+        }
+    }
     var confirmDiscard by remember { mutableStateOf(false) }
     var deleteCandidate by remember { mutableStateOf<Reminder?>(null) }
     var pendingEdit by remember { mutableStateOf<Reminder?>(null) }
@@ -44,7 +54,7 @@ fun AriciuApp(viewModel: RemindersViewModel,
     }
     val stateHolder = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
     val tabs = listOf(ReminderRoute.MAP to "Create", ReminderRoute.LIST to "Reminders", ReminderRoute.DELIVERY to "Settings")
-    Scaffold(contentWindowInsets = WindowInsets.safeDrawing, containerColor = MaterialTheme.colorScheme.background,
+    Scaffold(snackbarHost = { SnackbarHost(snackbar) }, contentWindowInsets = WindowInsets.safeDrawing, containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             if (route != ReminderRoute.EDITOR) {
                 NavigationBar(modifier = Modifier.heightIn(min = if (LocalDensity.current.fontScale > 1.3f) 104.dp else 80.dp), containerColor = MaterialTheme.colorScheme.background, tonalElevation = 0.dp) {
@@ -74,7 +84,7 @@ fun AriciuApp(viewModel: RemindersViewModel,
                         onCancel = if (draft.location != null) ({ viewModel.navigate(ReminderRoute.EDITOR) }) else null)
                 }
                 ReminderRoute.EDITOR -> ReminderEditorScreen(draft, viewModel::updateDraft,
-                    { viewModel.navigate(ReminderRoute.MAP) }, viewModel::save, cancelEditor, viewModel.editing, state.busy)
+                    { viewModel.navigate(ReminderRoute.MAP) }, { viewModel.save(arrivalCheck) }, cancelEditor, viewModel.editing, state.busy, state.checkingArrival)
                 ReminderRoute.LIST -> RemindersScreen(state, capabilities, viewModel.openReminderId,
                     onCreate = { viewModel.navigate(if (draft.title.isNotBlank()) ReminderRoute.EDITOR else ReminderRoute.MAP) },
                     onSettings = { viewModel.navigate(ReminderRoute.DELIVERY) },

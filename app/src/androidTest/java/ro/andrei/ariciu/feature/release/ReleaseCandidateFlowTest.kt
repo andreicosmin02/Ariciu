@@ -70,7 +70,7 @@ class ReleaseCandidateFlowTest {
         val rows = MutableStateFlow(emptyList<Reminder>())
         val repo = object : ReminderRepository {
             override fun observeReminders() = rows
-            override suspend fun save(reminder: Reminder) { rows.value = listOf(reminder) }
+            override suspend fun save(reminder: Reminder): String { rows.value = listOf(reminder); return "test-generation" }
             override suspend fun complete(id: String, occurrence: Int) {
                 rows.value = rows.value.map { if (it.id == id && it.delivery.occurrence == occurrence)
                     it.copy(delivery = it.delivery.completed()) else it }

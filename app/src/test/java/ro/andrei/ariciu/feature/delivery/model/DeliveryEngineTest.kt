@@ -171,6 +171,47 @@ class DeliveryEngineTest {
         assertTrue(f.store.records.getValue("id").reminder.delivery.active)
     }
 
+    @Test fun optedInArrivalIsARealOccurrenceAndNeedsOppositeCrossingBeforeNextVisit() = runBlocking {
+        val f = Fixture(record(repeat = ReminderRepeat.EVERY_VISIT))
+        val fix = ArrivalLocationFix(45.0,25.0,10.0,1_000,1)
+        assertTrue(f.engine.immediateArrival("id:v1", fix,2_000,1))
+        val triggered = f.store.records.getValue("id").reminder.delivery
+        assertEquals(DeliveryPhase.TRIGGERED, triggered.phase)
+        assertEquals(AreaPosition.INSIDE, triggered.position)
+        assertEquals(1,triggered.occurrence)
+        assertTrue(triggered.notificationPending)
+        f.engine.dispatchNotifications(true)
+        f.engine.reconcile(ready); f.engine.dispatchNotifications(true)
+        assertEquals(1,f.notifications.posts)
+        f.engine.action("id:v1",1,OccurrenceAction.NEXT_TIME)
+        assertFalse(f.engine.immediateArrival("id:v1",fix,2_000,1))
+        f.engine.transition(setOf("id:v1"),ReminderTransition.ENTER,3_000,1)
+        f.engine.dispatchNotifications(true)
+        assertEquals(1,f.notifications.posts)
+        f.engine.transition(setOf("id:v1"),ReminderTransition.EXIT,4_000,1)
+        f.engine.transition(setOf("id:v1"),ReminderTransition.ENTER,5_000,1)
+        f.engine.dispatchNotifications(true)
+        assertEquals(2,f.notifications.posts)
+        assertFalse(f.engine.immediateArrival("id:v1",fix.copy(elapsedMs = 6_000),6_000,1))
+    }
+
+    @Test fun immediateArrivalRejectsEditedDeletedCompletedChainExitAndOldFix() = runBlocking {
+        val original = record()
+        val fix = ArrivalLocationFix(45.0,25.0,10.0,1_000,1)
+        for (invalid in listOf(record(generation = "v2"), record(transition = ReminderTransition.EXIT),
+            original.copy(reminder = original.reminder.copy(delivery = DeliveryState().completed())),
+            original.copy(reminder = original.reminder.copy(chainName = "Kaufland", chainAreas = listOf(ChainArea("n1",45.0,25.0)))))) {
+            val f = Fixture(invalid)
+            assertFalse(f.engine.immediateArrival("id:v1",fix,2_000,1))
+            assertEquals(invalid, f.store.records.getValue("id"))
+        }
+        assertFalse(Fixture().engine.immediateArrival("id:v1",fix,2_000,1))
+        val f = Fixture(original)
+        assertFalse(f.engine.immediateArrival("id:v1",fix,ARRIVAL_MAX_AGE_MS + 1_001,1))
+        f.engine.transition(setOf("id:v1"),ReminderTransition.EXIT,3_000,1)
+        assertFalse(f.engine.immediateArrival("id:v1",fix,4_000,1)) // A newer real event takes precedence.
+    }
+
     private class Fixture(vararg records: DeliveryRecord) {
         val store = FakeStore(records.toList())
         val backend = FakeBackend()

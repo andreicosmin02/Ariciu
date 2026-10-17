@@ -168,10 +168,12 @@ class RoomReminderRepository(private val dao: ReminderDao, private val onChanged
     override fun observeReminders(): Flow<List<Reminder>> =
         dao.observeAll().map { rows -> rows.map { it.toReminder() } }
 
-    override suspend fun save(reminder: Reminder) {
+    override suspend fun save(reminder: Reminder): String {
         // Editing replaces the monitoring generation, preserving occurrence/completion semantics.
-        dao.saveEdited(reminder.toEntity(UUID.randomUUID().toString()))
+        val generation = UUID.randomUUID().toString()
+        dao.saveEdited(reminder.toEntity(generation))
         onChanged()
+        return generation
     }
     override suspend fun complete(id: String, occurrence: Int) { dao.complete(id, occurrence); onChanged() }
     override suspend fun delete(id: String) { dao.delete(id); onChanged() }

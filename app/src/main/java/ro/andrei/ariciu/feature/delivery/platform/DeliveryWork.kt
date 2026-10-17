@@ -21,6 +21,33 @@ import ro.andrei.ariciu.feature.reminders.data.RoomDeliveryStore
 import ro.andrei.ariciu.feature.reminders.model.ReminderTransition
 
 object DeliveryWork {
+    internal val runtimeMutex = Mutex()
+
+    /** Persist the occurrence before scheduling normal outbox dispatch. Never called by reconciliation. */
+    suspend fun immediateArrival(context: Context, requestId: String, fix: ArrivalLocationFix,
+        foreground: () -> Boolean): Boolean {
+        val recorded = runtimeMutex.withLock {
+            val capabilities = context.deliveryCapabilities()
+            if (!foreground() || !capabilities.preciseLocation || !capabilities.locationEnabled ||
+                !capabilities.playServices || !capabilities.notifications) return@withLock false
+            val store = RoomDeliveryStore(ReminderDatabase.getInstance(context))
+            val reminder = store.all().firstOrNull { it.requestId == requestId }?.reminder ?: return@withLock false
+            if (reminder.intensity in capabilities.blockedIntensities) return@withLock false
+            DeliveryEngine(store,PlayServicesGeofenceBackend(context),AndroidReminderNotifications(context)).immediateArrival(
+                requestId,fix,SystemClock.elapsedRealtime(),Settings.Global.getInt(context.contentResolver,Settings.Global.BOOT_COUNT,0))
+        }
+        if (recorded) {
+            val operation = command(context,workDataOf("command" to "dispatch"))
+            kotlinx.coroutines.suspendCancellableCoroutine<Unit> { continuation ->
+                operation.result.addListener({
+                    try { operation.result.get(); if (continuation.isActive) continuation.resumeWith(kotlin.Result.success(Unit)) }
+                    catch (e: Exception) { if (continuation.isActive) continuation.resumeWith(kotlin.Result.failure(e)) }
+                },java.util.concurrent.Executor { it.run() })
+            }
+        }
+        return recorded
+    }
+
     private fun request(data: Data) = OneTimeWorkRequestBuilder<DeliveryWorker>()
         .setInputData(data).setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS).build()
 
@@ -41,7 +68,7 @@ class DeliveryWorker(context: Context, parameters: WorkerParameters) : Coroutine
     override suspend fun doWork(): Result {
         val command = inputData.getString("command") ?: "reconcile"
         return try {
-            mutex.withLock {
+            DeliveryWork.runtimeMutex.withLock {
                 val store = RoomDeliveryStore(ReminderDatabase.getInstance(applicationContext))
                 val engine = DeliveryEngine(store, PlayServicesGeofenceBackend(applicationContext), AndroidReminderNotifications(applicationContext))
                 when (command) {
@@ -82,7 +109,6 @@ class DeliveryWorker(context: Context, parameters: WorkerParameters) : Coroutine
         }
     }
 
-    companion object { private val mutex = Mutex() }
 }
 
 private fun BroadcastReceiver.finishAfter(operation: Operation, pending: BroadcastReceiver.PendingResult) {

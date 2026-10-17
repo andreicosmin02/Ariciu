@@ -19,8 +19,9 @@ class AriciuAppTest {
         val repo = object : ReminderRepository {
             val rows = MutableStateFlow(emptyList<Reminder>())
             override fun observeReminders() = rows
-            override suspend fun save(reminder: Reminder) {
+            override suspend fun save(reminder: Reminder): String {
                 rows.value = rows.value.filterNot { it.id == reminder.id } + reminder
+                return "test-generation"
             }
             override suspend fun complete(id: String, occurrence: Int) {
                 rows.value = rows.value.map { if (it.id == id && it.delivery.occurrence == occurrence)
@@ -52,7 +53,7 @@ class AriciuAppTest {
             assertEquals(ReminderTransition.EXIT, repo.rows.value.single().transition)
         }
         compose.onNodeWithText("Mark done", substring = false).performScrollTo().performClick()
-        compose.onNodeWithText("Completed · 1").performScrollTo().performClick().assertIsSelected()
+        compose.onNodeWithText("Completed · 1").performClick().assertIsSelected()
         compose.onNodeWithText("Buy milk").assertIsDisplayed()
         compose.onNodeWithTag("tab_completed").assertIsSelected()
     }
@@ -60,7 +61,7 @@ class AriciuAppTest {
     @Test fun tabsPreserveDraftAndAppearanceSelectionIsExplicit() {
         val repository = object : ReminderRepository {
             override fun observeReminders() = MutableStateFlow(emptyList<Reminder>())
-            override suspend fun save(reminder: Reminder) = Unit
+            override suspend fun save(reminder: Reminder) = "test-generation"
             override suspend fun complete(id: String, occurrence: Int) = Unit
             override suspend fun delete(id: String) = Unit
         }

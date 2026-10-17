@@ -2,6 +2,8 @@ package ro.andrei.ariciu.feature.reminders.ui
 
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.Dispatchers
+import ro.andrei.ariciu.feature.delivery.model.ImmediateArrivalAttempt
+import ro.andrei.ariciu.feature.delivery.model.ImmediateArrivalResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.*
@@ -80,17 +82,63 @@ class RemindersViewModelTest {
         assertTrue(vm.state.value.reminders.isEmpty())
     }
 
+    @Test fun immediateAttemptRunsOnlyAfterSaveAndFailureNeverLosesTheReminder() = runTest(dispatcher) {
+        val repo = FakeRepository(); val vm = RemindersViewModel(repo, SavedStateHandle())
+        vm.chooseLocation(location); vm.updateDraft(vm.draft.value.copy(title = "Here", notifyOnSave = true))
+        var calls = 0
+        val attempt = ImmediateArrivalAttempt { requestId, reminder ->
+            calls++; assertEquals(reminder.id + ":test-generation",requestId)
+            assertEquals(reminder.id,repo.rows.value.single().id)
+            assertTrue(vm.state.value.checkingArrival)
+            error("GPS unavailable")
+        }
+        vm.save(attempt); vm.save(attempt); advanceUntilIdle()
+        assertEquals(1,calls); assertEquals(1,repo.saves)
+        assertEquals(ReminderRoute.LIST.name,vm.route.value)
+        assertNull(vm.state.value.error)
+        assertEquals(ImmediateArrivalResult.UNAVAILABLE.message,vm.state.value.notice)
+        assertFalse(vm.state.value.busy); assertFalse(vm.state.value.checkingArrival)
+    }
+
+    @Test fun immediateAttemptIsOffByDefaultAndNeverRunsForEditChainOrExit() = runTest(dispatcher) {
+        var calls = 0
+        val attempt = ImmediateArrivalAttempt { _, _ -> calls++; ImmediateArrivalResult.REQUESTED }
+        for (draft in listOf(ReminderDraft("Default",location), ReminderDraft("Exit",location, transition = ReminderTransition.EXIT, notifyOnSave = true),
+            ReminderDraft("Chain",location,chainName = "Kaufland",chainAreas = listOf(ro.andrei.ariciu.feature.delivery.model.ChainArea("n1",45.0,25.0)),notifyOnSave = true))) {
+            val vm = RemindersViewModel(FakeRepository(), SavedStateHandle()); vm.updateDraft(draft); vm.save(attempt); advanceUntilIdle()
+        }
+        val vm = RemindersViewModel(FakeRepository(), SavedStateHandle())
+        vm.edit(Reminder("existing","Existing",location,ReminderTransition.ENTER,ReminderRepeat.ONCE))
+        vm.updateDraft(vm.draft.value.copy(notifyOnSave = true)); vm.save(attempt); advanceUntilIdle()
+        assertEquals(0,calls)
+    }
+
+    @Test fun newSaveRetryKeepsOptInButChangingToDepartureClearsIt() = runTest(dispatcher) {
+        val repo = FakeRepository(); val handle = SavedStateHandle(); val vm = RemindersViewModel(repo,handle)
+        vm.updateDraft(ReminderDraft("Here",location,notifyOnSave = true)); repo.failSave = true; vm.save(); advanceUntilIdle()
+        assertFalse(vm.editing)
+        val restored = RemindersViewModel(repo,SavedStateHandle(handle.keys().associateWith { handle.get<Any?>(it) }))
+        assertTrue(restored.draft.value.notifyOnSave)
+        repo.failSave = false; var calls = 0
+        restored.save(ImmediateArrivalAttempt { _, _ -> calls++; ImmediateArrivalResult.OUTSIDE }); advanceUntilIdle()
+        assertEquals(1,calls)
+        restored.updateDraft(ReminderDraft("Other",location,notifyOnSave = true))
+        restored.updateDraft(restored.draft.value.copy(transition = ReminderTransition.EXIT))
+        assertFalse(restored.draft.value.notifyOnSave)
+    }
+
     private class FakeRepository : ReminderRepository {
         val rows = MutableStateFlow(emptyList<Reminder>())
         var failSave = false
         var saves = 0
         var lastId: String? = null
         override fun observeReminders() = rows
-        override suspend fun save(reminder: Reminder) {
+        override suspend fun save(reminder: Reminder): String {
             saves++
             lastId = reminder.id
             if (failSave) error("Disk unavailable")
             rows.value = rows.value.filterNot { it.id == reminder.id } + reminder
+            return "test-generation"
         }
         override suspend fun complete(id: String, occurrence: Int) {
                 rows.value = rows.value.map { if (it.id == id && it.delivery.occurrence == occurrence)

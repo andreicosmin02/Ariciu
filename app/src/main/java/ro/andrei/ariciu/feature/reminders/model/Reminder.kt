@@ -38,7 +38,9 @@ data class ReminderDraft(
     val intensity: NotificationIntensity = NotificationIntensity.NORMAL,
     val chainName: String? = null,
     val chainAreas: List<ChainArea> = emptyList(),
+    val notifyOnSave: Boolean = false,
 ) {
+    val canCheckArrival: Boolean get() = chainName == null && transition == ReminderTransition.ENTER
     val canSave: Boolean
         get() = title.isNotBlank() && (chainName == null || (chainName.isNotBlank() && chainAreas.size in 1..40 &&
             chainAreas.map { it.id }.distinct().size == chainAreas.size && chainAreas.all { area ->

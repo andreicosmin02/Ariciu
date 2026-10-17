@@ -52,6 +52,19 @@ class DeliveryEngine(
         }
     }
 
+    /** Explicit foreground opt-in for the first occurrence of a new single-place arrival. */
+    suspend fun immediateArrival(requestId: String, fix: ArrivalLocationFix, nowElapsedMs: Long, boot: Int): Boolean = store.transaction {
+        val record = store.all().firstOrNull { it.requestId == requestId } ?: return@transaction false
+        val r = record.reminder
+        if (r.chainName != null || r.transition != ReminderTransition.ENTER || r.delivery.occurrence != 0 ||
+            r.delivery.phase != DeliveryPhase.WAITING || assessArrival(r.location,fix,nowElapsedMs,boot) != ArrivalCheck.INSIDE)
+            return@transaction false
+        val next = r.delivery.onTransition(ReminderTransition.ENTER,r.transition,r.repeat,fix.elapsedMs,boot)
+        if (next == r.delivery) return@transaction false
+        store.put(record.copy(reminder = r.copy(delivery = next)))
+        true
+    }
+
     suspend fun action(requestId: String, occurrence: Int, action: OccurrenceAction, nowMs: Long = 0) {
         store.transaction {
             store.all().firstOrNull { it.requestId == requestId }?.let { record ->
