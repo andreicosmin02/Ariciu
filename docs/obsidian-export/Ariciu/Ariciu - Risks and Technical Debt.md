@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Risks, limitations and technical debt
@@ -41,3 +41,7 @@ These are **audit hypotheses, not reproduced critical bugs**. The documentation 
 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
+
+## Second phone review — rc3
+
+Actual Samsung unlocked swipe/Next time was observed for rc2; it is an Android limitation rather than a missing ongoing flag. Locked/Clear all/new fox/immediate precise-fix behavior still need rc3 phone retest. Location accuracy is estimated; conservative margins are not a physical-boundary guarantee. Initial check may be skipped when backgrounded/timed out; saved reminder/outbox/recovery remain. Earlier unrelated source hypotheses remain unclaimed. [[Ariciu - Phone Review 2]].

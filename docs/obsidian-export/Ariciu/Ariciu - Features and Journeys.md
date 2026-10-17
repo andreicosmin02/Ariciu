@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Features and user journeys
@@ -53,3 +53,7 @@ The app presents initial empty lists, loading reminders, save/load/delete errors
 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
+
+## Second phone review — rc3
+
+New single-place arrival reminders optionally check “Notify me now if I’m already here”, initially off. Save always commits before one bounded foreground precise location attempt. Clearly inside may request the chosen real alert; skipped/failed checks explain that saving succeeded. No chain/departure/edit support. Connected tabs/Mark done and search progress refine existing journeys. See [[Ariciu - Phone Review 2]].

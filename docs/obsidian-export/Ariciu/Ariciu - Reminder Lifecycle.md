@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Reminder lifecycle and action semantics
@@ -64,3 +64,7 @@ Automatically tested: duplicate/old events, new boot epoch, Once/Every visit/EXI
 ## Phone review update (17 October)
 
 Card Done also works before a crossing and while snoozed. `DeliveryState.completed()` clears visible/pending/snooze state. Notification Done keeps its visible-token guard; card completion is a distinct explicit task intent. See [[Ariciu - Phone Review 1]].
+
+## Second phone review — rc3
+
+Optional immediate arrival is only the first new single ENTER occurrence. After save, fresh/accurate foreground evidence and exact generation pass through the real engine transaction/outbox. Duplicate attempt/reconcile cannot trigger another occurrence; Next time/Every visit require a real opposite crossing. Existing card completion/generation guards remain. No schema change or initialTrigger policy change. See [[Ariciu - Phone Review 2]].

@@ -1,10 +1,10 @@
 # Ariciu: first install and a few weeks of phone testing
 
-Use a phone with Google Play services and Android 8 or newer. This is the 1.1-rc2 debug release candidate, not a Play release. The first rc1 phone UX review is recorded in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md); rc2 fixes await phone retest. Start with that targeted checklist. No account, key or payment is needed.
+Use a phone with Google Play services and Android 8 or newer. This is the 1.1-rc3 debug release candidate, not a Play release. The first rc1 phone UX review is recorded in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md); the second review and rc3 targeted retest are in [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md); actual rc2 swipe handling was observed, while rc3 phone checks remain pending. Start with the second-review checklist. No account, key or payment is needed.
 
 ## Install without losing reminders
 
-1. Copy `app/build/outputs/apk/debug/Ariciu-1.1-rc2-debug.apk` (or the identical `app-debug.apk`) to your phone and open it. Android may ask you to allow installation from the app opening the file. Install over the previous Ariciu build; **do not uninstall or clear storage**. Your reminders are kept only on this phone, without cloud backup. An upgrade must be signed with the same debug key as the previous install. If Android rejects it, keep the installed app and report the error.
+1. Copy `app/build/outputs/apk/debug/Ariciu-1.1-rc3-debug.apk` (or the identical `app-debug.apk`) to your phone and open it. Android may ask you to allow installation from the app opening the file. Install over the previous Ariciu build; **do not uninstall or clear storage**. Your reminders are kept only on this phone, without cloud backup. An upgrade must be signed with the same debug key as the previous install. If Android rejects it, keep the installed app and report the error.
 2. Open Ariciu → Settings. Choose System, Light or Dark. Close/reopen: the choice should remain. Existing reminders should still be present.
 3. Set up location while using the app, precise location, location all the time, notifications and device Location, one step at a time. Declining should still let you create/manage reminders and should show setup help. Saving a reminder alone does not prove monitoring is ready.
 

@@ -1,26 +1,16 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
-# Current status — first phone review
+# Current status — second phone review
 
-Current candidate: **1.1-rc2 / code 3**, branch **fix/phone-review-1**, based on feat/phone-release-candidate at 62557c5. No merge or publication. Source is authoritative; related: [[Ariciu - Phone Review 1]], [[Ariciu - Tests and Evidence]], [[Ariciu - Risks and Technical Debt]].
+Candidate **1.1-rc3/code 4**, branch **fix/phone-review-2**, based on first-review fix/phone-review-1 at `1b2eb13`. No master merge or publication. [[Ariciu - Phone Review 2]] owns dispositions, exact evidence and retest; repository docs/RELEASE_CANDIDATE.md owns artifact checksum.
 
-The owner's full rc1 review and all eight accompanying screenshots were inspected before implementation. Reporting phone: Samsung S26 Ultra, One UI 8.5, Android 16. **Post-fix physical-phone retesting is pending.**
+Implemented: explicit cancellation-safe search progress/retry/restored query; horizontal tabs joined to content; outlined Mark done; small Create gap; Settings status beside Review; dedicated monochrome notification fox; optional new-single-ENTER foreground first occurrence through the real lifecycle/outbox. Existing Room 4/data/migrations, initialTrigger0, identities/recovery, 100-area limit, themes/offline/cost boundaries preserved.
 
-Implemented: safe Done on cards; clearer Active/Completed and intensity; token-ranked local search with 231 malls added from the original source; draggable Create sheet and early Place/Chain choice; dedicated full-screen store map/list; new/refreshed snapshots bounded to 25 km; compact scalable editor; clearer Settings/offline explanations; original adaptive/monochrome vector fox. Urgent individual unlocked swiping is permitted by Android 14+ and means Next time.
+Read-only actual Samsung S26 Ultra/Android 16/One UI 8.5 rc2 inspection confirmed HIGH/ongoing Urgent and correct Next time after owner swipe. No private text/coordinates/IDs/logs are retained in project docs. Phone disconnected and owner requested emulator-only continuation. No phone upgrade/settings/data/process/instrumentation action occurred. rc3 physical retest, locked/Clear all and real crossings/audio/TalkBack remain pending.
 
-Room remains version 4, migrations unchanged. Existing data, notification identities and geofence recovery remain; all original 25,834 catalogue rows remain unchanged. No dependency/service/permission/backend/cost added. Older saved chain snapshots stay intact until explicit refresh. Android monitors at most 100 areas across reminders.
-
-## Evidence and next action
-
-See [[Ariciu - Phone Review 1]] for the executed checks, screenshots and focused phone checklist. Repository docs/RELEASE_CANDIDATE.md owns the current APK checksum; rebuilding can change bytes. Install with the same signing key over the existing app; never uninstall or clear the owner's data to test an upgrade.
-
-Prioritize the owner's phone retest, background lifecycle/notification recovery, actual sound and OEM restrictions. No speculative feature expansion, master merge, force-push or release publication is authorized.
-
-Repository handoff remains independent of the vault: AGENTS.md, docs/CODEX_HANDOFF.md, PROJECT_STATUS.md, STABILIZATION.md and PHONE_REVIEW_1.md. The export mirrors focused project notes; original planning notes and the private rc1 review are preserved.
-
-Synchronization completed 17 October with filesystem approval: 26 notes/27 emulator images match the portable export. Original planning/review notes and phone screenshots remain unchanged.
+Use [[Ariciu - Tests and Evidence]]/[[Ariciu - Phone Review 2]] for current executed checks; earlier 68/23 and 64/19 are historical. Install rc3 over the current app with the same signing key, never clear storage. Repository handoff remains independent of vault access. Preserve original planning/review/phone captures and compare managed notes before future sync.

@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Design and accessibility
@@ -63,3 +63,7 @@ Prioritize reported confusion, clipped/unreachable controls and accessibility ba
 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
+
+## Second phone review — rc3
+
+rc3 uses horizontal traditional tabs joined to the bordered reminder panel, with counts, Tab/selection semantics and fixed visibility while content scrolls. Redundant headings/empty spacing removed. Mark done is outlined and has no checkmark. Settings status belongs beside Review, with stacked larger text; Create map gap: 8dp. Search has inline progress/polite announcements; new single arrivals have an off-by-default notify-on-save choice. Actual emulator evidence: [[Ariciu - Phone Review 2]].

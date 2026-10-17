@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Development environment and builds
@@ -60,3 +60,7 @@ Release optimization is disabled in the current Gradle release type. This is an 
 
 
 Phone review changes and current evidence: [[Ariciu - Phone Review 1]].
+
+## Second phone review — rc3
+
+Current debug retest candidate is1.1-rc3/code 4 on fix/phone-review-2, not a published release. Build with the existing Gradle/dependencies; convenience filename Ariciu-1.1-rc3-debug.apk. Installation must update the existing package with the same key; never uninstall/clear storage. Target emulator-5554 explicitly for instrumentation/installation. User requested emulator-only continuation after Samsung disconnected. See [[Ariciu - Phone Review 2]].

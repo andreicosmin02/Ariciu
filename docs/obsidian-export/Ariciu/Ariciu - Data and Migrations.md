@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Data, persistence and migrations
@@ -66,3 +66,7 @@ Cloud backup/device transfer are excluded in manifest/XML. There is no in-app us
 ## Phone review update (17 October)
 
 `ReminderDao.complete(id, occurrence)` is transactional: retain current row data, check occurrence, mark completed/inactive, clear alert/snooze state and rotate generation. Older worker writes cannot undo it. Repository invokes the existing reconciliation callback for notification/registration cleanup. Room remains version 4. See [[Ariciu - Phone Review 1]].
+
+## Second phone review — rc3
+
+Room remains4 with schemas/migrations unchanged. save returns the exact committed generation; optional foreground arrival targets that identity and the first occurrence only. Choice remains draft/SavedState, not a new column. Existing snapshots/data are preserved. Actual phone DB/WAL diagnostics were checksum-consistent read-only snapshots, never committed or mutated. See [[Ariciu - Phone Review 2]].

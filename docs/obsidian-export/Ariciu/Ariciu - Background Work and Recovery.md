@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: 011746c
-version: 1.1-rc1
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Background commands, synchronization and recovery
@@ -69,3 +69,7 @@ Room outbox state, the registration ledger and snooze deadlines survive process 
 | Snooze deadline → enqueue delayed work | Future workers/app/boot scan stored deadlines. |
 
 No blanket exactly-once, immediate delivery or complete missed-event reconstruction claim is justified. See [[Ariciu - Risks and Technical Debt]] for audit hypotheses requiring reproduction.
+
+## Second phone review — rc3
+
+Normal registration keeps initialTrigger0. The explicit immediate arrival is never replayed on reconcile/restart. Only a validated occurrence already committed to the normal outbox can recover dispatch. The shared runtime mutex serializes it with workers; exact generation and first-occurrence guard reject stale/duplicate attempts. Room/WorkManager/Android side effects remain separate commits. See [[Ariciu - Phone Review 2]].

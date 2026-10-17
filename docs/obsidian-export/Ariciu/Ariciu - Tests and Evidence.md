@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Tests and evidence
@@ -13,7 +13,7 @@ Related: [[Ariciu - Development and Builds]], [[Ariciu - Current Status]], [[Ari
 
 **68 unit / 23 connected Android 17 emulator tests passed**, zero failures/errors/skips. Lint 0 errors/39 warnings; debug assembly/install/signature verification passed. Command: `./gradlew :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:lintDebug :app:assembleDebug`.
 
-See [[Ariciu - Phone Review 1]] for regression scope, actual native screenshots, intermediate failures corrected and phone retest. Swiftshader software GPU, Medium_Phone API37.2; older Android runtimes and Samsung S26 Ultra/One UI8.5/Android16 behavior remain unverified. No physical phone/data modified. The following rc1 evidence is historical and is not proof for rc2 changes.
+See [[Ariciu - Phone Review 1]] for regression scope, actual native screenshots, intermediate failures corrected and phone retest. Swiftshader software GPU, Medium_Phone API37.2; older Android runtimes and Samsung S26 Ultra/One UI 8.5/Android 16 behavior remain unverified. No physical phone/data modified. The following rc1 evidence is historical and is not proof for rc2 changes.
 
 ## Last executed baseline
 
@@ -76,3 +76,7 @@ RC screenshots are checked in; see [[Ariciu - Design and Accessibility]]. One li
 Still not verified: actual arrivals/departures while locked/backgrounded, force stop/reboot/update recovery on a phone, audio/vibration/DND, OEM battery restrictions, wall-clock changes during snooze, TalkBack/Switch Access, external keyboard and large display scaling usability. Follow `docs/PHONE_VERIFICATION.md` and record results with [[Ariciu - Phone Issue Template]].
 
 Lint warning groups include dependency/version advisories, LogNotTimber, ModifierParameter, RedundantLabel, UnusedResources and UseKtx. The audit does not convert those 39 warnings into runtime bug reports or authorize bulk upgrades.
+
+## Second phone review
+
+Current rc3 gate: **82 unit / 35 emulator instrumentation tests passed**, lint **0 errors / 39 warnings**, assembly/install/signature passed. Both raw and Gradle connected runners passed. Current checks, 19 new screenshots, actual foreground provider/manual simulated-position outcomes and limits are in [[Ariciu - Phone Review 2]]. Historical sections above do not prove new code. Actual Samsung rc2 swipe lifecycle was inspected read-only; all rc3 instrumentation targets only the emulator.

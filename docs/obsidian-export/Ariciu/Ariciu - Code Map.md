@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Code map
@@ -57,3 +57,7 @@ Tests mirror these packages in `app/src/test/java/` and `app/src/androidTest/jav
 ## Phone review update (17 October)
 
 `feature/places/StorePreviewScreen.kt` renders persisted chain areas on MapLibre with a List alternative. `ReminderRepository.complete`, `ReminderDao.complete` and `RemindersViewModel.complete` own card completion; shared `ExpandableSection` contains expanded help. See [[Ariciu - Phone Review 1]].
+
+## Second phone review — rc3
+
+PlaceSearchController.kt and PlaceSearchDialog.kt own current-query states. ForegroundArrivalCheck.kt bounds/cancels one foreground fix; ImmediateArrival.kt owns pure evidence/rules/results; DeliveryEngine.immediateArrival and DeliveryWork.runtimeMutex/dispatch persist the normal occurrence/outbox. ReminderRepository.save returns the committed generation. Draft notifyOnSave/newSave marker are SavedState-only. [[Ariciu - Phone Review 2]] has mechanism/tests/limits.

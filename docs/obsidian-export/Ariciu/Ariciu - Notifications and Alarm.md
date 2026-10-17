@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Notifications and Alarm
@@ -50,3 +50,7 @@ Automatically tested: channel defaults/flags/actions on an emulator, injected wo
 ## Phone review update (17 October)
 
 Urgent still requests high importance and ongoing=true. Android 14+ permits individual unlocked swipes; the delete intent persists Next time through the real receiver/worker. No automatic repost or false call/media exemption. Help now states this directly. Only Android 17 runtime was available in this environment; older runtime and Samsung locked/Clear all behavior need phone testing. See [[Ariciu - Phone Review 1]].
+
+## Second phone review — rc3
+
+The notification small-icon resource now contains a dedicated transparent white 24dp fox, independent of the unchanged adaptive launcher. Actual Android 17 light/dark shades reviewed; Samsung rendering awaits rc3 retest. Read-only rc2 Samsung ADB confirmed HIGH/ongoing/deleteIntent. Owner swipe produced WAITING_NEXT_VISIT, INSIDE, occurrence 1, no visible/pending notification and REGISTERED monitoring. Android 14+ permits individual unlocked dismissal; locked/Clear all remain phone-test items. No repost/exemption workaround. [[Ariciu - Phone Review 2]] records limits without private content.

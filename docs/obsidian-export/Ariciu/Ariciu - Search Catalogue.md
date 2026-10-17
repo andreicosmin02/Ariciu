@@ -1,8 +1,8 @@
 ---
 project: Ariciu
 reviewed: 2026-10-17
-implementation_baseline: fix/phone-review-1
-version: 1.1-rc2
+implementation_baseline: fix/phone-review-2
+version: 1.1-rc3
 ---
 
 # Romania catalogue, search and data generation
@@ -49,3 +49,7 @@ Existing chain snapshots remain until explicitly refreshed; app update alone doe
 ## Phone review correction (17 October)
 
 The importer now includes named `shop=mall` nodes/closed ways, including AFI Brașov, Cotroceni and Ploiești from the same source. Malls never become supermarket-chain areas. Queries require whole-token prefixes; ranking prefers exact names, whole name words, name prefixes, then address matches, with distance/ID tie breakers. Accents and punctuation normalize locally. See [[Ariciu - Phone Review 1]].
+
+## Second phone review — rc3
+
+Search progress now distinguishes local catalogue load, active current-query work and completed results. Revision/cancellation guards prevent an old result overwriting a new query; clearing returns to idle and query restores across recreation. Retry is explicit. No ranking/data/remote-service change. See [[Ariciu - Phone Review 2]].

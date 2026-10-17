@@ -36,3 +36,7 @@ Prioritize the owner's reproducible problem. Confirm a hypothesis before changin
 ## Review 1 stabilization batch
 
 Confirmed local defects: fragment-based search matches and omitted mall coverage; unbounded nearest-store selection created distant snapshots. UX changes and Urgent’s Android restriction are documented separately in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md). None of the unreproduced concurrency/offline hypotheses above is claimed fixed by this UX batch. Card completion adds stale-worker generation protection without removing the existing async cleanup boundary.
+
+## Second phone review
+
+The ambiguous pending/empty search state and stale produceState list were confirmed in source and replaced with query-owned explicit state. Fixed tabs remove the empty warning placeholder/gaps; Mark done separates action from status; Settings status is aligned with Review. Dedicated notification resource replaces the old pin. Actual Samsung unlocked Urgent swipe produced WAITING_NEXT_VISIT with no pending/visible alert and monitoring retained; Android 14+ allows that dismissal. No locked/Clear all/extended no-return observation is claimed. Explicit new-single-ENTER foreground opt-in adds one first lifecycle occurrence under fresh/accurate evidence; registration initialTrigger0 remains. Root causes, verification and remaining physical limits are in [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md). Earlier unrelated concurrency/offline hypotheses remain unclaimed.

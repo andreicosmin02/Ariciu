@@ -37,3 +37,7 @@ See [PROJECT_STATUS.md](PROJECT_STATUS.md) for executed check counts and screens
 
 
 First physical-phone-review stabilization: [1.1-rc2 dispositions, implementation evidence and retest](PHONE_REVIEW_1.md). The review adds card Done, relevant local mall search, early chain/map preview, a draggable picker sheet, focused visual refinement and an original vector fox. Historical 16 October checks above do not validate the new code; current evidence is in the review record.
+
+## Second phone-review stabilization (rc3)
+
+See [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md): explicit search progress, joined reminder tabs/Mark done, focused spacing/status alignment, dedicated small fox icon and an optional first single-place foreground arrival check through the real lifecycle/outbox. Initial geofence registration remains 0, schema 4 and cost boundaries unchanged. Actual rc2 Samsung swipe-to-Next-time is confirmed for one observation; rc3 physical retest is pending. Do not reuse historical 64/19 or 68/23 test results for rc3.

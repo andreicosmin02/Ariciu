@@ -2,35 +2,30 @@
 
 ## Current direction — 2026-10-17
 
-**Ariciu 1.1-rc2 / version code 3**, branch **`fix/phone-review-1`**, based on `feat/phone-release-candidate` at `62557c5`. This is the first physical-phone-review stabilization batch, not a new broad feature phase. Nothing merged into master or published. The graphite/slate-blue identity, warm light theme, System/Light/Dark and Create / Reminders / Settings remain.
+**Ariciu 1.1-rc3 / version code 4**, branch **fix/phone-review-2**, based on the completed first-review branch at `1b2eb13`. All second-review items and limits are in [PHONE_REVIEW_2.md](PHONE_REVIEW_2.md). No master merge or release publication. Source is authoritative; final evidence belongs to the review record.
 
-The original Obsidian review and all eight screenshots in its capture sequence were inspected before edits. [Review dispositions, root causes and retest checklist](PHONE_REVIEW_1.md) cover every item. Physical-phone resolution is **awaiting owner retest**; screenshots of rc1 do not establish rc2 reliability.
+## Second-review implementation
 
-## Verified implementation
+- Search now has explicit catalogue-loading, idle, searching, current-results and failure states; inline progress, retry, cancellation/revision guards and recreation-safe query. Local ranking/catalogue remain unchanged.
+- Active/Completed are horizontal accessible tabs joined directly to the scrolling bordered panel, with counts and fixed selection. Redundant headings/empty spacing removed; notification targeting uses corrected offsets. Mark done is an outlined action without a checkmark; completion lifecycle is unchanged.
+- Create has an 8dp selector/map gap; short screens at large text scroll the header above a bounded map, keeping options and the primary action reachable. Settings places its status check immediately before Review and stacks the action group at larger text.
+- Dedicated monochrome 24dp fox notification resource; launcher/adaptive icons/channel identities unchanged.
+- New single-place ENTER editor drafts optionally check Notify me now if I’m already here, initially off. Save commits first and returns the exact generation. One bounded foreground precise fix may create only occurrence 0’s real engine transition/outbox; failure keeps the reminder saved and explains the result. Freshness/accuracy/lifecycle guards and no automatic replay. Normal registration remains initialTrigger0.
 
-- Active reminder cards expose Done, including waiting and snoozed tasks. A Room transaction checks occurrence, retains task data, marks completion/inactive, clears notification/snooze state and rotates generation. Existing callback/reconciliation cleans notifications and registrations; stale engine writes cannot undo completion. Completed edits stay completed.
-- Active/Completed selection has checkmark/color/text and sticks while scrolling; large text stacks the choices. Card status labels align; alert intensity has its own line.
-- Create has a padded search row bounded to 640dp and adjacent labeled 52dp My location icon. Single place / Supermarket chain is offered before search/confirmation. A compact draggable Material 3 sheet expands via drag or a labeled action, with scrollable options and primary action outside it. Coordinates are secondary. Download explanation distinguishes map roads/labels from offline search and geofence coverage.
-- Private search matches token prefixes and ranks exact names/name words ahead of address-only matches, then distance/ID. The same original OSM extract adds 231 malls, including AFI Brașov, Cotroceni and Ploiești: 26,065 total, all original 25,834 rows unchanged. Source timestamp remains 2026-10-15T20:21Z, rebuilt 17 October; no remote search or newer-data claim.
-- New/explicitly refreshed chain snapshots select up to 40 listed stores **within 25 km** of the pin. Persisted old selections stay intact until refreshed; distant selections show a warning. Real map preview and accessible list show selected store areas. The actual reminder radius remains 100–1000m per store, and the app-wide geofence limit remains 100.
-- Editor uses smaller headings/input hierarchy and tighter spacing with sp scaling retained. Save stays fixed. Settings uses consistent surfaces/insets, contained expandable help, clear monitoring retry/offline-map descriptions and app-wide notification settings for generic setup.
-- Urgent retains high importance/ongoing request. Android 14+ allows individual unlocked dismissal; swiping is Next time. Copy explains the limitation. No full-screen/FGS/exact-alarm/audio-loop workaround.
-- Original adaptive vector fox and separate monochrome icon, consistent with the existing palette. No external image dependency/licence.
+## Physical evidence versus pending retest
 
-## Architecture and preserved boundaries
+The Samsung S26 Ultra / Android 16 / One UI 8.5 was connected for read-only rc2 diagnostics. Its actual Urgent alert had HIGH importance, ongoing flag and a delete intent. After the owner's unlocked swipe, the matching row was WAITING_NEXT_VISIT/INSIDE, occurrence 1, no visible/pending alert, still REGISTERED; no active Ariciu notification or delivery warning remained at the snapshot. This confirms that swipe’s Next time handling, not background/geofence timing or all later visits.
 
-Kotlin/Compose/Material 3, activity ViewModel/StateFlow/SavedStateHandle, constructor injection, Room, WorkManager, Play services geofencing and MapLibre remain. **Room 4 and exported schemas/additive migrations 1–4 are unchanged.** No permissions, dependency versions, remote services, paid keys, backend, accounts or recurring costs added.
+Connection dropped, and the owner explicitly requested emulator-only continuation. The phone was not upgraded, force-stopped, cleared, rebooted, reconfigured or used for instrumentation. New rc3 UI/fox/immediate location behavior, locked/Clear all, extended same-visit observations and actual crossings remain for physical retest. Android 14+ permits individual unlocked ongoing dismissal; Ariciu retains the strongest applicable compliant request.
 
-Generation/occurrence guards, notification tags/outbox, journal-before-add/removal retry, both ENTER/EXIT and disabled initial triggers remain. Platform side effects, Room and WorkManager are separate commits; cleanup/delivery can be delayed and recovery is best-effort. No perfectly immediate or absolute exactly-once promise. Preserve the installed app and debug signing identity; never uninstall/clear storage to fix an upgrade.
+## Preserved architecture and boundaries
 
-Offline maps retain explicit approximately 4×4 km/theme/zoom 10–14 packs, maximum three/one active, pause/resume/delete, bounded provider traffic and visible failures. Search remains Romania-first and incomplete. Offline basemap caching does not guarantee disconnected Play services positioning.
+Kotlin/Compose/Material 3, constructor injection, Room 4/additive migrations 1–4, Play-services geofencing, WorkManager and MapLibre remain. No dependency/permission/schema/backend/account/paid API/recurring cost change. Existing reminders, generations/actions, registration journal/outbox, conservative rearming, saved chain snapshots and 100-area limit remain. No full-screen/FGS/exact-alarm workaround, continuous GPS or guaranteed immediate/exactly-once delivery.
 
-## Verification
+Romania catalogue remains 26,065 rows from 15 October source (231 malls added in rc2). New/refreshed chain selections stay within 25km/max 40; old selections stay intact until explicit refresh. Theme-specific small offline basemap packs retain their existing limits and do not add search or guaranteed disconnected positioning. Graphite/slate identity, System/Light/Dark and Create/Reminders/Settings remain.
 
-Current rc2 commands, counts and screenshots: [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md). Final gate: **68 unit / 23 connected emulator tests passed**, lint 0 errors/39 warnings, debug assembly/install/signature verification passed. Do not reuse rc1 results to validate rc2.
+## Verification and next work
 
-Historical rc1 gate on 16 October: 64 unit / 19 Android 17 emulator tests, lint 0 errors/39 warnings, debug assembly/install passed. One actual light pack rendered roads/labels with emulator networking off. These older results are retained as history, not physical-phone validation.
+Current executed gate: **82 unit / 35 emulator instrumentation tests passed**, lint **0 errors / 39 warnings**, debug assembly/signature verified. [Executed checks, screenshots, commits and targeted phone retest](PHONE_REVIEW_2.md). Historical rc2 gate: 68 unit/23 connected tests; rc1:64/19. Those results are not reused to validate rc3.
 
-## Next priority
-
-Install rc2 over rc1 with the same signing key and run the [targeted phone retest](PHONE_REVIEW_1.md#phone-retest). Continue field testing of notification audio/lock behavior, real crossings, rearming, reboot/update, OEM battery restrictions, TalkBack and larger font/display settings. No physical phone was modified by this development batch. See [handoff](CODEX_HANDOFF.md), [source audit](STABILIZATION_AUDIT.md) and [phone checklist](PHONE_VERIFICATION.md).
+Install the [current candidate](RELEASE_CANDIDATE.md) over rc2 with the same signing key, never uninstall/clear storage. Continue the focused phone checklist, then background ENTER/EXIT, rearming, reboot/update/OEM battery and TalkBack checks. No speculative feature expansion, merge, force-push or release publication.
