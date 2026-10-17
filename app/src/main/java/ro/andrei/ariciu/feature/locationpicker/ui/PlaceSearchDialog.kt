@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -24,12 +25,13 @@ internal fun PlaceSearchDialog(centre: SelectedCoordinates, onDismiss: () -> Uni
     search: (suspend (List<CatalogPlace>, String) -> List<CatalogPlace>)? = null) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var restoredQuery by rememberSaveable { mutableStateOf("") }
     val controller = remember(context, centre) { PlaceSearchController(scope, load ?: { LocalPlaces.load(context) },
-        search ?: { places, query -> withContext(Dispatchers.Default) { searchPlaces(places, query, centre.latitude, centre.longitude) } }) }
+        search ?: { places, query -> withContext(Dispatchers.Default) { searchPlaces(places, query, centre.latitude, centre.longitude) } }).also { it.query(restoredQuery) } }
     val state by controller.state.collectAsState()
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Find a place") }, text = {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(state.query, controller::query, label = { Text("Town, mall, store or store address") },
+            OutlinedTextField(state.query, { restoredQuery = it; controller.query(it) }, label = { Text("Town, mall, store or store address") },
                 singleLine = true, modifier = Modifier.fillMaxWidth().testTag("place_search"))
             Text("Romania · offline · OpenStreetMap. Selected malls, shops and towns, not every address. OSM source: 15 Oct 2026.", style = MaterialTheme.typography.bodySmall)
             when (state.phase) {

@@ -74,4 +74,23 @@ class PlaceSearchControllerTest {
         runCurrent(); search.query("afi"); runCurrent()
         assertEquals(PlaceSearchPhase.SEARCH_FAILED, search.state.value.phase)
     }
+    @Test fun lateCancelledResultCannotReplaceTheNewQuery() = runTest {
+        val late = CompletableDeferred<List<CatalogPlace>>()
+        val search = PlaceSearchController(backgroundScope,{ listOf(place) }) { _, query ->
+            if (query == "a") withContext(NonCancellable) { late.await() } else emptyList()
+        }
+        runCurrent(); search.query("a"); runCurrent(); search.query("none"); runCurrent()
+        late.complete(listOf(place)); runCurrent()
+        assertEquals("none",search.state.value.query)
+        assertEquals(PlaceSearchPhase.RESULTS,search.state.value.phase)
+        assertTrue(search.state.value.matches.isEmpty())
+    }
+    @Test fun closingWhileCatalogueLoadsCancelsItWithoutFailure() = runTest {
+        val scope = CoroutineScope(coroutineContext + Job()); var cancelled = false
+        val search = PlaceSearchController(scope, { try { awaitCancellation() } finally { cancelled = true } }) { data, _ -> data }
+        runCurrent(); scope.cancel(); runCurrent()
+        assertTrue(cancelled)
+        assertEquals(PlaceSearchPhase.LOADING_CATALOGUE,search.state.value.phase)
+    }
+
 }
