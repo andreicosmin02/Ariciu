@@ -65,7 +65,7 @@ import ro.andrei.ariciu.feature.locationpicker.geometry.buildRadiusBoundary
 import ro.andrei.ariciu.feature.locationpicker.map.toGeoJsonPolygon
 import ro.andrei.ariciu.feature.locationpicker.model.SelectedCoordinates
 import ro.andrei.ariciu.feature.locationpicker.model.SelectedLocation
-import ro.andrei.ariciu.feature.offlinemap.OfflineMaps
+import ro.andrei.ariciu.feature.offlinemap.*
 import ro.andrei.ariciu.feature.places.*
 import ro.andrei.ariciu.ui.components.*
 import ro.andrei.ariciu.ui.theme.isAriciuDarkTheme
@@ -138,7 +138,10 @@ fun LocationPickerScreen(
     var mapFailed by remember { mutableStateOf(false) }
     var locating by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
-    var downloadConfirm by remember { mutableStateOf(false) }
+    var downloadUi by remember { mutableStateOf<DownloadUi>(DownloadUi.Idle) }
+    var covered by remember { mutableStateOf(false) }
+    var steppedBack by remember { mutableStateOf(false) }
+    val currentPackId by offlineMaps.currentId.collectAsState()
     var locationExplanation by remember { mutableStateOf(false) }
     var permissionAsked by rememberSaveable { mutableStateOf(false) }
     var searchJob by remember { mutableStateOf<Job?>(null) }
@@ -233,6 +236,31 @@ fun LocationPickerScreen(
     fun requestLocate() { if (context.hasMapLocationPermission()) locate() else locationExplanation = true }
     ro.andrei.ariciu.feature.offlinemap.PauseOfflineMapsWhenBackgrounded(offlineMaps)
     LaunchedEffect(Unit) { searchRef?.let { ref -> runSearch(SelectedCoordinates(ref[0], ref[1]), query, chips, snap = false) } }
+    val offlineRegions = remember(downloadedAreas) { downloadedAreas.mapNotNull { it.toRegion() } }
+    val regionsNow by rememberUpdatedState(offlineRegions)
+    val darkNow by rememberUpdatedState(dark)
+    fun viewportBounds(): GeoBounds? = cameraState.projection?.queryVisibleBoundingBox()?.let { GeoBounds(it.south, it.west, it.north, it.east) }
+    fun recomputeCovered() { val v = viewportBounds(); covered = v != null && viewportCovered(v, cameraState.position.zoom, darkNow, regionsNow) }
+    fun openDownload() {
+        val v = viewportBounds() ?: return
+        if (covered) { downloadUi = DownloadUi.Covered; return }
+        val stats = downloadedAreas.map { it.toStats() }
+        val plan = planDownload(v, cameraState.position.zoom, averageBytesPerTile(stats), measuredOverheadBytes(stats))
+        downloadUi = DownloadUi.Plan(plan)
+        // The box is the view plus a margin, so step back a little to show its outline on the map.
+        if (plan is DownloadPlan.Ready) { steppedBack = true; fly(cameraState.position.copy(zoom = cameraState.position.zoom - 0.4)) }
+    }
+    val downloadActions = DownloadActions(
+        start = { plan -> when (areaGate(downloadedAreas.size, downloadedAreas.any { it.active })) {
+            AreaGate.ALLOWED -> { downloadUi = DownloadUi.Starting; offlineMaps.startDownload(plan, dark) }
+            AreaGate.AT_LIMIT -> downloadUi = DownloadUi.Replace(plan)
+            AreaGate.BUSY -> offlineMaps.error.value = "Finish or pause the current download first."
+        } },
+        replace = { plan, id -> downloadUi = DownloadUi.Starting; offlineMaps.startDownload(plan, dark, replaceId = id) },
+        close = { downloadUi = DownloadUi.Idle; if (steppedBack) { steppedBack = false; fly(cameraState.position.copy(zoom = cameraState.position.zoom + 0.4)) } }, cancel = { offlineMaps.cancel(it) }, resume = { offlineMaps.resume(it) }, remove = { offlineMaps.delete(it) })
+    LaunchedEffect(offlineRegions, dark) { recomputeCovered() }
+    LaunchedEffect(currentPackId) { val id = currentPackId; if (id != null && downloadUi is DownloadUi.Starting) downloadUi = DownloadUi.Tracking(id) }
+    LaunchedEffect(offlineError) { if (offlineError != null && downloadUi is DownloadUi.Starting) downloadUi = DownloadUi.Idle }
     LaunchedEffect(selection) {
         nearby = try { index.near(selection.latitude, selection.longitude, NEAREST_PLACE_MAX_METERS) } catch (e: CancellationException) { throw e } catch (_: Exception) { emptyList() }
     }
@@ -240,6 +268,7 @@ fun LocationPickerScreen(
         snapshotFlow { cameraState.isCameraMoving }.collect { movingNow ->
             if (movingNow) return@collect
             val c = centre()
+            recomputeCovered()
             if (!resultsModeNow) selectedCoordinates = c
             val last = lastSearchCentre
             if (!animating && last != null && mapMovedEnough(last.latitude, last.longitude, c.latitude, c.longitude, cameraState.position.zoom)) moved = true
@@ -274,6 +303,10 @@ fun LocationPickerScreen(
                     geofenceBlockMessage(geofenceAreasUsed, if (!singleFits) 1 else inRange.size, replacingAreas),
                     style = MaterialTheme.typography.bodySmall, color = colors.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("geofence_block_message"))
             }
+    }
+    val bottomPanel: @Composable () -> Unit = {
+        if (downloadUi == DownloadUi.Idle) actions()
+        else Box(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 8.dp)) { DownloadPanel(downloadUi, downloadedAreas, dark, downloadActions) }
     }
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.weight(1f).then(if (compact) Modifier.verticalScroll(rememberScrollState()) else Modifier)) {
@@ -331,7 +364,7 @@ fun LocationPickerScreen(
                         }
                         Text("$radiusMeters m", style = MaterialTheme.typography.titleSmall, modifier = Modifier.testTag("location_picker_radius_value"))
                     }
-                if (!compact) actions()
+                if (!compact) bottomPanel()
                 }
                 LazyColumn(Modifier.fillMaxWidth().heightIn(max = sheetBodyHeight).testTag("place_results_list"), state = listState,
                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -377,9 +410,8 @@ fun LocationPickerScreen(
                         Surface(color = colors.surfaceContainer, shape = MaterialTheme.shapes.medium) {
                             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text("Keep the map available offline", style = MaterialTheme.typography.titleSmall)
-                                Text("Map tiles need internet unless a downloaded area covers this spot. Place search is already offline. Saves roads, labels and map detail for about 4 × 4 km in this theme. Other areas and zoom levels may need internet.", style = MaterialTheme.typography.bodySmall)
+                                Text("Map tiles need internet unless a downloaded area covers this spot. Place search is already offline. Use Download area in the map controls to save the visible map for the current theme. Manage or delete areas in Settings.", style = MaterialTheme.typography.bodySmall)
                                 downloadedAreas.lastOrNull()?.let { area -> Text(if (area.complete) "Map area saved. Manage in Settings → Offline maps." else if (area.active) "Downloading ${(area.progress * 100).toInt()}%" else "Download paused. Resume in Settings → Offline maps.", style = MaterialTheme.typography.bodySmall) }
-                                TextButton(onClick = { downloadConfirm = true }) { Text("Download this area") }
                                 TextButton(onClick = { coordinatesVisible = !coordinatesVisible }) { Text(if (coordinatesVisible) "Hide coordinates" else "Show coordinates") }
                                 if (coordinatesVisible) {
                                     Text(selection.formatLatitude(), Modifier.testTag("location_picker_latitude"), style = MaterialTheme.typography.bodySmall)
@@ -399,11 +431,15 @@ fun LocationPickerScreen(
                     val source = rememberGeoJsonSource(data = GeoJsonData.Features(boundary))
                     FillLayer(id = "reminder-radius-fill", source = source, color = const(colors.primary), opacity = const(0.14f))
                     LineLayer(id = "reminder-radius-outline", source = source, color = const(colors.primary), width = const(2.dp))
+                    OfflineOutlineLayers(offlineRegions.filter { it.dark == dark }.map { it.bounds },
+                        ((downloadUi as? DownloadUi.Plan)?.plan as? DownloadPlan.Ready)?.bounds ?: (downloadUi as? DownloadUi.Replace)?.plan?.bounds, colors)
                     userFix?.let { UserLocationLayers(it.position, it.accuracyMeters, colors) }
                     ResultPinLayers(pinsJson, selectedPlace, cameraState, colors, onPlace = { id -> results.firstOrNull { it.id == id }?.let { select(it, fly = false) } })
                 }
                 if (!resultsMode) CenterSelectionMarker()
-                MapControls(cameraState, onRecenter = { requestLocate() }, modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp))
+                MapControls(cameraState, onRecenter = { requestLocate() }, modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp),
+                    extra = MapControl(if (covered) AriciuIcons.Check else AriciuIcons.Download, if (covered) "Downloaded" else "Download area", "map_download",
+                        enabled = downloadUi == DownloadUi.Idle, onClick = { openDownload() }))
                 if (moved && (resultsMode || query.isNotBlank() || chips.isNotEmpty()) && !searching) FilledTonalButton(
                     onClick = { runSearch(centre(), query, chips) }, modifier = Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 12.dp, end = 92.dp)
                         .heightIn(min = 48.dp).testTag("search_this_area")) { Text("Search this area") }
@@ -420,7 +456,7 @@ fun LocationPickerScreen(
         }
         }
         }
-        if (compact) Surface(color = colors.surface) { actions() }
+        if (compact) Surface(color = colors.surface) { bottomPanel() }
     }
     }
     if (locationExplanation) AlertDialog(onDismissRequest = { locationExplanation = false }, title = { Text("Find your location") },
@@ -431,10 +467,6 @@ fun LocationPickerScreen(
             else { permissionAsked = true; locationPermission.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)) }
         }) { Text(if (permissionAsked) "Open settings" else "Allow location") } },
         dismissButton = { TextButton(onClick = { locationExplanation = false }) { Text("Not now") } })
-    if (downloadConfirm) AlertDialog(onDismissRequest = { downloadConfirm = false }, title = { Text("Keep this area offline?") },
-        text = { Text("Download about 4 × 4 km around your pin, for the ${if (dark) "dark" else "light"} map, at neighbourhood detail. Saves the basemap (roads and labels), not extra searchable places or reminder coverage. Search already works offline. Uses internet and up to 45 MB; up to three areas. Keep Create open while downloading. Manage or delete areas in Settings. Offline maps don’t guarantee offline location detection. Map requests are sent to OpenFreeMap and its CDN.") },
-        confirmButton = { TextButton(onClick = { downloadConfirm = false; offlineMaps.download(selection.latitude, selection.longitude, dark); message = "Preparing the area. View progress or resume it in Settings → Offline maps." }) { Text("Download area") } },
-        dismissButton = { TextButton(onClick = { downloadConfirm = false }) { Text("Cancel") } })
     offlineError?.let { error -> AlertDialog(onDismissRequest = { offlineMaps.error.value = null }, title = { Text("Offline maps") }, text = { Text(error) },
         confirmButton = { TextButton(onClick = { offlineMaps.error.value = null }) { Text("OK") } }) }
     message?.let { text -> AlertDialog(onDismissRequest = { message = null }, title = { Text("Map") }, text = { Text(text) },

@@ -28,9 +28,12 @@ import ro.andrei.ariciu.ui.components.AriciuIcons
 private const val MIN_ZOOM = 3.0
 private const val MAX_ZOOM = 19.0
 
-/** Zoom, compass and recenter. Each target is at least 48dp and carries a visible label. */
+/** An extra labelled control below the standard ones, for example "Download area". */
+data class MapControl(val icon: ImageVector, val label: String, val tag: String, val enabled: Boolean = true, val onClick: () -> Unit)
+
+/** Zoom, compass, recenter and an optional extra control. Each target is at least 48dp and carries a visible label. */
 @Composable
-fun MapControls(cameraState: CameraState, onRecenter: () -> Unit, modifier: Modifier = Modifier, recenterLabel: String = "Recenter") {
+fun MapControls(cameraState: CameraState, onRecenter: () -> Unit, modifier: Modifier = Modifier, recenterLabel: String = "Recenter", extra: MapControl? = null) {
     val scope = rememberCoroutineScope()
     fun zoomBy(delta: Double) = scope.launch {
         val p = cameraState.position
@@ -46,13 +49,14 @@ fun MapControls(cameraState: CameraState, onRecenter: () -> Unit, modifier: Modi
                 scope.launch { cameraState.animateTo(cameraState.position.copy(bearing = 0.0, tilt = 0.0)) }
             }
             ControlButton(AriciuIcons.Locate, recenterLabel, "map_recenter", onClick = onRecenter)
+            extra?.let { ControlButton(it.icon, it.label, it.tag, enabled = it.enabled, onClick = it.onClick) }
         }
     }
 }
 
 @Composable
-private fun ControlButton(icon: ImageVector, label: String, tag: String, iconRotation: Float = 0f, onClick: () -> Unit) {
-    Column(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(role = Role.Button, onClick = onClick)
+private fun ControlButton(icon: ImageVector, label: String, tag: String, iconRotation: Float = 0f, enabled: Boolean = true, onClick: () -> Unit) {
+    Column(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable(enabled = enabled, role = Role.Button, onClick = onClick)
         .padding(vertical = 6.dp).testTag(tag).semantics { contentDescription = label },
         horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(icon, null, Modifier.size(22.dp).rotate(iconRotation), tint = MaterialTheme.colorScheme.onSurface)

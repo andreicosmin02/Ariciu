@@ -29,12 +29,22 @@ class OfflineCoverageTest {
 
     @Test fun averageBytesPerTileUsesOnlyCompletedPacksWithEnoughTiles() {
         assertNull(averageBytesPerTile(emptyList()))
-        assertNull(averageBytesPerTile(listOf(PackStats(complete = true, tiles = 10, tileBytes = 1_000_000))))
-        assertNull(averageBytesPerTile(listOf(PackStats(complete = false, tiles = 500, tileBytes = 9_000_000))))
-        assertEquals(20_000L, averageBytesPerTile(listOf(PackStats(true, 300, 6_000_000), PackStats(true, 100, 2_000_000), PackStats(false, 900, 90_000_000))))
+        assertNull(averageBytesPerTile(listOf(PackStats(complete = true, tiles = 3, tileBytes = 1_000_000, totalBytes = 5_000_000))))
+        assertNull(averageBytesPerTile(listOf(PackStats(complete = false, tiles = 500, tileBytes = 9_000_000, totalBytes = 30_000_000))))
+        assertEquals(20_000L, averageBytesPerTile(listOf(PackStats(true, 300, 6_000_000, 25_000_000), PackStats(true, 100, 2_000_000, 21_000_000), PackStats(false, 900, 90_000_000, 99_000_000))))
+    }
+    @Test fun theEstimateFollowsTheDensestPackSeenNotTheMean() {
+        // Real packs: Brasov 8 tiles 680,255 bytes (85 KB each), Vienna 8 tiles 2,094,121 bytes (261 KB each).
+        val packs = listOf(PackStats(true, 8, 680_255, 18_708_284), PackStats(true, 8, 2_094_121, 20_122_150))
+        assertEquals(261_765L, averageBytesPerTile(packs))
+    }
+    @Test fun measuredOverheadIsTheLargestNonTileShareOfCompletedPacks() {
+        assertNull(measuredOverheadBytes(emptyList()))
+        assertNull(measuredOverheadBytes(listOf(PackStats(false, 100, 1_000_000, 30_000_000))))
+        assertEquals(19_000_000L, measuredOverheadBytes(listOf(PackStats(true, 8, 700_000, 18_700_000), PackStats(true, 100, 2_000_000, 21_000_000), PackStats(false, 5, 1, 99_000_000))))
     }
     @Test fun averageIsNeverBelowAFloorSoTheEstimateStaysConservative() {
-        assertEquals(OfflineLimits.MIN_BYTES_PER_TILE, averageBytesPerTile(listOf(PackStats(true, 1000, 1_000_000))))
+        assertEquals(OfflineLimits.MIN_BYTES_PER_TILE, averageBytesPerTile(listOf(PackStats(true, 1000, 1_000_000, 22_000_000))))
     }
 
     @Test fun threeAreasIsTheLimit() {
@@ -43,5 +53,13 @@ class OfflineCoverageTest {
         assertEquals(AreaGate.AT_LIMIT, areaGate(areaCount = 5, downloading = false))
         assertEquals(AreaGate.BUSY, areaGate(areaCount = 1, downloading = true))
         assertEquals(AreaGate.BUSY, areaGate(areaCount = 3, downloading = true))
+    }
+
+    @Test fun outlinesAreClosedPolygonsWithLongitudeFirst() {
+        val json = boundsGeoJson(listOf(GeoBounds(45.0, 25.0, 46.0, 26.0)))
+        assertTrue(json, json.contains("[[25.0,45.0],[26.0,45.0],[26.0,46.0],[25.0,46.0],[25.0,45.0]]"))
+        assertEquals(1, Regex("\"type\":\"Polygon\"").findAll(json).count())
+        assertEquals("""{"type":"FeatureCollection","features":[]}""", boundsGeoJson(emptyList()))
+        assertEquals(2, Regex("\"type\":\"Polygon\"").findAll(boundsGeoJson(listOf(GeoBounds(0.0, 0.0, 1.0, 1.0), GeoBounds(5.0, 5.0, 6.0, 6.0)))).count())
     }
 }

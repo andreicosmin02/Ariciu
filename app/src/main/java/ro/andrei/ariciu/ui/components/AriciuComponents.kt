@@ -114,6 +114,7 @@ object AriciuIcons {
         moveTo(4f, 14f); arcTo(8f, 6f, 0f, false, true, 20f, 14f); lineTo(20f, 18f); arcTo(1f, 1f, 0f, false, true, 19f, 19f)
         lineTo(5f, 19f); arcTo(1f, 1f, 0f, false, true, 4f, 18f); close(); moveTo(9f, 10f); lineTo(10.5f, 13f); moveTo(13f, 10f); lineTo(14.5f, 13f)
     }
+    val Download = icon("Download") { moveTo(12f, 4f); lineTo(12f, 15f); moveTo(7f, 10f); lineTo(12f, 15f); lineTo(17f, 10f); moveTo(5f, 19f); lineTo(19f, 19f) }
     val Close = icon("Close") { moveTo(6f, 6f); lineTo(18f, 18f); moveTo(18f, 6f); lineTo(6f, 18f) }
     val Layers = icon("Map layers") {
         moveTo(12f, 3f); lineTo(21f, 8f); lineTo(12f, 13f); lineTo(3f, 8f); close()

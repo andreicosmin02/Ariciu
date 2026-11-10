@@ -20,17 +20,18 @@ private fun GeoBounds.valid() = south.isFinite() && west.isFinite() && north.isF
  * limits, a lower maximum zoom (13, then 12); if still too large, a box around the centre at zoom 14. When nothing fits
  * the user must zoom in. Plans stay within the soft limits (2,000 tiles / 40 MB), below the hard stops.
  */
-fun planDownload(viewport: GeoBounds, cameraZoom: Double, bytesPerTile: Long?): DownloadPlan {
+fun planDownload(viewport: GeoBounds, cameraZoom: Double, bytesPerTile: Long?, overheadBytes: Long? = null): DownloadPlan {
     if (!viewport.valid()) return DownloadPlan.Unsupported
     if (cameraZoom < OfflineLimits.MIN_CAMERA_ZOOM) return DownloadPlan.TooFarOut
     val bpt = (bytesPerTile ?: OfflineLimits.DEFAULT_BYTES_PER_TILE).coerceAtLeast(OfflineLimits.MIN_BYTES_PER_TILE)
+    val overhead = overheadBytes?.coerceAtLeast(OfflineLimits.MIN_OVERHEAD_BYTES) ?: OfflineLimits.DEFAULT_OVERHEAD_BYTES
     val padLat = (viewport.north - viewport.south) * OfflineLimits.MARGIN
     val padLon = (viewport.east - viewport.west) * OfflineLimits.MARGIN
     val padded = GeoBounds((viewport.south - padLat).coerceAtLeast(-80.0), (viewport.west - padLon).coerceAtLeast(-179.0),
         (viewport.north + padLat).coerceAtMost(80.0), (viewport.east + padLon).coerceAtMost(179.0))
     fun plan(b: GeoBounds, maxZoom: Int, detail: DownloadPlan.Detail): DownloadPlan.Ready? {
         val tiles = TileMath.pyramidTileCount(b, OfflineLimits.MIN_ZOOM, maxZoom)
-        val bytes = tiles * bpt + OfflineLimits.OVERHEAD_BYTES
+        val bytes = tiles * bpt + overhead
         return if (tiles <= OfflineLimits.SOFT_TILES && bytes <= OfflineLimits.SOFT_BYTES)
             DownloadPlan.Ready(b, OfflineLimits.MIN_ZOOM, maxZoom, tiles, bytes, detail) else null
     }
@@ -48,7 +49,7 @@ fun planDownload(viewport: GeoBounds, cameraZoom: Double, bytesPerTile: Long?): 
 
 /** A downloaded (or downloading) pack, as far as coverage and estimates need to know. */
 data class DownloadedRegion(val bounds: GeoBounds, val dark: Boolean, val minZoom: Int, val maxZoom: Int, val complete: Boolean)
-data class PackStats(val complete: Boolean, val tiles: Long, val tileBytes: Long)
+data class PackStats(val complete: Boolean, val tiles: Long, val tileBytes: Long, val totalBytes: Long)
 
 /** The viewport lies fully inside one complete pack of the current theme, and the camera is not below the pack's minimum zoom. */
 fun viewportCovered(viewport: GeoBounds, cameraZoom: Double, dark: Boolean, regions: List<DownloadedRegion>): Boolean =
@@ -58,10 +59,18 @@ fun viewportCovered(viewport: GeoBounds, cameraZoom: Double, dark: Boolean, regi
             viewport.west >= r.bounds.west && viewport.east <= r.bounds.east
     }
 
-/** Measured average tile size over completed packs (null until there are at least 20 tiles), never below the floor. */
-fun averageBytesPerTile(packs: List<PackStats>): Long? {
-    val done = packs.filter { it.complete }
-    val tiles = done.sumOf { it.tiles }
-    if (tiles < 20) return null
-    return (done.sumOf { it.tileBytes } / tiles).coerceAtLeast(OfflineLimits.MIN_BYTES_PER_TILE)
+/**
+ * Conservative measured tile size: the densest completed pack (at least 5 tiles) rather than the mean, because city centres
+ * differ a lot (Brasov 85 KB per tile, Vienna 262 KB). Null until a pack completed. Never below the floor.
+ */
+fun averageBytesPerTile(packs: List<PackStats>): Long? =
+    packs.filter { it.complete && it.tiles >= 5 }.maxOfOrNull { it.tileBytes / it.tiles }?.coerceAtLeast(OfflineLimits.MIN_BYTES_PER_TILE)
+
+/** Largest non-tile share (fonts, sprites, styling) seen in a completed pack, or null before any pack completed. */
+fun measuredOverheadBytes(packs: List<PackStats>): Long? =
+    packs.filter { it.complete }.maxOfOrNull { (it.totalBytes - it.tileBytes).coerceAtLeast(0) }
+
+/** Rectangles as closed Polygon features (longitude first) for map outlines. */
+fun boundsGeoJson(boxes: List<GeoBounds>): String = boxes.joinToString(",", """{"type":"FeatureCollection","features":[""", "]}") { b ->
+    """{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[${b.west},${b.south}],[${b.east},${b.south}],[${b.east},${b.north}],[${b.west},${b.north}],[${b.west},${b.south}]]]},"properties":{}}"""
 }

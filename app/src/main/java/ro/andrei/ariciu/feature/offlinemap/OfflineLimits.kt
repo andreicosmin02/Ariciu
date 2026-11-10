@@ -14,11 +14,15 @@ object OfflineLimits {
     const val MIN_ZOOM = 10
     const val MAX_ZOOM = 14
     const val MIN_CAMERA_ZOOM = 11.0
-    /** Used until a completed pack gives a measured average. Deliberately high (dense city tiles). */
-    const val DEFAULT_BYTES_PER_TILE = 80_000L
+    /** Used until a completed pack gives a measured value. Deliberately high: a Vienna city-centre pack measured 262 KB per tile. */
+    const val DEFAULT_BYTES_PER_TILE = 250_000L
     const val MIN_BYTES_PER_TILE = 8_000L
-    /** Style, sprites and glyph ranges on top of tiles. */
-    const val OVERHEAD_BYTES = 3_000_000L
+    /**
+     * Style, sprites and glyph ranges on top of tiles. The first real pack (8 tiles) measured about 18 MB of this,
+     * so the default is deliberately high; completed packs replace it with their measured value.
+     */
+    const val DEFAULT_OVERHEAD_BYTES = 20_000_000L
+    const val MIN_OVERHEAD_BYTES = 3_000_000L
     const val MARGIN = 0.10
 }
 

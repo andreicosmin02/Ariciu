@@ -18,27 +18,27 @@ class DownloadPlannerTest {
     }
     @Test fun aSmallViewportGetsFullDetailInBothCities() {
         listOf(brasov, vienna).forEach { city ->
-            val p = ready(planDownload(box(city, 0.05), cameraZoom = 14.0, bytesPerTile = null))
+            val p = ready(planDownload(box(city, 0.03), cameraZoom = 14.0, bytesPerTile = null))
             assertEquals(DownloadPlan.Detail.FULL, p.detail); assertEquals(14, p.maxZoom); assertEquals(10, p.minZoom)
-            assertEquals(p.tiles * OfflineLimits.DEFAULT_BYTES_PER_TILE + OfflineLimits.OVERHEAD_BYTES, p.estimatedBytes)
-            assertTrue(p.tiles in 70L..130L)
+            assertEquals(p.tiles * OfflineLimits.DEFAULT_BYTES_PER_TILE + OfflineLimits.DEFAULT_OVERHEAD_BYTES, p.estimatedBytes)
+            assertTrue(p.tiles in 20L..80L)
         }
     }
     @Test fun theBoxIncludesASmallMarginAroundTheViewport() {
-        val v = box(brasov, 0.05)
+        val v = box(brasov, 0.03)
         val p = ready(planDownload(v, 14.0, null))
         assertTrue(p.bounds.south < v.south && p.bounds.north > v.north && p.bounds.west < v.west && p.bounds.east > v.east)
-        assertTrue(p.bounds.north - v.north <= 0.05 * 2 * OfflineLimits.MARGIN + 1e-9)
+        assertTrue(p.bounds.north - v.north <= 0.03 * 2 * OfflineLimits.MARGIN + 1e-9)
     }
     @Test fun aMeasuredAverageLowersTheEstimate() {
-        val v = box(vienna, 0.05)
+        val v = box(vienna, 0.03)
         val conservative = ready(planDownload(v, 14.0, null)); val measured = ready(planDownload(v, 14.0, 20_000))
         assertTrue(measured.estimatedBytes < conservative.estimatedBytes)
-        assertEquals(measured.tiles * 20_000 + OfflineLimits.OVERHEAD_BYTES, measured.estimatedBytes)
+        assertEquals(measured.tiles * 20_000 + OfflineLimits.DEFAULT_OVERHEAD_BYTES, measured.estimatedBytes)
     }
     @Test fun aLargerViewportReducesMaxZoomBeforeShrinking() {
         listOf(brasov, vienna).forEach { city ->
-            val p = ready(planDownload(box(city, 0.3), cameraZoom = 11.5, bytesPerTile = null))
+            val p = ready(planDownload(box(city, 0.3), cameraZoom = 11.5, bytesPerTile = 80_000))
             assertEquals(DownloadPlan.Detail.REDUCED, p.detail); assertTrue(p.maxZoom in 12..13)
             assertTrue(p.estimatedBytes <= OfflineLimits.SOFT_BYTES)
         }
@@ -74,6 +74,22 @@ class DownloadPlannerTest {
                 assertTrue(p.maxZoom in 12..14 && p.minZoom == 10)
             }
         }
+    }
+    @Test fun theDefaultTileSizeCoversDenseCityCentres() {
+        // Measured: Brasov 85 KB per tile, Vienna city centre 262 KB per tile.
+        assertTrue(OfflineLimits.DEFAULT_BYTES_PER_TILE >= 250_000L)
+    }
+    @Test fun measuredOverheadReplacesTheDefaultAndFontsAndStylingAreCounted() {
+        val v = box(brasov, 0.05)
+        val measured = ready(planDownload(v, 14.0, 85_000, overheadBytes = 18_000_000))
+        assertEquals(measured.tiles * 85_000 + 18_000_000, measured.estimatedBytes)
+        // The overhead alone (about 18 MB in the first real pack) is what limits how many tiles fit under 40 MB.
+        assertTrue(OfflineLimits.DEFAULT_OVERHEAD_BYTES >= 18_000_000L)
+        val fewTiles = (OfflineLimits.SOFT_BYTES - OfflineLimits.DEFAULT_OVERHEAD_BYTES) / OfflineLimits.DEFAULT_BYTES_PER_TILE
+        assertTrue(fewTiles in 50..400)
+    }
+    @Test fun anOverheadAboveTheLimitMeansNothingFits() {
+        assertEquals(DownloadPlan.TooFarOut, planDownload(box(vienna, 0.05), 14.0, 80_000, overheadBytes = 39_900_000))
     }
     @Test fun polarAndDateLineViewportsAreUnsupported() {
         assertEquals(DownloadPlan.Unsupported, planDownload(GeoBounds(81.0, 10.0, 82.0, 11.0), 12.0, null))
