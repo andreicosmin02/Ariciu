@@ -6,12 +6,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
@@ -26,15 +20,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import ro.andrei.ariciu.feature.delivery.model.DeliveryCapabilities
 import ro.andrei.ariciu.feature.reminders.model.*
 import ro.andrei.ariciu.ui.components.*
-
-/** Tabs and panel share one outer radius; cards sit 8dp inside it, so their radius is outer minus inset. */
-private val PanelRadius = 20.dp
-private val CardRadius = 12.dp
 
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -55,22 +46,12 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
             if (index >= 0) listState.animateScrollToItem(index + (if (!capabilities.ready && active.isNotEmpty()) 1 else 0) + (if (state.loading) 1 else 0))
         }
     }
-    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp).padding(top = 20.dp, bottom = 8.dp)) {
+    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp).padding(top = 20.dp)) {
         ScreenHeading("Your reminders", "The things you want to remember.")
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(8.dp))
         ReminderTabs(completed, active.size, finished.size, { completed = it })
-        val panelBorder = colors.primary.copy(alpha = 0.55f)
-        val panelShape = RoundedCornerShape(bottomStart = PanelRadius, bottomEnd = PanelRadius)
-        LazyColumn(Modifier.weight(1f).fillMaxWidth().clip(panelShape).background(colors.surface).drawBehind {
-            val stroke = 1.dp.toPx(); val inset = stroke / 2; val radius = PanelRadius.toPx()
-            val path = Path().apply {
-                moveTo(inset, 0f); lineTo(inset, size.height - radius)
-                quadraticTo(inset, size.height - inset, radius, size.height - inset); lineTo(size.width - radius, size.height - inset)
-                quadraticTo(size.width - inset, size.height - inset, size.width - inset, size.height - radius); lineTo(size.width - inset, 0f)
-            }
-            drawPath(path, panelBorder, style = Stroke(stroke))
-        }.testTag("reminders_list"), state = listState,
-            contentPadding = PaddingValues(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("reminders_list"), state = listState,
+            contentPadding = PaddingValues(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (!capabilities.ready && active.isNotEmpty()) item {
             Surface(shape = MaterialTheme.shapes.medium, color = colors.tertiaryContainer) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -92,8 +73,8 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
         }
         items(reminders, key = { it.id }) { reminder ->
             val status = reminder.presentStatus(capabilities)
-            Surface(shape = RoundedCornerShape(CardRadius), color = colors.surfaceContainer,
-                border = if (reminder.id == openedId) BorderStroke(1.dp, colors.primary) else null) {
+            Surface(shape = MaterialTheme.shapes.medium, color = colors.surface,
+                border = BorderStroke(1.dp, if (reminder.id == openedId) colors.primary else colors.outlineVariant)) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                         verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -143,34 +124,24 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
     }
 }
 
-/** Fixed above the scrolling panel: tabs and content share a border without a chip gap. */
+/** Plain text tabs: selection is bold + accent colour + a 2dp underline, never colour alone. */
 @Composable
 private fun ReminderTabs(completed: Boolean, active: Int, finished: Int, onSelect: (Boolean) -> Unit) {
     val colors = MaterialTheme.colorScheme
-    val panelBorder = colors.primary.copy(alpha = 0.55f)
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).selectableGroup().testTag("reminder_tabs")) {
         listOf(false to "Active · $active", true to "Completed · $finished").forEach { (value, label) ->
             val selected = completed == value
-            Box(Modifier.weight(1f).fillMaxHeight().heightIn(min = 56.dp)
-                .background(if (selected) colors.surface else colors.background, RoundedCornerShape(topStart = PanelRadius, topEnd = PanelRadius))
+            Column(Modifier.weight(1f).fillMaxHeight().heightIn(min = 48.dp)
                 .selectable(selected, role = Role.Tab, onClick = { onSelect(value) })
                 .semantics { stateDescription = if (selected) "Selected" else "Not selected" }
-                .testTag(if (value) "tab_completed" else "tab_active")
-                .drawBehind {
-                    val width = 1.dp.toPx(); val inset = width / 2; val radius = PanelRadius.toPx()
-                    val path = Path().apply {
-                        moveTo(inset, size.height); lineTo(inset, radius)
-                        quadraticTo(inset, inset, radius, inset); lineTo(size.width - radius, inset)
-                        quadraticTo(size.width - inset, inset, size.width - inset, radius)
-                        lineTo(size.width - inset, size.height)
-                    }
-                    drawPath(path, if (selected) panelBorder else colors.outlineVariant, style = Stroke(width))
-                    if (!selected) drawLine(panelBorder, Offset(0f, size.height - inset), Offset(size.width, size.height - inset), width)
-                    else drawLine(colors.primary, Offset(radius, 3.dp.toPx()), Offset(size.width - radius, 3.dp.toPx()), 2.dp.toPx())
-                }.padding(horizontal = 12.dp, vertical = 12.dp), contentAlignment = Alignment.Center) {
-                Text(label, style = MaterialTheme.typography.titleSmall, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (selected) colors.primary else colors.onSurfaceVariant)
+                .testTag(if (value) "tab_completed" else "tab_active")) {
+                Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 2.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
+                    Text(label, style = MaterialTheme.typography.titleSmall, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                        color = if (selected) colors.primary else colors.onSurfaceVariant)
+                }
+                Box(Modifier.fillMaxWidth().height(2.dp).background(if (selected) colors.primary else Color.Transparent))
             }
         }
     }
+    HorizontalDivider(color = colors.outlineVariant)
 }
