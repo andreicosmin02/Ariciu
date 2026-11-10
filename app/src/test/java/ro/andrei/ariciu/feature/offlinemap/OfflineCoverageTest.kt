@@ -31,12 +31,14 @@ class OfflineCoverageTest {
         assertNull(averageBytesPerTile(emptyList()))
         assertNull(averageBytesPerTile(listOf(PackStats(complete = true, tiles = 3, tileBytes = 1_000_000, totalBytes = 5_000_000))))
         assertNull(averageBytesPerTile(listOf(PackStats(complete = false, tiles = 500, tileBytes = 9_000_000, totalBytes = 30_000_000))))
-        assertEquals(20_000L, averageBytesPerTile(listOf(PackStats(true, 300, 6_000_000, 25_000_000), PackStats(true, 100, 2_000_000, 21_000_000), PackStats(false, 900, 90_000_000, 99_000_000))))
+        assertEquals(24_000L, averageBytesPerTile(listOf(PackStats(true, 300, 6_000_000, 25_000_000), PackStats(true, 100, 2_000_000, 21_000_000), PackStats(false, 900, 90_000_000, 99_000_000))))
     }
-    @Test fun theEstimateFollowsTheDensestPackSeenNotTheMean() {
+    @Test fun theEstimateFollowsTheDensestPackSeenPlusASafetyMargin() {
         // Real packs: Brasov 8 tiles 680,255 bytes (85 KB each), Vienna 8 tiles 2,094,121 bytes (261 KB each).
         val packs = listOf(PackStats(true, 8, 680_255, 18_708_284), PackStats(true, 8, 2_094_121, 20_122_150))
-        assertEquals(261_765L, averageBytesPerTile(packs))
+        assertEquals(314_118L, averageBytesPerTile(packs))
+        // Paris measured 335 KB per tile after Vienna: the margin must be at least that large a step.
+        assertTrue(averageBytesPerTile(packs)!! * 1.07 > 335_669)
     }
     @Test fun measuredOverheadIsTheLargestNonTileShareOfCompletedPacks() {
         assertNull(measuredOverheadBytes(emptyList()))

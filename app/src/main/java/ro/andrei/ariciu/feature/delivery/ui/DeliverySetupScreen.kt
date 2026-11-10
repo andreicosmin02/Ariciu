@@ -158,7 +158,7 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
         }
         SettingsPanel {
             SectionLabel("Offline maps")
-            Text("Keeps roads, labels and map detail available without internet for about 4 × 4 km in the downloaded theme. It does not download extra searchable stores or change reminder coverage; search already works offline. Start in Create → Location details. Resume partial downloads here. Leaving Settings or Create pauses downloads.", style = MaterialTheme.typography.bodyMedium)
+            Text("Saved from Create with Download area: the visible map plus a small margin, for one theme (light or dark) only, up to three areas. It does not download extra searchable places or change reminder coverage; search already works offline. Each area includes about 18 MB of fonts and map styling. Resume partial downloads here. Leaving Settings or Create pauses downloads.", style = MaterialTheme.typography.bodyMedium)
             if (offlineAreas.isEmpty()) Text("No downloaded areas yet.", color = colors.onSurfaceVariant)
             offlineError?.let { Text(it, color = colors.error) }
             offlineAreas.forEach { area ->

@@ -76,8 +76,8 @@ class DownloadPlannerTest {
         }
     }
     @Test fun theDefaultTileSizeCoversDenseCityCentres() {
-        // Measured: Brasov 85 KB per tile, Vienna city centre 262 KB per tile.
-        assertTrue(OfflineLimits.DEFAULT_BYTES_PER_TILE >= 250_000L)
+        // Measured: Brasov 85 KB per tile, Vienna 262 KB, Paris 335 KB.
+        assertTrue(OfflineLimits.DEFAULT_BYTES_PER_TILE >= 350_000L)
     }
     @Test fun measuredOverheadReplacesTheDefaultAndFontsAndStylingAreCounted() {
         val v = box(brasov, 0.05)
@@ -86,7 +86,7 @@ class DownloadPlannerTest {
         // The overhead alone (about 18 MB in the first real pack) is what limits how many tiles fit under 40 MB.
         assertTrue(OfflineLimits.DEFAULT_OVERHEAD_BYTES >= 18_000_000L)
         val fewTiles = (OfflineLimits.SOFT_BYTES - OfflineLimits.DEFAULT_OVERHEAD_BYTES) / OfflineLimits.DEFAULT_BYTES_PER_TILE
-        assertTrue(fewTiles in 50..400)
+        assertTrue(fewTiles in 40..400)
     }
     @Test fun anOverheadAboveTheLimitMeansNothingFits() {
         assertEquals(DownloadPlan.TooFarOut, planDownload(box(vienna, 0.05), 14.0, 80_000, overheadBytes = 39_900_000))

@@ -57,7 +57,7 @@ fun DownloadPanel(state: DownloadUi, areas: List<OfflineArea>, dark: Boolean, ac
     val colors = MaterialTheme.colorScheme
     val theme = if (dark) "dark" else "light"
     Surface(modifier.fillMaxWidth().testTag("download_panel"), shape = MaterialTheme.shapes.medium, color = colors.surfaceContainer) {
-        Column(Modifier.fillMaxWidth().heightIn(max = 300.dp).verticalScroll(rememberScrollState()).padding(16.dp).semantics { liveRegion = LiveRegionMode.Polite },
+        Column(Modifier.fillMaxWidth().heightIn(max = 260.dp).verticalScroll(rememberScrollState()).padding(16.dp).semantics { liveRegion = LiveRegionMode.Polite },
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
             when (state) {
                 DownloadUi.Idle -> Unit
@@ -71,12 +71,12 @@ fun DownloadPanel(state: DownloadUi, areas: List<OfflineArea>, dark: Boolean, ac
                             DownloadPlan.Detail.REDUCED -> "Less zoom detail (up to zoom ${plan.maxZoom}) because this view is large. Zoom in a little for full detail."
                             DownloadPlan.Detail.SHRUNK -> "Only the middle of this view fits. Zoom in a little to cover what you need at full detail."
                         }, style = MaterialTheme.typography.bodyMedium)
-                        Text("Saves the $theme map only. If you switch theme, download again for that theme. Uses internet. Up to three areas; keep Create open while downloading. Map requests are sent to OpenFreeMap and its CDN.",
-                            style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                             Button(onClick = { actions.start(plan) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("download_confirm")) { Text("Download") }
                             OutlinedButton(onClick = actions.close, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("download_cancel")) { Text("Cancel") }
                         }
+                        Text("Saves the $theme map only. If you switch theme, download again for that theme. Uses internet. Up to three areas; keep Create open while downloading. Map requests are sent to OpenFreeMap and its CDN.",
+                            style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     }
                     DownloadPlan.TooFarOut -> Notice("Zoom in a little to download at full detail.", actions.close)
                     DownloadPlan.Unsupported -> Notice("Offline downloads are available away from polar regions and the date line.", actions.close)

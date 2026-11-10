@@ -60,11 +60,12 @@ fun viewportCovered(viewport: GeoBounds, cameraZoom: Double, dark: Boolean, regi
     }
 
 /**
- * Conservative measured tile size: the densest completed pack (at least 5 tiles) rather than the mean, because city centres
- * differ a lot (Brasov 85 KB per tile, Vienna 262 KB). Null until a pack completed. Never below the floor.
+ * Conservative measured tile size: the densest completed pack (at least 5 tiles) plus a 20% margin, rather than the mean,
+ * because city centres differ a lot (Brasov 85 KB per tile, Vienna 262 KB, Paris 335 KB). Null until a pack completed. Never below the floor.
  */
 fun averageBytesPerTile(packs: List<PackStats>): Long? =
-    packs.filter { it.complete && it.tiles >= 5 }.maxOfOrNull { it.tileBytes / it.tiles }?.coerceAtLeast(OfflineLimits.MIN_BYTES_PER_TILE)
+    packs.filter { it.complete && it.tiles >= 5 }.maxOfOrNull { it.tileBytes / it.tiles }
+        ?.let { (it * OfflineLimits.SAFETY).toLong() }?.coerceAtLeast(OfflineLimits.MIN_BYTES_PER_TILE)
 
 /** Largest non-tile share (fonts, sprites, styling) seen in a completed pack, or null before any pack completed. */
 fun measuredOverheadBytes(packs: List<PackStats>): Long? =

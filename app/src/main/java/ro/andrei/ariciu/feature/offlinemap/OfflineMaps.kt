@@ -148,7 +148,7 @@ class OfflineMaps private constructor(context: Context) {
         val session = ++downloadSession
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             if (session == downloadSession && mutableAreas.value.any { it.id == id && it.active }) {
-                pause(id); update(id) { it.copy(error = "Download paused after 90 seconds. Check internet, then Resume to continue.") }
+                pause(id); update(id) { it.copy(error = "Download paused after 90 seconds. Check internet, then continue the download.") }
             }
         }, 90_000)
     }
