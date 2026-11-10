@@ -4,13 +4,18 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.vector.VectorPath
+import androidx.compose.ui.graphics.vector.toPath
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -43,7 +48,7 @@ import ro.andrei.ariciu.feature.locationpicker.model.SelectedCoordinates
 import ro.andrei.ariciu.ui.components.AriciuIcons
 
 private val MARKER_SIZE = 32.dp
-private val SELECTED_SIZE = 44.dp
+private val SELECTED_SIZE = 40.dp
 
 fun PlaceCategory.icon(): ImageVector = when (this) {
     PlaceCategory.SUPERMARKET -> AriciuIcons.Store; PlaceCategory.PHARMACY -> AriciuIcons.Pharmacy; PlaceCategory.FUEL -> AriciuIcons.Fuel
@@ -52,15 +57,27 @@ fun PlaceCategory.icon(): ImageVector = when (this) {
     PlaceCategory.BAKERY -> AriciuIcons.Bakery; PlaceCategory.TOWN -> AriciuIcons.Town
 }
 
-/** Round badge + stroke icon. MapLibre rasterises the painter at screen density for the current theme. */
-internal class MarkerPainter(private val icon: Painter, private val fill: Color, private val ring: Color, private val glyph: Color,
+/** Stroke path of a hand-drawn 24dp [ImageVector]. Drawing the path directly avoids rasterising a VectorPainter off-screen. */
+internal fun ImageVector.strokePath(): Path {
+    val path = Path()
+    for (node in root) if (node is VectorPath) node.pathData.toPath(path)
+    return path
+}
+
+/** Round badge + stroke icon, drawn with plain canvas calls. MapLibre rasterises the painter at screen density. */
+internal class MarkerPainter(private val glyph: Path, private val fill: Color, private val ring: Color, private val glyphColor: Color,
     private val sizePx: Float) : Painter() {
     override val intrinsicSize = Size(sizePx, sizePx)
     override fun DrawScope.onDraw() {
         drawCircle(fill, radius = size.minDimension / 2)
         drawCircle(ring, radius = size.minDimension / 2 - 1.dp.toPx(), style = Stroke(2.dp.toPx()))
-        val inset = size.minDimension * 0.2f
-        translate(inset, inset) { with(icon) { draw(Size(size.width - inset * 2, size.height - inset * 2), colorFilter = ColorFilter.tint(glyph)) } }
+        val box = size.minDimension * 0.6f
+        val unit = box / 24f
+        translate((size.width - box) / 2, (size.height - box) / 2) {
+            scale(unit, unit, pivot = Offset.Zero) {
+                drawPath(glyph, glyphColor, style = Stroke(width = 2.2f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            }
+        }
     }
 }
 
@@ -94,7 +111,7 @@ fun ResultPinLayers(pinsJson: String, selected: CatalogPlace?, cameraState: Came
         textFont = const(listOf("Noto Sans Bold")), textColor = const(colors.onPrimaryContainer),
         iconAllowOverlap = const(true), textAllowOverlap = const(true))
     PlaceCategory.entries.forEach { category ->
-        val glyph = rememberVectorPainter(category.icon())
+        val glyph = remember(category) { category.icon().strokePath() }
         val (fill, ring, onFill) = category.tones(colors)
         val painter = remember(glyph, fill, ring, onFill) { MarkerPainter(glyph, fill, ring, onFill, with(density) { MARKER_SIZE.toPx() }) }
         SymbolLayer(id = "res-${category.key}", source = source,
@@ -105,13 +122,11 @@ fun ResultPinLayers(pinsJson: String, selected: CatalogPlace?, cameraState: Came
                 ClickResult.Consume
             })
     }
-    if (selected != null) {
-        val selectedSource = rememberGeoJsonSource(data = GeoJsonData.JsonString(placesGeoJson(listOf(selected))))
-        val glyph = rememberVectorPainter(PlaceCategory.of(selected).icon())
-        val painter = remember(glyph, colors) { MarkerPainter(glyph, colors.primary, colors.surface, colors.onPrimary, with(density) { SELECTED_SIZE.toPx() }) }
-        SymbolLayer(id = "res-selected", source = selectedSource, iconImage = image(painter, size = DpSize(SELECTED_SIZE, SELECTED_SIZE)),
-            iconAllowOverlap = const(true))
-    }
+    val selectedSource = rememberGeoJsonSource(data = GeoJsonData.JsonString(placesGeoJson(listOfNotNull(selected))))
+    val selectedGlyph = remember(selected?.id) { (selected?.let { PlaceCategory.of(it) } ?: PlaceCategory.TOWN).icon().strokePath() }
+    val selectedPainter = remember(selectedGlyph, colors) { MarkerPainter(selectedGlyph, colors.primary, colors.surface, colors.onPrimary, with(density) { SELECTED_SIZE.toPx() }) }
+    SymbolLayer(id = "res-selected", source = selectedSource, iconImage = image(selectedPainter, size = DpSize(SELECTED_SIZE, SELECTED_SIZE)),
+        iconAllowOverlap = const(true))
 }
 
 /** Blue dot plus an accuracy circle for the My location fix. Call inside the MaplibreMap content. */

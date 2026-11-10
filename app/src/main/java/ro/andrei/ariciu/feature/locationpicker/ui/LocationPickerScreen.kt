@@ -175,10 +175,12 @@ fun LocationPickerScreen(
         searchJob = scope.launch {
             searching = true; searchMessage = null
             try {
-                val found = withContext(Dispatchers.Default) {
-                    searchCatalog(index.near(ref.latitude, ref.longitude, SEARCH_RADIUS_METERS), text, categories, ref.latitude, ref.longitude,
-                        towns = if (text.isNotBlank()) index.towns() else emptyList())
-                }
+                val t0 = System.nanoTime()
+                val near = index.near(ref.latitude, ref.longitude, SEARCH_RADIUS_METERS)
+                val towns = if (text.isNotBlank()) index.towns() else emptyList()
+                val t1 = System.nanoTime()
+                val found = withContext(Dispatchers.Default) { searchCatalog(near, text, categories, ref.latitude, ref.longitude, towns = towns) }
+                android.util.Log.i("AriciuMap", "search '$text' ${categories.size} chips: ${near.size} candidates, ${found.size} results; load ${(t1 - t0) / 1_000_000} ms, rank ${(System.nanoTime() - t1) / 1_000_000} ms")
                 searchRef = doubleArrayOf(ref.latitude, ref.longitude)
                 if (found.isEmpty()) {
                     results = emptyList(); selectedId = null
@@ -301,6 +303,23 @@ fun LocationPickerScreen(
                         }
                         Text("$radiusMeters m", style = MaterialTheme.typography.titleSmall, modifier = Modifier.testTag("location_picker_radius_value"))
                     }
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (!resultsMode) PrimaryAction("Use this place", onClick = { onLocationSelected(chosenLocation) },
+                    enabled = !cameraState.isCameraMoving && singleFits, modifier = Modifier.testTag("location_picker_confirm_button"))
+                else {
+                    PrimaryAction("Remind me at this place", onClick = { selectedPlace?.let { onPlaceSelected(chosenLocation, it.name) } },
+                        enabled = selectedPlace != null && singleFits, modifier = Modifier.testTag("remind_this_place"))
+                    if (inRange.size > 1) OutlinedButton(onClick = {
+                        val ref = searchRef?.let { SelectedCoordinates(it[0], it[1]) } ?: selection
+                        onPlacesSelected(SelectedLocation(ref.latitude, ref.longitude, radiusMeters), searchLabel(query, chips, inRange),
+                            inRange.take(MAX_CHAIN_AREAS).map { ChainArea(it.id, it.latitude, it.longitude) })
+                    }, enabled = allFits, shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("remind_all_places")) { Text("Remind me at all ${minOf(inRange.size, MAX_CHAIN_AREAS)} places") }
+                }
+                if (geofenceAreasUsed != null && (!singleFits || !allFits)) Text(
+                    geofenceBlockMessage(geofenceAreasUsed, if (!singleFits) 1 else inRange.size, replacingAreas),
+                    style = MaterialTheme.typography.bodySmall, color = colors.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("geofence_block_message"))
+            }
                 }
                 LazyColumn(Modifier.fillMaxWidth().heightIn(max = sheetBodyHeight).testTag("place_results_list"), state = listState,
                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -369,7 +388,7 @@ fun LocationPickerScreen(
                     FillLayer(id = "reminder-radius-fill", source = source, color = const(colors.primary), opacity = const(0.14f))
                     LineLayer(id = "reminder-radius-outline", source = source, color = const(colors.primary), width = const(2.dp))
                     userFix?.let { UserLocationLayers(it.position, it.accuracyMeters, colors) }
-                    if (resultsMode) ResultPinLayers(pinsJson, selectedPlace, cameraState, colors, onPlace = { id -> results.firstOrNull { it.id == id }?.let { select(it, fly = false) } })
+                    ResultPinLayers(pinsJson, selectedPlace, cameraState, colors, onPlace = { id -> results.firstOrNull { it.id == id }?.let { select(it, fly = false) } })
                 }
                 if (!resultsMode) CenterSelectionMarker()
                 MapControls(cameraState, onRecenter = { requestLocate() }, modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp))
@@ -388,25 +407,6 @@ fun LocationPickerScreen(
             }
         }
         }
-        }
-        Surface(color = colors.surface) {
-            Column(Modifier.padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (!resultsMode) PrimaryAction("Use this place", onClick = { onLocationSelected(chosenLocation) },
-                    enabled = !cameraState.isCameraMoving && singleFits, modifier = Modifier.testTag("location_picker_confirm_button"))
-                else {
-                    PrimaryAction("Remind me at this place", onClick = { selectedPlace?.let { onPlaceSelected(chosenLocation, it.name) } },
-                        enabled = selectedPlace != null && singleFits, modifier = Modifier.testTag("remind_this_place"))
-                    if (inRange.size > 1) OutlinedButton(onClick = {
-                        val ref = searchRef?.let { SelectedCoordinates(it[0], it[1]) } ?: selection
-                        onPlacesSelected(SelectedLocation(ref.latitude, ref.longitude, radiusMeters), searchLabel(query, chips, inRange),
-                            inRange.take(MAX_CHAIN_AREAS).map { ChainArea(it.id, it.latitude, it.longitude) })
-                    }, enabled = allFits, shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("remind_all_places")) { Text("Remind me at all ${minOf(inRange.size, MAX_CHAIN_AREAS)} places") }
-                }
-                if (geofenceAreasUsed != null && (!singleFits || !allFits)) Text(
-                    geofenceBlockMessage(geofenceAreasUsed, if (!singleFits) 1 else inRange.size, replacingAreas),
-                    style = MaterialTheme.typography.bodySmall, color = colors.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("geofence_block_message"))
-            }
         }
     }
     }

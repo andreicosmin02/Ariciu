@@ -9,7 +9,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.DpSize
@@ -39,6 +38,7 @@ import ro.andrei.ariciu.feature.delivery.model.DeliveryCapabilities
 import ro.andrei.ariciu.feature.locationpicker.ui.MapControls
 import ro.andrei.ariciu.feature.offlinemap.OfflineMaps
 import ro.andrei.ariciu.feature.places.MarkerPainter
+import ro.andrei.ariciu.feature.places.strokePath
 import ro.andrei.ariciu.feature.reminders.model.Reminder
 import ro.andrei.ariciu.ui.components.AriciuIcons
 import ro.andrei.ariciu.ui.theme.isAriciuDarkTheme
@@ -87,7 +87,7 @@ fun RemindersMap(reminders: List<Reminder>, capabilities: DeliveryCapabilities, 
                     val isTone = feature["tone"].asString() eq const(tone.name)
                     FillLayer(id = "rem-fill-${tone.name}", source = circleSource, filter = isTone, color = const(style.ring), opacity = const(0.16f))
                     LineLayer(id = "rem-line-${tone.name}", source = circleSource, filter = isTone, color = const(style.ring), width = const(2.dp))
-                    val glyph = rememberVectorPainter(style.icon)
+                    val glyph = remember(style.icon) { style.icon.strokePath() }
                     val painter = remember(glyph, style) { MarkerPainter(glyph, style.fill, style.ring, style.glyph, with(density) { 36.dp.toPx() }) }
                     SymbolLayer(id = "rem-pin-${tone.name}", source = pinSource, filter = isTone,
                         iconImage = image(painter, size = DpSize(36.dp, 36.dp)), iconAllowOverlap = const(true),
