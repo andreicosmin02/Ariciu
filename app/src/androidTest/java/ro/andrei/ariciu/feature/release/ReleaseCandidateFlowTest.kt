@@ -32,16 +32,16 @@ class ReleaseCandidateFlowTest {
             path.outputStream().use { bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }; bitmap.recycle()
         }
     }
-    @Test fun localCatalogueContainsAfiAndKeepsMallsOutOfChainSelections() = kotlinx.coroutines.runBlocking {
+    @Test fun localCatalogueIndexFindsAfiAndKeepsMallsBrandless() = kotlinx.coroutines.runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val places = ro.andrei.ariciu.feature.places.LocalPlaces.load(context)
-        assertEquals(26065, places.size)
-        assertEquals(231, places.count { it.kind == "mall" })
-        assertTrue(places.filter { it.kind == "mall" }.all { it.chain.isEmpty() })
-        val matches = ro.andrei.ariciu.feature.places.searchPlaces(places, "afi", 45.6579, 25.6012)
+        val index = ro.andrei.ariciu.feature.places.LocalPlaces.index(context)
+        val near = index.near(45.6579, 25.6012, 25_000.0)
+        assertTrue(near.size > 100)
+        assertTrue(near.filter { it.kind == "mall" }.all { it.chain.isEmpty() })
+        val matches = ro.andrei.ariciu.feature.places.searchCatalog(near, "afi", emptySet(), 45.6579, 25.6012)
         assertEquals("AFI Brașov", matches.first().name)
-        assertTrue(matches.any { it.name == "AFI Cotroceni" })
-        assertTrue(matches.any { it.name == "AFI Ploiești" })
+        assertTrue(index.towns().any { it.name == "Brașov" })
+        assertTrue(ro.andrei.ariciu.feature.places.PlaceCategory.entries.all { c -> c == ro.andrei.ariciu.feature.places.PlaceCategory.TOWN || near.any { ro.andrei.ariciu.feature.places.PlaceCategory.of(it) == c } })
     }
 
     @Test fun originalFoxAdaptiveIconReview() {
@@ -88,7 +88,7 @@ class ReleaseCandidateFlowTest {
                 AriciuTheme(darkTheme = mode == ThemePreference.DARK) { AriciuApp(vm, mode, { mode = it }) }
             }
         }
-        compose.onNodeWithText("Search places").assertIsDisplayed()
+        compose.onNodeWithTag("place_search").assertIsDisplayed()
         Thread.sleep(2500) // Allow native map resources to render; no tile/network assertion.
         capture("rc-dark-create")
         compose.runOnIdle { mode = ThemePreference.LIGHT }
@@ -97,39 +97,26 @@ class ReleaseCandidateFlowTest {
         compose.onNodeWithTag("place_sheet_toggle").performClick()
         capture("review-create-expanded")
         compose.onNodeWithTag("place_sheet_toggle").performClick()
-        compose.onNodeWithText("Search places").performClick()
         compose.onNodeWithTag("place_search").performTextInput("afi")
+        compose.onNodeWithTag("place_search").performImeAction()
         compose.waitUntil(15_000) { compose.onAllNodesWithText("AFI Brașov", substring = false).fetchSemanticsNodes().isNotEmpty() }
         capture("review-afi-search")
-        compose.onAllNodesWithText("AFI Brașov", substring = false).onFirst().performClick()
-        compose.onNodeWithText("Supermarket chain").performClick()
-        compose.onNodeWithText("Kaufland", substring = false).performScrollTo().performClick()
-        compose.onNodeWithTag("place_sheet_toggle").performClick()
-        compose.onNodeWithText("Preview stores on map").performScrollTo().performClick()
-        compose.onNodeWithTag("store_preview_map").assertIsDisplayed()
-        compose.onNodeWithTag("store_preview_close").performClick()
-        compose.waitUntil(10_000) { compose.onAllNodes(hasTestTag("location_picker_confirm_button") and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithTag("location_picker_confirm_button").performClick()
+        compose.onNodeWithTag("remind_this_place").performClick()
+        compose.runOnIdle { assertEquals("AFI Brașov", vm.draft.value.title); assertNull(vm.draft.value.chainName) }
+        compose.onNodeWithTag("reminder_editor_title_field").performTextClearance()
+        compose.onNodeWithText("Change place").performScrollTo().performClick()
+        compose.onNodeWithTag("place_search").performTextInput("kaufland")
+        compose.onNodeWithTag("place_search").performImeAction()
+        compose.waitUntil(15_000) { compose.onAllNodes(hasTestTag("remind_all_places") and isEnabled()).fetchSemanticsNodes().isNotEmpty() }
+        capture("review-kaufland-results")
+        compose.onNodeWithTag("remind_all_places").performClick()
         compose.onNodeWithTag("reminder_editor_title_field").performTextInput("Buy groceries")
         compose.onNodeWithText("Alert: Normal").performScrollTo().performClick()
         compose.onNodeWithText("Urgent", substring = false).performScrollTo().performClick()
         compose.runOnIdle { assertEquals("Kaufland", vm.draft.value.chainName); assertTrue(vm.draft.value.chainAreas.isNotEmpty()); assertTrue(vm.draft.value.chainAreas.size <= 40) }
         compose.onNodeWithText("New reminder").performScrollTo()
         capture("rc-light-editor")
-        compose.onNodeWithText("View selected stores").performScrollTo().performClick()
-        Thread.sleep(2500) // Native basemap resources load independently of Compose; visually reviewed, not asserted.
-        capture("review-store-map")
-        compose.onNodeWithText("List", substring = false).performClick()
-        compose.onNodeWithTag("store_preview_list").assertIsDisplayed()
-        capture("review-store-list")
-        compose.onNodeWithTag("store_preview_close").performClick()
         compose.runOnIdle { mode = ThemePreference.DARK; large = true }
-        compose.onNodeWithText("View selected stores").performScrollTo().performClick()
-        compose.onNodeWithText("List", substring = false).performClick()
-        compose.onNodeWithTag("store_preview_list").assertIsDisplayed()
-        compose.onNodeWithTag("store_preview_close").assertIsDisplayed()
-        capture("review-large-store-list")
-        compose.onNodeWithTag("store_preview_close").performClick()
         compose.onNodeWithText("Alert: Urgent").performScrollTo().performClick()
         capture("rc-large-alerts")
         compose.onNodeWithText("Close").performClick()

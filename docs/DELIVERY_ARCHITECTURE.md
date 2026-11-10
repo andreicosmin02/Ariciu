@@ -94,3 +94,12 @@ The new explicit foreground arrival check is separate from registration; initial
 [Current policy, fields, tests and phone checklist](URGENT_RE_ALERTS.md). Room4→5 adds separate urgentRetryAtMs/notificationAttempt fields, keeping Alarm snooze independent and every earlier migration/schema intact. Due work advances the alert attempt, not occurrence, through the existing outbox. Unique delayed one-time WorkManager requests are deduplicated/cancelled against persisted state and recovered on startup/boot/update. An unresolved Urgent cannot rearm through Every visit or chain exits. Card Next time transaction rotates generation; final Urgent post revalidates inside a transaction. Notification permission/channel failures retain one pending outbox attempt, without a periodic access poll.
 
 Existing visible rc3 Urgent alerts are quietly rebound to the new delete intent when their marker is absent. New DISMISS URIs append attempt; explicit action identities and all channel IDs remain. ALARM implementation/data/actions remain supported internally, but pickers offer only Silent/Normal/Urgent. Explicit legacy conversion preserves any current snooze deadline. WorkManager timing is inexact; no FGS, exact alarm, continuous sound, full-screen or GPS loop.
+
+## Multi-place reminders from map search (2026-11-10)
+
+"Remind me at all N places" in the Create search reuses the existing chain fields. No schema, migration or engine change.
+- `Reminder.chainAreas` holds the 1-40 selected results (ids stay `n<osm id>` / `w<osm id>`). `Reminder.chainName` now stores the search label (the shared brand, else the typed query, else the category names), shown in the UI as "N places".
+- `ChainLifecycle`, `DeliveryEngine`, per-area request IDs, the union-of-areas lifecycle and the 100-area allocator are unchanged. Each place uses one of the shared 100 areas. Create blocks a save that would exceed the free count (`geofenceFits`) and says how many areas are free; the count comes from stored registration state, not a live Play services read.
+- Existing chain reminders (for example "Kaufland") load, display and edit exactly as before. The chain picker UI was removed. In the editor, "Refresh places around this pin" re-runs the stored label as a search within 25 km and keeps the current places when nothing is found; "Use only my map pin" turns the reminder into a single place.
+- Confirming a different manual pin on a multi-place reminder makes it a single place; confirming the same pin (radius change only) keeps the places.
+
