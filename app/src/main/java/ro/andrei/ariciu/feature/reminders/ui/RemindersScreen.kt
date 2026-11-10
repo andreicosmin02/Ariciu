@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,9 +50,9 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
             if (index >= 0) listState.animateScrollToItem(index + (if (!capabilities.ready && active.isNotEmpty()) 1 else 0) + (if (state.loading) 1 else 0))
         }
     }
-    Column(Modifier.fillMaxSize().padding(horizontal = 24.dp).padding(top = 24.dp)) {
+    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp).padding(top = 20.dp)) {
         ScreenHeading("Your reminders", "The things you want to remember.")
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
         ReminderTabs(completed, active.size, finished.size, { completed = it })
         val panelBorder = colors.primary.copy(alpha = 0.55f)
         LazyColumn(Modifier.weight(1f).fillMaxWidth().background(colors.surface).drawBehind {
@@ -60,7 +61,7 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
             drawLine(panelBorder, Offset(size.width - stroke / 2, 0f), Offset(size.width - stroke / 2, size.height), stroke)
             drawLine(panelBorder, Offset(0f, size.height - stroke / 2), Offset(size.width, size.height - stroke / 2), stroke)
         }.testTag("reminders_list"), state = listState,
-            contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            contentPadding = PaddingValues(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (!capabilities.ready && active.isNotEmpty()) item {
             Surface(shape = MaterialTheme.shapes.medium, color = colors.tertiaryContainer) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -82,35 +83,49 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
         }
         items(reminders, key = { it.id }) { reminder ->
             val status = reminder.presentStatus(capabilities)
-            Surface(shape = MaterialTheme.shapes.large, color = colors.surface,
+            Surface(shape = MaterialTheme.shapes.large, color = colors.surfaceContainer,
                 border = if (reminder.id == openedId) BorderStroke(1.dp, colors.primary) else null) {
-                Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(if (reminder.transition == ReminderTransition.ENTER) "ON ARRIVAL" else "ON DEPARTURE",
-                            modifier = Modifier.padding(vertical = 6.dp), style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+                            modifier = Modifier.padding(vertical = 4.dp), style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
                         Surface(shape = MaterialTheme.shapes.small, color = if (status.needsAttention) colors.tertiaryContainer else colors.primaryContainer) {
-                            Text(status.label, Modifier.padding(horizontal = 10.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium,
+                            Text(status.label, Modifier.padding(horizontal = 10.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium,
                                 color = if (status.needsAttention) colors.onTertiaryContainer else colors.onPrimaryContainer)
                         }
                     }
-                    Text(reminder.title, style = MaterialTheme.typography.titleLarge)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(AriciuIcons.Place, null, Modifier.size(18.dp), tint = colors.onSurfaceVariant)
-                        Text("${reminder.location.radiusMeters} m area · ${if (reminder.repeat == ReminderRepeat.ONCE) "Just once" else "Every visit"}",
-                            style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(reminder.title, style = MaterialTheme.typography.titleLarge)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp),
+                            itemVerticalAlignment = Alignment.CenterVertically) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Icon(AriciuIcons.Place, null, Modifier.size(16.dp), tint = colors.onSurfaceVariant)
+                                Text("${reminder.location.radiusMeters} m · ${if (reminder.repeat == ReminderRepeat.ONCE) "Just once" else "Every visit"}",
+                                    style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                            }
+                            Text(reminder.intensity.label, style = MaterialTheme.typography.labelMedium, color = colors.primary,
+                                modifier = Modifier.semantics { contentDescription = "Alert: ${reminder.intensity.label}" })
+                        }
+                        reminder.chainName?.let { Text("$it · ${reminder.chainAreas.size} selected stores around your pin", style = MaterialTheme.typography.bodyMedium) }
+                        Text(status.description, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     }
-                    Text("Alert: ${reminder.intensity.label}", style = MaterialTheme.typography.labelLarge, color = colors.primary)
-                    reminder.chainName?.let { Text("$it · ${reminder.chainAreas.size} selected stores around your pin", style = MaterialTheme.typography.bodyMedium) }
-                    Text(status.description, style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
-                    HorizontalDivider(color = colors.outlineVariant)
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        if (reminder.delivery.active) OutlinedButton(onClick = { onDone(reminder) }, enabled = !state.busy,
-                            modifier = Modifier.heightIn(min = 48.dp).testTag("done_${reminder.id}")) { Text("Mark done") }
-                        if (reminder.unresolvedUrgent) OutlinedButton(onClick = { onNextTime(reminder) }, enabled = !state.busy,
-                            modifier = Modifier.heightIn(min = 48.dp).testTag("next_time_${reminder.id}")) { Text("Next time") }
-                        TextButton(onClick = { onEdit(reminder) }, enabled = !state.busy, contentPadding = PaddingValues(0.dp)) { Text("Edit") }
-                        TextButton(onClick = { onDelete(reminder) }, enabled = !state.busy, contentPadding = PaddingValues(0.dp),
-                            colors = ButtonDefaults.textButtonColors(contentColor = colors.onSurfaceVariant)) { Text("Delete") }
+                    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (reminder.delivery.active) OutlinedButton(onClick = { onDone(reminder) }, enabled = !state.busy,
+                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                modifier = Modifier.heightIn(min = 48.dp).testTag("done_${reminder.id}")) { Text("Mark done") }
+                            if (reminder.unresolvedUrgent) OutlinedButton(onClick = { onNextTime(reminder) }, enabled = !state.busy,
+                                contentPadding = PaddingValues(horizontal = 12.dp),
+                                modifier = Modifier.heightIn(min = 48.dp).testTag("next_time_${reminder.id}")) { Text("Next time") }
+                        }
+                        Row {
+                            TextButton(onClick = { onEdit(reminder) }, enabled = !state.busy, contentPadding = PaddingValues(horizontal = 8.dp),
+                                modifier = Modifier.heightIn(min = 48.dp)) { Text("Edit") }
+                            TextButton(onClick = { onDelete(reminder) }, enabled = !state.busy, contentPadding = PaddingValues(horizontal = 8.dp),
+                                modifier = Modifier.heightIn(min = 48.dp),
+                                colors = ButtonDefaults.textButtonColors(contentColor = colors.onSurfaceVariant)) { Text("Delete") }
+                        }
                     }
                 }
             }
