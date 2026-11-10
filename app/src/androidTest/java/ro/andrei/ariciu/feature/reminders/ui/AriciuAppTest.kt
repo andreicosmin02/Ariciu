@@ -33,7 +33,7 @@ class AriciuAppTest {
         lateinit var vm: RemindersViewModel
         compose.runOnUiThread { vm = RemindersViewModel(repo, SavedStateHandle()) }
         compose.setContent { AriciuTheme { AriciuApp(vm) } }
-        compose.onNodeWithText("Ariciu").assertIsDisplayed()
+        compose.onNodeWithText("Choose a place").assertIsDisplayed()
         compose.onNodeWithTag("location_picker_confirm_button").performClick()
         compose.onNodeWithTag("reminder_editor_title_field").performTextInput("Buy bread")
         // Exercise the accessible choice action without racing Android's native keyboard resize.

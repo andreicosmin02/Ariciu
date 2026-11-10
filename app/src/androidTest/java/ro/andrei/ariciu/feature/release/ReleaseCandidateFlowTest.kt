@@ -136,6 +136,8 @@ class ReleaseCandidateFlowTest {
         capture("review-settings-help")
         compose.runOnIdle { large = true; vm.discard() }
         compose.onNodeWithTag("nav_Create").performClick()
+        // The picker restores the earlier search; clearing it returns to the manual pin and its primary action.
+        compose.onNodeWithTag("place_search_clear").performClick()
         compose.onNodeWithTag("location_picker_confirm_button").assertIsDisplayed()
         // The saved Create sheet may already be expanded after returning from Settings.
         if (compose.onAllNodesWithText("Expand place options").fetchSemanticsNodes().isNotEmpty())

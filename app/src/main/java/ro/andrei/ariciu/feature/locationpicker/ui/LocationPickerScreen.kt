@@ -147,7 +147,7 @@ fun LocationPickerScreen(
     fun fly(target: CameraPosition) {
         scope.launch {
             animating = true
-            try { cameraState.animateTo(target, 600.milliseconds) } finally { animating = false; lastSearchCentre = centre(); moved = false }
+            try { withContext(Dispatchers.Main) { cameraState.animateTo(target, 600.milliseconds) } } finally { animating = false; lastSearchCentre = centre(); moved = false }
         }
     }
     fun fitTo(found: List<CatalogPlace>, ref: SelectedCoordinates) {
@@ -156,11 +156,13 @@ fun LocationPickerScreen(
             try {
                 val local = found.filter { distanceMeters(ref.latitude, ref.longitude, it.latitude, it.longitude) <= SEARCH_RADIUS_METERS }
                 val b = fitBounds(local.ifEmpty { found }, ref.latitude, ref.longitude)
-                if (b == null || (b.north - b.south < 0.0006 && b.east - b.west < 0.0006)) {
-                    val one = found.first()
-                    cameraState.animateTo(CameraPosition(target = Position(one.longitude, one.latitude), zoom = 16.0), 600.milliseconds)
-                } else cameraState.animateTo(BoundingBox(b.west, b.south, b.east, b.north),
-                    padding = PaddingValues(horizontal = 40.dp, vertical = 72.dp), duration = 600.milliseconds)
+                withContext(Dispatchers.Main) {
+                    if (b == null || (b.north - b.south < 0.0006 && b.east - b.west < 0.0006)) {
+                        val one = found.first()
+                        cameraState.animateTo(CameraPosition(target = Position(one.longitude, one.latitude), zoom = 16.0), 600.milliseconds)
+                    } else cameraState.animateTo(BoundingBox(b.west, b.south, b.east, b.north),
+                        padding = PaddingValues(horizontal = 40.dp, vertical = 72.dp), duration = 600.milliseconds)
+                }
             } finally { animating = false; lastSearchCentre = centre(); moved = false }
         }
     }
@@ -249,6 +251,25 @@ fun LocationPickerScreen(
     BoxWithConstraints(Modifier.fillMaxSize()) {
     val compact = maxHeight < 600.dp && density.fontScale > 1.3f || maxHeight < 400.dp
     val compactMapHeight = (maxHeight - 120.dp).coerceIn(180.dp, 300.dp)
+    val actions: @Composable () -> Unit = {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (!resultsMode) PrimaryAction("Use this place", onClick = { onLocationSelected(chosenLocation) },
+                    enabled = !cameraState.isCameraMoving && singleFits, modifier = Modifier.testTag("location_picker_confirm_button"))
+                else {
+                    PrimaryAction("Remind me at this place", onClick = { selectedPlace?.let { onPlaceSelected(chosenLocation, it.name) } },
+                        enabled = selectedPlace != null && singleFits, modifier = Modifier.testTag("remind_this_place"))
+                    if (inRange.size > 1) OutlinedButton(onClick = {
+                        val ref = searchRef?.let { SelectedCoordinates(it[0], it[1]) } ?: selection
+                        onPlacesSelected(SelectedLocation(ref.latitude, ref.longitude, radiusMeters), searchLabel(query, chips, inRange),
+                            inRange.take(MAX_CHAIN_AREAS).map { ChainArea(it.id, it.latitude, it.longitude) })
+                    }, enabled = allFits, shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("remind_all_places")) { Text("Remind me at all ${minOf(inRange.size, MAX_CHAIN_AREAS)} places") }
+                }
+                if (geofenceAreasUsed != null && (!singleFits || !allFits)) Text(
+                    geofenceBlockMessage(geofenceAreasUsed, if (!singleFits) 1 else inRange.size, replacingAreas),
+                    style = MaterialTheme.typography.bodySmall, color = colors.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("geofence_block_message"))
+            }
+    }
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.weight(1f).then(if (compact) Modifier.verticalScroll(rememberScrollState()) else Modifier)) {
         Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -305,23 +326,7 @@ fun LocationPickerScreen(
                         }
                         Text("$radiusMeters m", style = MaterialTheme.typography.titleSmall, modifier = Modifier.testTag("location_picker_radius_value"))
                     }
-                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (!resultsMode) PrimaryAction("Use this place", onClick = { onLocationSelected(chosenLocation) },
-                    enabled = !cameraState.isCameraMoving && singleFits, modifier = Modifier.testTag("location_picker_confirm_button"))
-                else {
-                    PrimaryAction("Remind me at this place", onClick = { selectedPlace?.let { onPlaceSelected(chosenLocation, it.name) } },
-                        enabled = selectedPlace != null && singleFits, modifier = Modifier.testTag("remind_this_place"))
-                    if (inRange.size > 1) OutlinedButton(onClick = {
-                        val ref = searchRef?.let { SelectedCoordinates(it[0], it[1]) } ?: selection
-                        onPlacesSelected(SelectedLocation(ref.latitude, ref.longitude, radiusMeters), searchLabel(query, chips, inRange),
-                            inRange.take(MAX_CHAIN_AREAS).map { ChainArea(it.id, it.latitude, it.longitude) })
-                    }, enabled = allFits, shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("remind_all_places")) { Text("Remind me at all ${minOf(inRange.size, MAX_CHAIN_AREAS)} places") }
-                }
-                if (geofenceAreasUsed != null && (!singleFits || !allFits)) Text(
-                    geofenceBlockMessage(geofenceAreasUsed, if (!singleFits) 1 else inRange.size, replacingAreas),
-                    style = MaterialTheme.typography.bodySmall, color = colors.error, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }.testTag("geofence_block_message"))
-            }
+                if (!compact) actions()
                 }
                 LazyColumn(Modifier.fillMaxWidth().heightIn(max = sheetBodyHeight).testTag("place_results_list"), state = listState,
                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -410,6 +415,7 @@ fun LocationPickerScreen(
         }
         }
         }
+        if (compact) Surface(color = colors.surface) { actions() }
     }
     }
     if (locationExplanation) AlertDialog(onDismissRequest = { locationExplanation = false }, title = { Text("Find your location") },
