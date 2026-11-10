@@ -81,8 +81,9 @@ fun AriciuApp(viewModel: RemindersViewModel,
                 ReminderRoute.DELIVERY -> DeliverySetupScreen(capabilities, { viewModel.navigate(ReminderRoute.MAP) }, themePreference, onThemeChange, geofenceAreasUsed(state.reminders))
                 ReminderRoute.MAP -> stateHolder.SaveableStateProvider("map_${draft.location}") {
                     LocationPickerScreen(onLocationSelected = viewModel::chooseLocation, initialLocation = draft.location,
-                        chainName = draft.chainName, onChainSelected = { viewModel.updateDraft(draft.copy(chainName = it, chainAreas = emptyList())) },
                         geofenceAreasUsed = geofenceAreasUsed(state.reminders),
+                        replacingAreas = if (!viewModel.editing) 0 else if (draft.chainName != null) draft.chainAreas.size else 1,
+                        onPlaceSelected = viewModel::choosePlace, onPlacesSelected = viewModel::choosePlaces,
                         onCancel = if (draft.location != null) ({ viewModel.navigate(ReminderRoute.EDITOR) }) else null)
                 }
                 ReminderRoute.EDITOR -> ReminderEditorScreen(draft, viewModel::updateDraft,

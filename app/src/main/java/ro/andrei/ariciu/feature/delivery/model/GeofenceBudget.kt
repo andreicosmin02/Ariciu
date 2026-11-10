@@ -18,3 +18,11 @@ fun geofenceAreasUsed(reminders: List<Reminder>): Int {
 }
 
 fun geofenceBudgetText(used: Int) = "${used.coerceIn(0, GEOFENCE_LIMIT)}/$GEOFENCE_LIMIT areas used"
+
+/** Whether [adding] more areas fit; [replacing] are the areas the edited reminder already holds. */
+fun geofenceFits(used: Int, adding: Int, replacing: Int = 0) = (used - replacing).coerceAtLeast(0) + adding <= GEOFENCE_LIMIT
+
+fun geofenceBlockMessage(used: Int, adding: Int, replacing: Int = 0): String {
+    val free = (GEOFENCE_LIMIT - (used - replacing).coerceAtLeast(0)).coerceAtLeast(0)
+    return "This needs $adding areas but only $free of $GEOFENCE_LIMIT are free. Complete or delete a reminder, or pick fewer places."
+}

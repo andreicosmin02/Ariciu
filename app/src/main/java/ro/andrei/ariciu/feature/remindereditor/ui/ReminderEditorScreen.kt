@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import ro.andrei.ariciu.feature.places.*
 import ro.andrei.ariciu.feature.delivery.model.ChainArea
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -43,24 +44,23 @@ fun ReminderEditorScreen(
     val colors = MaterialTheme.colorScheme
     val context = LocalContext.current
     val focus = androidx.compose.ui.platform.LocalFocusManager.current
-    var catalog by remember { mutableStateOf<List<CatalogPlace>>(emptyList()) }
-    var catalogError by remember { mutableStateOf(false) }
-    var viewingStores by remember { mutableStateOf(false) }
-    var choosingChain by remember { mutableStateOf(false) }
-    LaunchedEffect(context) { try { catalog = LocalPlaces.load(context) } catch (e: CancellationException) { throw e } catch (_: Exception) { catalogError = true } }
-    fun selectChain(chain: String?) {
+    val scope = rememberCoroutineScope()
+    var refreshMessage by remember { mutableStateOf<String?>(null) }
+    /** Re-run the stored search label around the pin. A refresh that finds nothing never replaces the current places. */
+    fun refreshPlaces() {
         val location = draft.location ?: return
-        val areas = if (chain == null) emptyList() else chainPlaces(catalog, chain, location.latitude, location.longitude).map { ChainArea(it.id, it.latitude, it.longitude) }
-        onDraftChange(draft.copy(chainName = chain, chainAreas = areas))
-    }
-    LaunchedEffect(draft.chainName, draft.location, catalog) {
-        if (draft.chainName != null && draft.chainAreas.isEmpty() && catalog.isNotEmpty()) selectChain(draft.chainName)
+        val label = draft.chainName ?: return
+        scope.launch {
+            try {
+                val index = LocalPlaces.index(context)
+                val found = searchCatalog(index.near(location.latitude, location.longitude, SEARCH_RADIUS_METERS), label, emptySet(),
+                    location.latitude, location.longitude, towns = emptyList())
+                if (found.isEmpty()) refreshMessage = "No listed places found around this pin. Your current places are kept."
+                else { refreshMessage = null; onDraftChange(draft.copy(chainAreas = found.map { ChainArea(it.id, it.latitude, it.longitude) })) }
+            } catch (e: CancellationException) { throw e } catch (_: Exception) { refreshMessage = "Could not read the place catalogue. Your current places are kept." }
+        }
     }
     val editorScroll = rememberScrollState()
-    if (viewingStores && draft.location != null) {
-        StorePreviewScreen(draft.chainAreas, catalog, draft.location, { viewingStores = false })
-        return
-    }
     Scaffold(modifier = Modifier.imePadding(), contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             Surface(color = colors.surface) {
@@ -91,8 +91,8 @@ fun ReminderEditorScreen(
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Icon(AriciuIcons.Place, null, tint = colors.primary, modifier = Modifier.size(24.dp))
                         Column(Modifier.weight(1f)) {
-                            Text(draft.chainName?.let { "Any selected $it store" } ?: if (draft.location == null) "Choose a place" else "Your chosen place", style = MaterialTheme.typography.titleMedium)
-                            Text(draft.location?.let { if (draft.chainName == null) "Within ${it.radiusMeters} metres of your pin" else "Within ${it.radiusMeters} metres of each selected store" } ?: "Set a spot on the map",
+                            Text(draft.chainName?.let { "${draft.chainAreas.size} places · $it" } ?: if (draft.location == null) "Choose a place" else "Your chosen place", style = MaterialTheme.typography.titleMedium)
+                            Text(draft.location?.let { if (draft.chainName == null) "Within ${it.radiusMeters} metres of your pin" else "Within ${it.radiusMeters} metres of each of these places" } ?: "Set a spot on the map",
                                 style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                         }
                     }
@@ -102,26 +102,15 @@ fun ReminderEditorScreen(
                     }
                 }
             }
-            OutlinedButton(onClick = { focus.clearFocus(); choosingChain = true }, enabled = !busy && draft.location != null && catalog.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(draft.chainName?.let { "$it · ${draft.chainAreas.size} selected stores" } ?: "Use a supermarket chain instead") }
-            if (catalogError) Text("Store catalogue unavailable. A single map pin still works.", color = colors.error)
             if (draft.chainName != null) {
-                if (draft.chainAreas.isEmpty()) Text("No listed stores within 25 km. Change the pin, choose another chain, or use a single place.", color = colors.error)
+                if (draft.chainAreas.isEmpty()) Text("No places are selected. Choose a place again.", color = colors.error)
                 var chainHelp by rememberSaveable { mutableStateOf(false) }
-                Text("${draft.chainAreas.size} selected stores. Refresh within 25 km of your pin when travelling.", style = MaterialTheme.typography.bodyMedium)
-                ExpandableSection("How chain reminders work", chainHelp, { chainHelp = !chainHelp }) { Text("This is an incomplete Romania catalogue. Done completes the whole reminder. Every visit waits until you leave all selected store areas. Missing crossings can delay rearming. Store data updates with the app; refresh picks listed stores within 25 km from its current catalogue.", style = MaterialTheme.typography.bodySmall) }
-                TextButton(onClick = { viewingStores = true; focus.clearFocus() }) { Text("View selected stores") }
-                TextButton(onClick = { selectChain(draft.chainName) }, enabled = !busy && catalog.isNotEmpty()) { Text("Refresh stores around this pin") }
+                Text("${draft.chainAreas.size} places. Refresh within 25 km of your pin when travelling.", style = MaterialTheme.typography.bodyMedium)
+                ExpandableSection("How multi-place reminders work", chainHelp, { chainHelp = !chainHelp }) { Text("This is an incomplete Romania catalogue. Done completes the whole reminder. Every visit waits until you leave all selected places. Each place uses one of Android’s 100 monitored areas.", style = MaterialTheme.typography.bodyMedium) }
+                refreshMessage?.let { Text(it, color = colors.error, style = MaterialTheme.typography.bodySmall) }
+                TextButton(onClick = { refreshPlaces() }, enabled = !busy && draft.location != null) { Text("Refresh places around this pin") }
+                TextButton(onClick = { onDraftChange(draft.copy(chainName = null, chainAreas = emptyList())) }, enabled = !busy) { Text("Use only my map pin") }
             }
-            if (choosingChain) AlertDialog(onDismissRequest = { choosingChain = false }, title = { Text("Choose places") }, text = {
-                Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Up to 40 listed stores within 25 km of your pin. Romania · OpenStreetMap source: 15 Oct 2026. Coverage may be incomplete. Refresh when travelling.")
-                    TextButton(onClick = { selectChain(null); choosingChain = false }) { Text("Only my map pin") }
-                    catalog.map { it.chain }.filter { it.isNotBlank() }.distinct().sorted().forEach { chain ->
-                        TextButton(onClick = { selectChain(chain); choosingChain = false }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(chain) }
-                    }
-                }
-            }, confirmButton = { TextButton(onClick = { choosingChain = false }) { Text("Close") } })
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 SectionLabel("When should we remind you?")
                 val arrival: @Composable (Modifier) -> Unit = { modifier ->

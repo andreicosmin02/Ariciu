@@ -31,4 +31,23 @@ class GeofenceBudgetTest {
         assertEquals("100/100 areas used", geofenceBudgetText(500))
         assertEquals("0/100 areas used", geofenceBudgetText(-3))
     }
+    @Test fun addingFitsOnlyUnderTheLimit() {
+        assertTrue(geofenceFits(used = 60, adding = 40))
+        assertFalse(geofenceFits(used = 61, adding = 40))
+        assertTrue(geofenceFits(used = 90, adding = 40, replacing = 40))
+        assertFalse(geofenceFits(used = 100, adding = 1))
+    }
+    @Test fun blockMessageSaysHowManyAreFree() {
+        assertEquals("This needs 40 areas but only 39 of 100 are free. Complete or delete a reminder, or pick fewer places.", geofenceBlockMessage(used = 61, adding = 40))
+    }
+    @Test fun areaCountMatchesChainAreasOrOne() {
+        assertEquals(1, r("a", RegistrationState.REGISTERED).areaCount())
+        assertEquals(7, r("b", RegistrationState.REGISTERED, areas = 7).areaCount())
+    }
+    @Test fun legacyChainAreasStillDecodeAndKeepTheirState() {
+        val text = "n12,45.1,25.2,INSIDE,5,1;w7,45.3,25.4,UNKNOWN,-1,-1"
+        val areas = decodeChainAreas(text)
+        assertEquals(listOf("n12", "w7"), areas.map { it.id }); assertEquals(AreaPosition.INSIDE, areas[0].position)
+        assertEquals(text, encodeChainAreas(areas))
+    }
 }

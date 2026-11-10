@@ -1,8 +1,7 @@
 package ro.andrei.ariciu.feature.places
 
-import android.util.Log
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.*
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -12,11 +11,10 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.jsonPrimitive
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.CameraState
@@ -30,6 +28,8 @@ import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.dsl.not
 import org.maplibre.compose.expressions.dsl.span
 import org.maplibre.compose.layers.CircleLayer
+import org.maplibre.compose.layers.FillLayer
+import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.GeoJsonOptions
@@ -37,14 +37,19 @@ import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.compose.util.MaplibreComposable
 import org.maplibre.spatialk.geojson.Point
-import org.maplibre.spatialk.geojson.Position
+import ro.andrei.ariciu.feature.locationpicker.geometry.buildRadiusBoundary
+import ro.andrei.ariciu.feature.locationpicker.map.toGeoJsonPolygon
+import ro.andrei.ariciu.feature.locationpicker.model.SelectedCoordinates
 import ro.andrei.ariciu.ui.components.AriciuIcons
 
-private const val TAG = "AriciuMap"
 private val MARKER_SIZE = 32.dp
+private val SELECTED_SIZE = 44.dp
 
-private fun PlaceCategory.icon(): ImageVector = when (this) {
-    PlaceCategory.SHOPS -> AriciuIcons.Store; PlaceCategory.MALLS -> AriciuIcons.Mall; PlaceCategory.TOWNS -> AriciuIcons.Town
+fun PlaceCategory.icon(): ImageVector = when (this) {
+    PlaceCategory.SUPERMARKET -> AriciuIcons.Store; PlaceCategory.PHARMACY -> AriciuIcons.Pharmacy; PlaceCategory.FUEL -> AriciuIcons.Fuel
+    PlaceCategory.BANK -> AriciuIcons.Bank; PlaceCategory.POST -> AriciuIcons.Post; PlaceCategory.MALL -> AriciuIcons.Mall
+    PlaceCategory.FOOD -> AriciuIcons.Food; PlaceCategory.HEALTH -> AriciuIcons.Health; PlaceCategory.HARDWARE -> AriciuIcons.Hardware
+    PlaceCategory.BAKERY -> AriciuIcons.Bakery; PlaceCategory.TOWN -> AriciuIcons.Town
 }
 
 /** Round badge + stroke icon. MapLibre rasterises the painter at screen density for the current theme. */
@@ -59,68 +64,64 @@ internal class MarkerPainter(private val icon: Painter, private val fill: Color,
     }
 }
 
-/** Viewport-filtered catalogue rows as GeoJSON. Recomputed only when the camera leaves the last padded box. */
-@Composable
-fun rememberViewportPlacesJson(cameraState: CameraState, catalog: List<CatalogPlace>, categories: Set<PlaceCategory>): State<String> {
-    val json = remember { mutableStateOf(placesGeoJson(emptyList())) }
-    LaunchedEffect(cameraState, catalog, categories) {
-        var loaded: GeoBounds? = null
-        json.value = placesGeoJson(emptyList())
-        snapshotFlow { cameraState.isCameraMoving to cameraState.position.zoom }.collect { (moving, zoom) ->
-            if (moving) return@collect
-            if (!placeMarkersVisible(zoom)) { if (loaded != null) { loaded = null; json.value = placesGeoJson(emptyList()) }; return@collect }
-            val box = cameraState.projection?.queryVisibleBoundingBox() ?: return@collect
-            val view = GeoBounds(box.south, box.west, box.north, box.east)
-            if (loaded?.let { it.contains(view.south, view.west) && it.contains(view.north, view.east) } == true) return@collect
-            val padLat = (view.north - view.south) / 2; val padLon = (view.east - view.west) / 2
-            val padded = GeoBounds(view.south - padLat, view.west - padLon, view.north + padLat, view.east + padLon)
-            val start = System.nanoTime()
-            val text = withContext(Dispatchers.Default) { placesGeoJson(placesInViewport(catalog, padded, categories)) }
-            Log.i(TAG, "viewport markers: ${text.length / 1024} KB json in ${(System.nanoTime() - start) / 1_000_000} ms, zoom ${"%.1f".format(zoom)}")
-            loaded = padded; json.value = text
-        }
-    }
-    return json
+private fun PlaceCategory.tones(c: ColorScheme) = when (ordinal % 3) {
+    0 -> Triple(c.primaryContainer, c.primary, c.onPrimaryContainer)
+    1 -> Triple(c.tertiaryContainer, c.tertiary, c.onTertiaryContainer)
+    else -> Triple(c.secondaryContainer, c.secondary, c.onSecondaryContainer)
 }
 
-/** Clustered catalogue markers. Must be called inside the MaplibreMap content block. Tap = choose that place. */
+/**
+ * Search results as clustered category pins plus one visually distinct selected pin. Call inside the MaplibreMap content.
+ * [pinsJson] must not contain the selected place. Tapping a pin reports its id; tapping a cluster zooms in.
+ */
 @MaplibreComposable
 @Composable
-fun PlaceMarkerLayers(json: String, cameraState: CameraState, colors: androidx.compose.material3.ColorScheme,
-    onPlace: (String) -> Unit) {
+fun ResultPinLayers(pinsJson: String, selected: CatalogPlace?, cameraState: CameraState, colors: ColorScheme, onPlace: (String) -> Unit) {
     val scope = rememberCoroutineScope()
-    val density = androidx.compose.ui.platform.LocalDensity.current
-    val source = rememberGeoJsonSource(data = GeoJsonData.JsonString(json),
-        options = GeoJsonOptions(cluster = true, clusterRadius = 48, clusterMaxZoom = 15))
+    val density = LocalDensity.current
+    val source = rememberGeoJsonSource(data = GeoJsonData.JsonString(pinsJson),
+        options = GeoJsonOptions(cluster = true, clusterRadius = 44, clusterMaxZoom = 15))
     val clustered = feature.has("point_count")
-    CircleLayer(id = "poi-cluster", source = source, filter = clustered, color = const(colors.primaryContainer),
+    CircleLayer(id = "res-cluster", source = source, filter = clustered, color = const(colors.primaryContainer),
         radius = const(18.dp), strokeColor = const(colors.primary), strokeWidth = const(2.dp),
         onClick = { features ->
             val at = (features.firstOrNull()?.geometry as? Point)?.coordinates
             if (at != null) scope.launch { cameraState.animateTo(CameraPosition(target = at, zoom = cameraState.position.zoom + 2.0)) }
             ClickResult.Consume
         })
-    SymbolLayer(id = "poi-cluster-count", source = source, filter = clustered,
+    SymbolLayer(id = "res-cluster-count", source = source, filter = clustered,
         textField = format(span(feature["point_count_abbreviated"].asString())),
         textFont = const(listOf("Noto Sans Bold")), textColor = const(colors.onPrimaryContainer),
         iconAllowOverlap = const(true), textAllowOverlap = const(true))
     PlaceCategory.entries.forEach { category ->
         val glyph = rememberVectorPainter(category.icon())
-        val (fill, ring) = when (category) {
-            PlaceCategory.SHOPS -> colors.primaryContainer to colors.primary
-            PlaceCategory.MALLS -> colors.tertiaryContainer to colors.tertiary
-            PlaceCategory.TOWNS -> colors.secondaryContainer to colors.secondary
-        }
-        val onFill = when (category) {
-            PlaceCategory.SHOPS -> colors.onPrimaryContainer; PlaceCategory.MALLS -> colors.onTertiaryContainer; PlaceCategory.TOWNS -> colors.onSecondaryContainer
-        }
+        val (fill, ring, onFill) = category.tones(colors)
         val painter = remember(glyph, fill, ring, onFill) { MarkerPainter(glyph, fill, ring, onFill, with(density) { MARKER_SIZE.toPx() }) }
-        SymbolLayer(id = "poi-${category.name.lowercase()}", source = source,
-            filter = !clustered and (feature["cat"].asString() eq const(category.name)),
+        SymbolLayer(id = "res-${category.key}", source = source,
+            filter = !clustered and (feature["cat"].asString() eq const(category.key)),
             iconImage = image(painter, size = DpSize(MARKER_SIZE, MARKER_SIZE)), iconAllowOverlap = const(true),
             onClick = { features ->
                 features.firstOrNull()?.properties?.get("id")?.jsonPrimitive?.content?.let(onPlace)
                 ClickResult.Consume
             })
     }
+    if (selected != null) {
+        val selectedSource = rememberGeoJsonSource(data = GeoJsonData.JsonString(placesGeoJson(listOf(selected))))
+        val glyph = rememberVectorPainter(PlaceCategory.of(selected).icon())
+        val painter = remember(glyph, colors) { MarkerPainter(glyph, colors.primary, colors.surface, colors.onPrimary, with(density) { SELECTED_SIZE.toPx() }) }
+        SymbolLayer(id = "res-selected", source = selectedSource, iconImage = image(painter, size = DpSize(SELECTED_SIZE, SELECTED_SIZE)),
+            iconAllowOverlap = const(true))
+    }
+}
+
+/** Blue dot plus an accuracy circle for the My location fix. Call inside the MaplibreMap content. */
+@MaplibreComposable
+@Composable
+fun UserLocationLayers(position: SelectedCoordinates, accuracyMeters: Float, colors: ColorScheme) {
+    val circle = remember(position, accuracyMeters) { buildRadiusBoundary(position, accuracyMeters.toInt().coerceIn(5, 2_000)).toGeoJsonPolygon() }
+    val ring = rememberGeoJsonSource(data = GeoJsonData.Features(circle))
+    FillLayer(id = "user-accuracy-fill", source = ring, color = const(colors.tertiary), opacity = const(0.12f))
+    LineLayer(id = "user-accuracy-line", source = ring, color = const(colors.tertiary), width = const(1.dp))
+    val dot = rememberGeoJsonSource(data = GeoJsonData.Features(Point(org.maplibre.spatialk.geojson.Position(position.longitude, position.latitude))))
+    CircleLayer(id = "user-dot", source = dot, color = const(colors.tertiary), radius = const(7.dp), strokeColor = const(colors.surface), strokeWidth = const(2.dp))
 }

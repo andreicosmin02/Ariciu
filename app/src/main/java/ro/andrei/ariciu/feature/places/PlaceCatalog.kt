@@ -5,7 +5,7 @@ import java.util.Locale
 import kotlin.math.*
 
 data class CatalogPlace(val id: String, val name: String, val kind: String, val address: String,
-    val latitude: Double, val longitude: Double, val chain: String = "")
+    val latitude: Double, val longitude: Double, val chain: String = "", val category: String = "")
 
 fun distanceMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
     val lat = Math.toRadians(lat2 - lat1); val lon = Math.toRadians(lon2 - lon1)

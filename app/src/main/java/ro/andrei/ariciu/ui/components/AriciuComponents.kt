@@ -89,6 +89,32 @@ object AriciuIcons {
         circle(12f, 12f, 9f)
         moveTo(15.5f, 8.5f); lineTo(13.5f, 13.5f); lineTo(8.5f, 15.5f); lineTo(10.5f, 10.5f); close()
     }
+    val Pharmacy = icon("Pharmacy") { circle(12f, 12f, 9f); moveTo(12f, 8f); lineTo(12f, 16f); moveTo(8f, 12f); lineTo(16f, 12f) }
+    val Health = icon("Hospital or clinic") {
+        moveTo(5f, 21f); lineTo(5f, 5f); lineTo(19f, 5f); lineTo(19f, 21f); close()
+        moveTo(12f, 9f); lineTo(12f, 15f); moveTo(9f, 12f); lineTo(15f, 12f)
+    }
+    val Fuel = icon("Fuel") {
+        moveTo(5f, 21f); lineTo(5f, 4f); lineTo(14f, 4f); lineTo(14f, 21f); moveTo(4f, 21f); lineTo(15f, 21f)
+        moveTo(5f, 9f); lineTo(14f, 9f); moveTo(14f, 8f); lineTo(17f, 8f); lineTo(19f, 10f); lineTo(19f, 17f)
+    }
+    val Bank = icon("Bank") {
+        moveTo(3f, 9f); lineTo(12f, 4f); lineTo(21f, 9f); close()
+        moveTo(6f, 11f); lineTo(6f, 17f); moveTo(10f, 11f); lineTo(10f, 17f); moveTo(14f, 11f); lineTo(14f, 17f); moveTo(18f, 11f); lineTo(18f, 17f)
+        moveTo(4f, 20f); lineTo(20f, 20f)
+    }
+    val Post = icon("Post office") { moveTo(3f, 6f); lineTo(21f, 6f); lineTo(21f, 18f); lineTo(3f, 18f); close(); moveTo(3f, 6f); lineTo(12f, 13f); lineTo(21f, 6f) }
+    val Food = icon("Food and cafes") {
+        moveTo(5f, 8f); lineTo(16f, 8f); lineTo(16f, 13f); arcTo(4f, 4f, 0f, false, true, 12f, 17f); lineTo(9f, 17f); arcTo(4f, 4f, 0f, false, true, 5f, 13f); close()
+        moveTo(16f, 10f); lineTo(17.5f, 10f); arcTo(2f, 2f, 0f, false, true, 17.5f, 14f); lineTo(16f, 14f)
+        moveTo(4f, 21f); lineTo(17f, 21f); moveTo(9f, 3f); lineTo(9f, 5f); moveTo(12f, 3f); lineTo(12f, 5f)
+    }
+    val Hardware = icon("Hardware") { moveTo(14f, 4f); lineTo(20f, 10f); lineTo(17f, 13f); lineTo(11f, 7f); close(); moveTo(13.5f, 9.5f); lineTo(5f, 18f); lineTo(6f, 20f); lineTo(8f, 19f) }
+    val Bakery = icon("Bakery") {
+        moveTo(4f, 14f); arcTo(8f, 6f, 0f, false, true, 20f, 14f); lineTo(20f, 18f); arcTo(1f, 1f, 0f, false, true, 19f, 19f)
+        lineTo(5f, 19f); arcTo(1f, 1f, 0f, false, true, 4f, 18f); close(); moveTo(9f, 10f); lineTo(10.5f, 13f); moveTo(13f, 10f); lineTo(14.5f, 13f)
+    }
+    val Close = icon("Close") { moveTo(6f, 6f); lineTo(18f, 18f); moveTo(18f, 6f); lineTo(6f, 18f) }
     val Layers = icon("Map layers") {
         moveTo(12f, 3f); lineTo(21f, 8f); lineTo(12f, 13f); lineTo(3f, 8f); close()
         moveTo(3f, 12f); lineTo(12f, 17f); lineTo(21f, 12f); moveTo(3f, 16f); lineTo(12f, 21f); lineTo(21f, 16f)
