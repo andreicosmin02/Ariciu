@@ -1,0 +1,16 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "deny": [
+      "Read(./docs/obsidian-export/**)",
+      "Read(./docs/design/screenshots/**)",
+      "Read(./app/src/main/assets/places/romania.tsv)",
+      "Read(./app/schemas/**)",
+      "Read(./**/*.png)",
+      "Read(./**/*.apk)",
+      "Read(./build/**)",
+      "Read(./app/build/**)",
+      "Read(./.idea/**)"
+    ]
+  }
+}
