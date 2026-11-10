@@ -30,6 +30,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.common.GoogleApiAvailability
 import ro.andrei.ariciu.feature.delivery.model.DeliveryCapabilities
+import ro.andrei.ariciu.feature.delivery.model.geofenceBudgetText
 import ro.andrei.ariciu.feature.delivery.platform.*
 import ro.andrei.ariciu.ui.components.*
 import ro.andrei.ariciu.ui.theme.ThemePreference
@@ -65,7 +66,7 @@ fun rememberDeliveryCapabilities(): DeliveryCapabilities {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
-    themePreference: ThemePreference = ThemePreference.SYSTEM, onThemeChange: (ThemePreference) -> Unit = {}) {
+    themePreference: ThemePreference = ThemePreference.SYSTEM, onThemeChange: (ThemePreference) -> Unit = {}, geofenceAreasUsed: Int? = null) {
     val context = LocalContext.current
     val offline = remember(context) { ro.andrei.ariciu.feature.offlinemap.OfflineMaps.get(context) }
     val offlineAreas by offline.areas.collectAsState()
@@ -115,6 +116,15 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
                     Text(if (!current.ready) "A few things to set up" else if (current.blockedIntensities.isNotEmpty()) "Some alerts are turned off" else "Ready when you are", style = MaterialTheme.typography.titleLarge)
                     Text(if (current.ready) "Your phone can look out for your chosen places." else "Give Ariciu permission to remind you, even when the app is closed.",
                         style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
+                }
+            }
+            if (geofenceAreasUsed != null) Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Top) {
+                Icon(AriciuIcons.Pin, null, Modifier.size(20.dp), tint = colors.onSurfaceVariant)
+                Column {
+                    Text(geofenceBudgetText(geofenceAreasUsed), Modifier.testTag("geofence_budget_text"), style = MaterialTheme.typography.titleSmall)
+                    Text("Android allows up to 100 areas in total. This is Ariciu’s last recorded count, not a live reading.",
+                        style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                 }
             }
             Surface(color = colors.surface, shape = MaterialTheme.shapes.large) {

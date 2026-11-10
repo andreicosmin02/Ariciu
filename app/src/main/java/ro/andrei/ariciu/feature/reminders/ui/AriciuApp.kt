@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ro.andrei.ariciu.feature.locationpicker.ui.LocationPickerScreen
 import ro.andrei.ariciu.feature.remindereditor.ui.ReminderEditorScreen
+import ro.andrei.ariciu.feature.delivery.model.geofenceAreasUsed
 import ro.andrei.ariciu.feature.delivery.ui.DeliverySetupScreen
 import ro.andrei.ariciu.feature.delivery.ui.rememberDeliveryCapabilities
 import ro.andrei.ariciu.feature.reminders.model.Reminder
@@ -77,10 +78,11 @@ fun AriciuApp(viewModel: RemindersViewModel,
         }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
             when (route) {
-                ReminderRoute.DELIVERY -> DeliverySetupScreen(capabilities, { viewModel.navigate(ReminderRoute.MAP) }, themePreference, onThemeChange)
+                ReminderRoute.DELIVERY -> DeliverySetupScreen(capabilities, { viewModel.navigate(ReminderRoute.MAP) }, themePreference, onThemeChange, geofenceAreasUsed(state.reminders))
                 ReminderRoute.MAP -> stateHolder.SaveableStateProvider("map_${draft.location}") {
                     LocationPickerScreen(onLocationSelected = viewModel::chooseLocation, initialLocation = draft.location,
                         chainName = draft.chainName, onChainSelected = { viewModel.updateDraft(draft.copy(chainName = it, chainAreas = emptyList())) },
+                        geofenceAreasUsed = geofenceAreasUsed(state.reminders),
                         onCancel = if (draft.location != null) ({ viewModel.navigate(ReminderRoute.EDITOR) }) else null)
                 }
                 ReminderRoute.EDITOR -> ReminderEditorScreen(draft, viewModel::updateDraft,

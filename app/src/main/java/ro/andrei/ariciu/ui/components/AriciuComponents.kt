@@ -45,6 +45,54 @@ object AriciuIcons {
     val Back = icon("Back") { moveTo(14f, 5f); lineTo(7f, 12f); lineTo(14f, 19f) }
     val Arrow = icon("Arrow") { moveTo(5f, 12f); lineTo(19f, 12f); moveTo(13f, 6f); lineTo(19f, 12f); lineTo(13f, 18f) }
     val Check = icon("Check") { moveTo(5f, 12f); lineTo(10f, 17f); lineTo(19f, 7f) }
+
+    private fun androidx.compose.ui.graphics.vector.PathBuilder.circle(cx: Float, cy: Float, r: Float) {
+        moveTo(cx - r, cy); arcTo(r, r, 0f, true, true, cx + r, cy); arcTo(r, r, 0f, true, true, cx - r, cy); close()
+    }
+    private fun androidx.compose.ui.graphics.vector.PathBuilder.bell() {
+        moveTo(6f, 16f); lineTo(6f, 11f); arcTo(6f, 6f, 0f, false, true, 18f, 11f); lineTo(18f, 16f)
+        lineTo(19.5f, 18f); lineTo(4.5f, 18f); close(); moveTo(10f, 21f); lineTo(14f, 21f)
+    }
+    val Store = icon("Shop") {
+        moveTo(5.5f, 4f); lineTo(18.5f, 4f); lineTo(20f, 9f); lineTo(4f, 9f); close()
+        moveTo(5f, 9f); lineTo(5f, 20f); lineTo(19f, 20f); lineTo(19f, 9f)
+        moveTo(10f, 20f); lineTo(10f, 14f); lineTo(14f, 14f); lineTo(14f, 20f)
+    }
+    val Mall = icon("Shopping centre") {
+        moveTo(5f, 8f); lineTo(19f, 8f); lineTo(20f, 20f); lineTo(4f, 20f); close()
+        moveTo(9f, 8f); lineTo(9f, 6.5f); arcTo(3f, 3f, 0f, false, true, 15f, 6.5f); lineTo(15f, 8f)
+    }
+    val Town = icon("Town") {
+        moveTo(3f, 20f); lineTo(3f, 12f); lineTo(8f, 8f); lineTo(13f, 12f); lineTo(13f, 20f); close()
+        moveTo(13f, 20f); lineTo(13f, 10f); lineTo(17f, 6f); lineTo(21f, 10f); lineTo(21f, 20f)
+        moveTo(6.5f, 20f); lineTo(6.5f, 15f); lineTo(9.5f, 15f); lineTo(9.5f, 20f)
+    }
+    val Pin = icon("Pin") {
+        moveTo(12f, 21f); curveTo(12f, 21f, 5f, 15f, 5f, 9.5f); arcTo(7f, 7f, 0f, false, true, 19f, 9.5f)
+        curveTo(19f, 15f, 12f, 21f, 12f, 21f); close(); circle(12f, 9.5f, 2.5f)
+    }
+    val Arrive = icon("On arrival") {
+        moveTo(3f, 12f); lineTo(14f, 12f); moveTo(10f, 8f); lineTo(14f, 12f); lineTo(10f, 16f)
+        moveTo(14f, 5f); lineTo(20f, 5f); lineTo(20f, 19f); lineTo(14f, 19f)
+    }
+    val Depart = icon("On departure") {
+        moveTo(10f, 12f); lineTo(21f, 12f); moveTo(17f, 8f); lineTo(21f, 12f); lineTo(17f, 16f)
+        moveTo(10f, 5f); lineTo(4f, 5f); lineTo(4f, 19f); lineTo(10f, 19f)
+    }
+    val BellNormal = icon("Normal alert") { bell() }
+    val BellSilent = icon("Silent alert") { bell(); moveTo(4f, 4f); lineTo(20f, 20f) }
+    val BellUrgent = icon("Urgent alert") { bell(); moveTo(12f, 8f); lineTo(12f, 12f); moveTo(12f, 14.5f); lineTo(12f, 14.6f) }
+    val Clock = icon("Time") { circle(12f, 12f, 9f); moveTo(12f, 7f); lineTo(12f, 12f); lineTo(15.5f, 14f) }
+    val ZoomIn = icon("Zoom in") { moveTo(5f, 12f); lineTo(19f, 12f); moveTo(12f, 5f); lineTo(12f, 19f) }
+    val ZoomOut = icon("Zoom out") { moveTo(5f, 12f); lineTo(19f, 12f) }
+    val Compass = icon("Compass") {
+        circle(12f, 12f, 9f)
+        moveTo(15.5f, 8.5f); lineTo(13.5f, 13.5f); lineTo(8.5f, 15.5f); lineTo(10.5f, 10.5f); close()
+    }
+    val Layers = icon("Map layers") {
+        moveTo(12f, 3f); lineTo(21f, 8f); lineTo(12f, 13f); lineTo(3f, 8f); close()
+        moveTo(3f, 12f); lineTo(12f, 17f); lineTo(21f, 12f); moveTo(3f, 16f); lineTo(12f, 21f); lineTo(21f, 16f)
+    }
 }
 
 @Composable

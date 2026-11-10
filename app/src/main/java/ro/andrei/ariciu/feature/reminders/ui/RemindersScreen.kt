@@ -33,6 +33,7 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
     onCreate: () -> Unit, onSettings: () -> Unit, onEdit: (Reminder) -> Unit, onDelete: (Reminder) -> Unit, onDone: (Reminder) -> Unit = {}, onNextTime: (Reminder) -> Unit = {}) {
     val colors = MaterialTheme.colorScheme
     var completed by rememberSaveable { mutableStateOf(false) }
+    var showMap by rememberSaveable { mutableStateOf(false) }
     val active = state.reminders.filter { it.delivery.active }
     val finished = state.reminders.filterNot { it.delivery.active }
     val reminders = if (completed) finished else active
@@ -49,8 +50,10 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp).padding(top = 20.dp)) {
         ScreenHeading("Your reminders", "The things you want to remember.")
         Spacer(Modifier.height(8.dp))
-        ReminderTabs(completed, active.size, finished.size, { completed = it })
-        LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("reminders_list"), state = listState,
+        ReminderTabs(completed, active.size, finished.size, { completed = it; if (it) showMap = false })
+        ViewToggle(showMap, { showMap = it; if (it) completed = false })
+        if (showMap) RemindersMap(state.reminders, capabilities, onOpen = onEdit, modifier = Modifier.weight(1f).padding(vertical = 8.dp))
+        else LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("reminders_list"), state = listState,
             contentPadding = PaddingValues(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (!capabilities.ready && active.isNotEmpty()) item {
             Surface(shape = MaterialTheme.shapes.medium, color = colors.tertiaryContainer) {
@@ -144,4 +147,16 @@ private fun ReminderTabs(completed: Boolean, active: Int, finished: Int, onSelec
         }
     }
     HorizontalDivider(color = colors.outlineVariant)
+}
+
+/** List / Map switch for the active reminders. Selection is text + check mark, never colour alone. */
+@Composable
+private fun ViewToggle(showMap: Boolean, onChange: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(top = 8.dp).selectableGroup().testTag("reminders_view_toggle"), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(false to "List", true to "Map").forEach { (value, label) ->
+            FilterChip(showMap == value, { onChange(value) }, modifier = Modifier.heightIn(min = 48.dp).testTag(if (value) "view_map" else "view_list"),
+                leadingIcon = { Icon(if (value) AriciuIcons.Pin else AriciuIcons.Reminders, null, Modifier.size(16.dp)) },
+                label = { Text(label) })
+        }
+    }
 }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 import ro.andrei.ariciu.feature.places.*
+import ro.andrei.ariciu.feature.delivery.model.geofenceBudgetText
 import ro.andrei.ariciu.feature.offlinemap.OfflineMaps
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -58,6 +59,7 @@ fun LocationPickerScreen(
     onCancel: (() -> Unit)? = null,
     chainName: String? = null,
     onChainSelected: (String?) -> Unit = {},
+    geofenceAreasUsed: Int? = null,
 ) {
     var selectedCoordinates by rememberSaveable(stateSaver = listSaver(
         save = { listOf(it.latitude, it.longitude) }, restore = { SelectedCoordinates(it[0], it[1]) },
@@ -70,9 +72,13 @@ fun LocationPickerScreen(
     var catalog by remember { mutableStateOf<List<CatalogPlace>>(emptyList()) }
     var catalogFailed by remember { mutableStateOf(false) }
     var details by rememberSaveable { mutableStateOf(false) }
+    var hiddenCategories by rememberSaveable { mutableStateOf("") }
+    val categories = remember(hiddenCategories) { PlaceCategory.entries.filter { it.name !in hiddenCategories.split(',') }.toSet() }
     val cameraState = rememberCameraState(firstPosition = CameraPosition(
         target = Position(latitude = selectedCoordinates.latitude, longitude = selectedCoordinates.longitude), zoom = 14.0))
     val colors = MaterialTheme.colorScheme
+    val markerJson by rememberViewportPlacesJson(cameraState, catalog, categories)
+    val nearest = remember(catalog, selectedCoordinates) { if (catalog.isEmpty()) null else nearestPlace(catalog, selectedCoordinates.latitude, selectedCoordinates.longitude) }
     val boundary = remember(selectedCoordinates, radiusMeters) { buildRadiusBoundary(selectedCoordinates, radiusMeters).toGeoJsonPolygon() }
     val dark = isAriciuDarkTheme()
     val context = LocalContext.current
@@ -159,7 +165,18 @@ fun LocationPickerScreen(
             FilterChip(chainName == null, { onChainSelected(null) }, label = { Text("Single place") }, modifier = Modifier.heightIn(min = 48.dp))
             FilterChip(chainName != null, { choosingChain = true }, label = { Text(chainName ?: "Supermarket chain") }, modifier = Modifier.heightIn(min = 48.dp))
         }
-        Spacer(Modifier.height(8.dp))
+        FlowRow(Modifier.fillMaxWidth().padding(horizontal = 20.dp).testTag("place_category_chips"), horizontalArrangement = Arrangement.spacedBy(8.dp),
+            itemVerticalAlignment = Alignment.CenterVertically) {
+            Icon(AriciuIcons.Layers, null, Modifier.size(18.dp), tint = colors.onSurfaceVariant)
+            Text("On map", style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+            PlaceCategory.entries.forEach { category ->
+                val on = category in categories
+                FilterChip(on, { hiddenCategories = toggleHidden(hiddenCategories, category) },
+                    label = { Text(category.label) }, modifier = Modifier.heightIn(min = 48.dp).testTag("category_${category.name.lowercase()}"),
+                    leadingIcon = { Icon(when (category) { PlaceCategory.SHOPS -> AriciuIcons.Store; PlaceCategory.MALLS -> AriciuIcons.Mall; PlaceCategory.TOWNS -> AriciuIcons.Town }, null, Modifier.size(16.dp)) })
+            }
+        }
+        Spacer(Modifier.height(4.dp))
         BoxWithConstraints(if (compact) Modifier.height(compactMapHeight) else Modifier.weight(1f)) {
         val sheetBodyHeight = (maxHeight - sheetPeek).coerceAtLeast(48.dp)
         BottomSheetScaffold(modifier = Modifier.fillMaxSize(), scaffoldState = sheetScaffold,
@@ -172,6 +189,8 @@ fun LocationPickerScreen(
                         Column(Modifier.weight(1f), horizontalAlignment = Alignment.Start) {
                             Text(if (compact) "Options" else if (chainName == null) "Around this spot" else "Around selected stores", style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
                             if (!compact) Text(if (sheetState.currentValue == SheetValue.Expanded) "Collapse place options" else "Expand place options", style = MaterialTheme.typography.bodySmall)
+                            if (catalog.isNotEmpty()) Text(nearestPlaceLabel(nearest), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant,
+                                modifier = Modifier.testTag("nearest_place_label"))
                         }
                         Text("$radiusMeters m", style = MaterialTheme.typography.titleSmall, modifier = Modifier.testTag("location_picker_radius_value"))
                     }
@@ -192,6 +211,10 @@ fun LocationPickerScreen(
                     if (moreRadius) Slider(value = radiusMeters.toFloat(), onValueChange = { radiusMeters = snapRadiusMeters(it) },
                         valueRange = MIN_RADIUS_METERS.toFloat()..MAX_RADIUS_METERS.toFloat(), steps = RADIUS_SLIDER_STEPS,
                         modifier = Modifier.testTag("location_picker_radius_slider").semantics { contentDescription = "Reminder radius in metres" })
+                    if (geofenceAreasUsed != null) Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(AriciuIcons.Pin, null, Modifier.size(16.dp), tint = colors.onSurfaceVariant)
+                        Text(geofenceBudgetText(geofenceAreasUsed), Modifier.testTag("geofence_budget_text"), style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                    }
                     if (chainName != null) {
                         Text("${nearbyStores.size} listed stores within 25 km of this pin. Move the map to change the area. At most 40 stores; coverage may be incomplete.", style = MaterialTheme.typography.bodySmall)
                         if (nearbyStores.isEmpty()) Text(if (catalogFailed) "Catalogue unavailable. Try a single place." else "No nearby stores. Move the map or choose another chain.", color = colors.error)
@@ -219,6 +242,11 @@ fun LocationPickerScreen(
                 MaplibreMap(Modifier.fillMaxSize(), baseStyle = baseStyle,
                     cameraState = cameraState, onMapLoadFailed = { mapFailed = true }, onMapLoadFinished = { mapFailed = false },
                     options = MapOptions(ornamentOptions = OrnamentOptions(isLogoEnabled = false, isScaleBarEnabled = false))) {
+                    PlaceMarkerLayers(markerJson, cameraState, colors, onPlace = { id ->
+                        catalog.firstOrNull { it.id == id }?.let { place ->
+                            scope.launch { cameraState.animateTo(CameraPosition(target = Position(latitude = place.latitude, longitude = place.longitude), zoom = maxOf(cameraState.position.zoom, 16.0))) }
+                        }
+                    })
                     val source = rememberGeoJsonSource(data = GeoJsonData.Features(boundary))
                     FillLayer(id = "reminder-radius-fill", source = source, color = const(colors.primary), opacity = const(0.14f))
                     LineLayer(id = "reminder-radius-outline", source = source, color = const(colors.primary), width = const(2.dp))
@@ -230,12 +258,14 @@ fun LocationPickerScreen(
                     }
                 }
                 CenterSelectionMarker()
+                MapControls(cameraState, onRecenter = { if (context.hasMapLocationPermission()) locate() else locationExplanation = true },
+                    modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp))
                 Surface(Modifier.align(Alignment.BottomStart).padding(12.dp).widthIn(max = 300.dp),
                     shape = MaterialTheme.shapes.extraSmall, color = colors.surface) {
                     Text("© OpenMapTiles · © OpenStreetMap", Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                 }
-                if (!compact) Surface(Modifier.align(Alignment.TopCenter).padding(16.dp), shape = MaterialTheme.shapes.small,
+                if (!compact) Surface(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 12.dp, end = 80.dp), shape = MaterialTheme.shapes.small,
                     color = colors.surface, shadowElevation = 2.dp) {
                     Text(if (mapFailed) "Map unavailable here. Check internet or use a downloaded area." else "Move the map to choose your spot", Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         style = MaterialTheme.typography.bodyMedium)
@@ -292,4 +322,11 @@ private fun CenterSelectionMarker() {
         drawCircle(color = colors.primary, radius = size.minDimension / 3)
         drawCircle(color = colors.onPrimary, radius = size.minDimension / 9)
     }
+}
+
+/** Comma-separated hidden category names (saveable). Toggling flips [category]. */
+private fun toggleHidden(hidden: String, category: PlaceCategory): String {
+    val set = hidden.split(',').filter { it.isNotEmpty() }.toMutableSet()
+    if (!set.remove(category.name)) set.add(category.name)
+    return set.sorted().joinToString(",")
 }
