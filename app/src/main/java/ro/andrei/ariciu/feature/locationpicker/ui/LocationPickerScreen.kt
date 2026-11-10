@@ -144,10 +144,10 @@ fun LocationPickerScreen(
     var searchJob by remember { mutableStateOf<Job?>(null) }
 
     fun centre() = cameraState.position.target.let { SelectedCoordinates(it.latitude, it.longitude) }
-    fun fly(target: CameraPosition) {
+    fun fly(target: CameraPosition, offerSearch: Boolean = false) {
         scope.launch {
             animating = true
-            try { withContext(Dispatchers.Main) { cameraState.animateTo(target, 600.milliseconds) } } finally { animating = false; lastSearchCentre = centre(); moved = false }
+            try { withContext(Dispatchers.Main) { cameraState.animateTo(target, 600.milliseconds) } } finally { animating = false; moved = offerSearch; if (!offerSearch) lastSearchCentre = centre() }
         }
     }
     fun fitTo(found: List<CatalogPlace>, ref: SelectedCoordinates) {
@@ -216,7 +216,12 @@ fun LocationPickerScreen(
             try {
                 val fix = context.currentMapFix()
                 if (fix == null) message = "We couldn’t find your position. Try again outdoors, or search for a place."
-                else { userFix = fix; fly(CameraPosition(target = Position(latitude = fix.position.latitude, longitude = fix.position.longitude), zoom = 15.0)) }
+                else {
+                    userFix = fix
+                    // With an active search, offer to search around the new spot instead of silently keeping old results.
+                    fly(CameraPosition(target = Position(latitude = fix.position.latitude, longitude = fix.position.longitude), zoom = 15.0),
+                        offerSearch = resultsMode || query.isNotBlank() || chips.isNotEmpty())
+                }
             } catch (e: CancellationException) { throw e
             } catch (_: Exception) { message = "Position unavailable. Check phone Location and permissions, or use search." }
             finally { locating = false }
