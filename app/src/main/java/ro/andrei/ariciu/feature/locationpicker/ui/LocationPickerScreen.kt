@@ -111,6 +111,7 @@ fun LocationPickerScreen(
     val dark = isAriciuDarkTheme()
     val context = LocalContext.current
     val focus = LocalFocusManager.current
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
     val index = remember(context) { LocalPlaces.index(context) }
     val baseStyle = remember(dark) { BaseStyle.Uri(OfflineMaps.styleUri(dark)) }
     val scope = rememberCoroutineScope()
@@ -264,7 +265,7 @@ fun LocationPickerScreen(
                         Icon(AriciuIcons.Close, "Clear search", Modifier.size(20.dp)) }
                 }) else null,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { focus.clearFocus(); runSearch(reference(), query, chips) }))
+                keyboardActions = KeyboardActions(onSearch = { focus.clearFocus(); keyboard?.hide(); runSearch(reference(), query, chips) }))
             FilledTonalIconButton(onClick = { requestLocate() }, enabled = !locating, modifier = Modifier.size(52.dp)) {
                 if (locating) CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
                 else Icon(AriciuIcons.Locate, "My location", Modifier.size(24.dp))
@@ -276,7 +277,7 @@ fun LocationPickerScreen(
                 val on = category in chips
                 FilterChip(on, {
                     chipKeys = (if (on) chips - category else chips + category).joinToString(",") { it.key }
-                    focus.clearFocus()
+                    focus.clearFocus(); keyboard?.hide()
                     runSearch(reference(), query, if (on) chips - category else chips + category)
                 }, label = { Text(category.label) }, modifier = Modifier.testTag("category_${category.key}"),
                     leadingIcon = { Icon(category.icon(), null, Modifier.size(16.dp)) })
@@ -284,7 +285,8 @@ fun LocationPickerScreen(
         }
         Spacer(Modifier.height(4.dp))
         BoxWithConstraints(if (compact) Modifier.height(compactMapHeight) else Modifier.weight(1f)) {
-        val sheetBodyHeight = (maxHeight - sheetPeek).coerceAtLeast(48.dp)
+        // Expanded = about 60% of the map area (half sheet) so the pins stay visible; short screens keep the full height.
+        val sheetBodyHeight = (if (compact) maxHeight - sheetPeek else maxHeight * 0.6f - sheetPeek).coerceAtLeast(120.dp)
         BottomSheetScaffold(modifier = Modifier.fillMaxSize(), scaffoldState = sheetScaffold,
             sheetPeekHeight = sheetPeek, sheetContainerColor = colors.surface,
             sheetDragHandle = null, sheetContent = {

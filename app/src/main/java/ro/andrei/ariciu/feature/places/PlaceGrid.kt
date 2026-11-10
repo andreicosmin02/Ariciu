@@ -54,13 +54,13 @@ class PlaceIndex(private val open: (String) -> InputStream?) {
     private fun cellList(): Set<String> = existing ?: (open("grid/index.txt")?.bufferedReader()?.useLines { l ->
         l.map { it.trim() }.filter { it.isNotEmpty() }.toSet() } ?: emptySet()).also { existing = it }
 
-    suspend fun towns(): List<CatalogPlace> = towns ?: withContext(Dispatchers.IO) { towns ?: read("towns.tsv").also { towns = it } }
+    suspend fun towns(): List<CatalogPlace> = towns ?: withContext(Dispatchers.IO) { towns ?: read("towns.tsv").onEach { it.nameWords }.also { towns = it } }
 
     /** Non-town rows within [radiusMeters] of the point. */
     suspend fun near(lat: Double, lon: Double, radiusMeters: Double): List<CatalogPlace> = withContext(Dispatchers.IO) {
         val known = cellList()
         PlaceGrid.cellsNear(lat, lon, radiusMeters).filter { it in known }
-            .flatMap { key -> cells.getOrPut(key) { read("grid/c$key.tsv") } }
+            .flatMap { key -> cells.getOrPut(key) { read("grid/c$key.tsv").onEach { it.searchText; it.nameWords; it.brandWords; it.addressWords } } }
             .filter { distanceMeters(lat, lon, it.latitude, it.longitude) <= radiusMeters }
     }
 }

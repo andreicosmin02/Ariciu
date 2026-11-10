@@ -100,7 +100,7 @@ fun RemindersScreen(state: RemindersUiState, capabilities: DeliveryCapabilities,
                             Text(reminder.intensity.label, style = MaterialTheme.typography.labelMedium, color = colors.primary,
                                 modifier = Modifier.semantics { contentDescription = "Alert: ${reminder.intensity.label}" })
                         }
-                        reminder.chainName?.let { Text("$it · ${reminder.chainAreas.size} selected stores around your pin", style = MaterialTheme.typography.bodyMedium) }
+                        reminder.chainName?.let { Text("${reminder.chainAreas.size} places · $it", style = MaterialTheme.typography.bodyMedium) }
                         Text(status.description, style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     }
                     FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalArrangement = Arrangement.spacedBy(4.dp)) {
