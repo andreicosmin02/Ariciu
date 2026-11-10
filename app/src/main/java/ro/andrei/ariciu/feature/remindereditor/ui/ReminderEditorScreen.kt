@@ -64,7 +64,7 @@ fun ReminderEditorScreen(
     Scaffold(modifier = Modifier.imePadding(), contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             Surface(color = colors.surface) {
-                Column(Modifier.padding(horizontal = 24.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (checkingArrival) Text("Your reminder is saved. Checking whether you’re already here…", style = MaterialTheme.typography.bodySmall)
                     PrimaryAction(if (checkingArrival) "Checking location…" else if (busy) "Saving…" else "Save reminder", onSave, enabled = draft.canSave && !busy,
                         modifier = Modifier.testTag("reminder_save"))
@@ -73,8 +73,8 @@ fun ReminderEditorScreen(
                 }
             }
         }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(editorScroll).padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(editorScroll).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = onCancel, enabled = !busy, contentPadding = PaddingValues(0.dp)) {
                 Icon(AriciuIcons.Back, null, Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp)); Text("Cancel")

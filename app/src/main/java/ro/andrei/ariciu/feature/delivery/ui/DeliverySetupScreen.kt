@@ -88,8 +88,8 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
     }
     val colors = MaterialTheme.colorScheme
     var showExplanation by rememberSaveable { mutableStateOf(false) }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)) {
         ScreenHeading("Settings", "Appearance and reminder delivery.")
         SettingsPanel {
             SectionLabel("Appearance")

@@ -49,7 +49,7 @@ object AriciuIcons {
 
 @Composable
 fun ScreenHeading(title: String, subtitle: String? = null, modifier: Modifier = Modifier) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(title, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { heading() })
         if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -69,8 +69,8 @@ fun ChoiceCard(title: String, description: String? = null, selected: Boolean, on
         shape = MaterialTheme.shapes.medium,
         color = if (selected) colors.primaryContainer else colors.surface,
         border = BorderStroke(if (selected) 1.5.dp else 1.dp, if (selected) colors.primary else colors.outlineVariant)) {
-        Row(Modifier.heightIn(min = 56.dp).padding(12.dp), verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(Modifier.heightIn(min = 56.dp).padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(title, style = MaterialTheme.typography.titleMedium,
                     color = if (selected) colors.onPrimaryContainer else colors.onSurface)
@@ -84,8 +84,8 @@ fun ChoiceCard(title: String, description: String? = null, selected: Boolean, on
 
 @Composable
 fun PrimaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
-    Button(onClick, modifier.fillMaxWidth().heightIn(min = 56.dp), enabled = enabled,
-        shape = MaterialTheme.shapes.medium, contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)) {
+    Button(onClick, modifier.fillMaxWidth().heightIn(min = 52.dp), enabled = enabled,
+        shape = MaterialTheme.shapes.medium, contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)) {
         Text(text, style = MaterialTheme.typography.labelLarge)
     }
 }
@@ -94,7 +94,7 @@ fun PrimaryAction(text: String, onClick: () -> Unit, modifier: Modifier = Modifi
 @Composable
 fun ExpandableSection(title: String, expanded: Boolean, onToggle: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainer, shape = MaterialTheme.shapes.medium) {
-        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.fillMaxWidth().padding(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             TextButton(onClick = onToggle, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).semantics {
                 stateDescription = if (expanded) "Expanded" else "Collapsed"
             }, contentPadding = PaddingValues(horizontal = 4.dp)) {
