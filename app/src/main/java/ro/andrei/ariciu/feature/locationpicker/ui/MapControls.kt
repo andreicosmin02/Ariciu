@@ -39,7 +39,7 @@ fun MapControls(cameraState: CameraState, onRecenter: () -> Unit, modifier: Modi
     val bearing = cameraState.position.bearing
     Surface(modifier.testTag("map_controls"), shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
         shadowElevation = 2.dp) {
-        Column(Modifier.verticalScroll(rememberScrollState()).width(56.dp)) {
+        Column(Modifier.verticalScroll(rememberScrollState()).widthIn(min = 68.dp).width(IntrinsicSize.Max)) {
             ControlButton(AriciuIcons.ZoomIn, "Zoom in", "map_zoom_in") { zoomBy(1.0) }
             ControlButton(AriciuIcons.ZoomOut, "Zoom out", "map_zoom_out") { zoomBy(-1.0) }
             ControlButton(AriciuIcons.Compass, if (bearing == 0.0) "North" else "Reset north", "map_compass", iconRotation = (-bearing).toFloat()) {
@@ -56,6 +56,7 @@ private fun ControlButton(icon: ImageVector, label: String, tag: String, iconRot
         .padding(vertical = 6.dp).testTag(tag).semantics { contentDescription = label },
         horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(icon, null, Modifier.size(22.dp).rotate(iconRotation), tint = MaterialTheme.colorScheme.onSurface)
-        Text(label, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2)
+        Text(label, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, softWrap = false,
+            modifier = Modifier.padding(horizontal = 4.dp))
     }
 }

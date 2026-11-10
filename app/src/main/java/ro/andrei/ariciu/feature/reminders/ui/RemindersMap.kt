@@ -99,7 +99,7 @@ fun RemindersMap(reminders: List<Reminder>, capabilities: DeliveryCapabilities, 
             }
             MapControls(cameraState, onRecenter = { scope.launch { fitAll() } }, recenterLabel = "Show all",
                 modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp))
-            if (bounds == null) Surface(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 12.dp, end = 80.dp),
+            if (bounds == null) Surface(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 12.dp, end = 92.dp),
                 shape = MaterialTheme.shapes.small, color = colors.surface, shadowElevation = 2.dp) {
                 Text("No active reminders to show yet.", Modifier.padding(horizontal = 12.dp, vertical = 8.dp), style = MaterialTheme.typography.bodyMedium)
             }

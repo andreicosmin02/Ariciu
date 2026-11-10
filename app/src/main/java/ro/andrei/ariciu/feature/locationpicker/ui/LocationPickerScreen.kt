@@ -165,18 +165,7 @@ fun LocationPickerScreen(
             FilterChip(chainName == null, { onChainSelected(null) }, label = { Text("Single place") }, modifier = Modifier.heightIn(min = 48.dp))
             FilterChip(chainName != null, { choosingChain = true }, label = { Text(chainName ?: "Supermarket chain") }, modifier = Modifier.heightIn(min = 48.dp))
         }
-        FlowRow(Modifier.fillMaxWidth().padding(horizontal = 20.dp).testTag("place_category_chips"), horizontalArrangement = Arrangement.spacedBy(8.dp),
-            itemVerticalAlignment = Alignment.CenterVertically) {
-            Icon(AriciuIcons.Layers, null, Modifier.size(18.dp), tint = colors.onSurfaceVariant)
-            Text("On map", style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
-            PlaceCategory.entries.forEach { category ->
-                val on = category in categories
-                FilterChip(on, { hiddenCategories = toggleHidden(hiddenCategories, category) },
-                    label = { Text(category.label) }, modifier = Modifier.heightIn(min = 48.dp).testTag("category_${category.name.lowercase()}"),
-                    leadingIcon = { Icon(when (category) { PlaceCategory.SHOPS -> AriciuIcons.Store; PlaceCategory.MALLS -> AriciuIcons.Mall; PlaceCategory.TOWNS -> AriciuIcons.Town }, null, Modifier.size(16.dp)) })
-            }
-        }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(8.dp))
         BoxWithConstraints(if (compact) Modifier.height(compactMapHeight) else Modifier.weight(1f)) {
         val sheetBodyHeight = (maxHeight - sheetPeek).coerceAtLeast(48.dp)
         BottomSheetScaffold(modifier = Modifier.fillMaxSize(), scaffoldState = sheetScaffold,
@@ -197,6 +186,17 @@ fun LocationPickerScreen(
                 }
                 Column(Modifier.fillMaxWidth().heightIn(max = sheetBodyHeight).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(Modifier.fillMaxWidth().testTag("place_category_chips"), horizontalArrangement = Arrangement.spacedBy(8.dp),
+            itemVerticalAlignment = Alignment.CenterVertically) {
+            Icon(AriciuIcons.Layers, null, Modifier.size(18.dp), tint = colors.onSurfaceVariant)
+            Text("On map", style = MaterialTheme.typography.labelMedium, color = colors.onSurfaceVariant)
+            PlaceCategory.entries.forEach { category ->
+                val on = category in categories
+                FilterChip(on, { hiddenCategories = toggleHidden(hiddenCategories, category) },
+                    label = { Text(category.label) }, modifier = Modifier.heightIn(min = 48.dp).testTag("category_${category.name.lowercase()}"),
+                    leadingIcon = { Icon(when (category) { PlaceCategory.SHOPS -> AriciuIcons.Store; PlaceCategory.MALLS -> AriciuIcons.Mall; PlaceCategory.TOWNS -> AriciuIcons.Town }, null, Modifier.size(16.dp)) })
+            }
+        }
                     FlowRow(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(100, 200, 500).forEach { radius ->
                             FilterChip(selected = radiusMeters == radius, onClick = { radiusMeters = radius },
@@ -265,7 +265,7 @@ fun LocationPickerScreen(
                     Text("© OpenMapTiles · © OpenStreetMap", Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                 }
-                if (!compact) Surface(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 12.dp, end = 80.dp), shape = MaterialTheme.shapes.small,
+                if (!compact && density.fontScale <= 1.3f) Surface(Modifier.align(Alignment.TopStart).padding(start = 12.dp, top = 12.dp, end = 92.dp), shape = MaterialTheme.shapes.small,
                     color = colors.surface, shadowElevation = 2.dp) {
                     Text(if (mapFailed) "Map unavailable here. Check internet or use a downloaded area." else "Move the map to choose your spot", Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                         style = MaterialTheme.typography.bodyMedium)
