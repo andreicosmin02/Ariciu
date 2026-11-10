@@ -26,7 +26,7 @@ The published binary is byte-for-byte the original rc4 candidate, so it adds no 
 
 ## Executed consolidation checks
 
-These commands record the historical selected emulator; use [DEVELOPMENT.md](DEVELOPMENT.md) for current portable examples.
+These commands record the historical selected emulator; use [DEVELOPMENT.md](../DEVELOPMENT.md) for current portable examples.
 
 ```bash
 ANDROID_SERIAL=emulator-5554 ./gradlew \
@@ -37,7 +37,7 @@ ANDROID_SERIAL=emulator-5554 ./gradlew \
 
 Gate **passed in 1m41s**, followed by the explicitly rerun unit task **passed in 2s**. Results: **97 unit tests, 44 connected Android 17 emulator tests, zero failures/errors/skips; lint 0 errors/39 warnings**. APK build, package/version/permissions/signature and actual release download checks passed. Only deliberately selected `emulator-5554` was attached/targeted; no daily-use phone instrumentation, settings changes, data clear or uninstall. The application tree at the merge equals the tested tree; later changes are README/docs/logo export only.
 
-Earlier rc4 mechanism evidence, shipping five-minute recovery and both-theme/large-text screenshots remain in [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md). The owner reports **positive initial physical-phone feedback** on Samsung S26 Ultra / Android 16 / One UI 8.5, without detailed scenarios/results; do not upgrade this to comprehensive physical verification.
+Earlier rc4 mechanism evidence, shipping five-minute recovery and both-theme/large-text screenshots remain in [URGENT_RE_ALERTS.md](../URGENT_RE_ALERTS.md). The owner reports **positive initial physical-phone feedback** on Samsung S26 Ultra / Android 16 / One UI 8.5, without detailed scenarios/results; do not upgrade this to comprehensive physical verification.
 
 ## Completed safe branch cleanup
 
@@ -59,14 +59,14 @@ All eight approved deletions completed without force deletion/push or history re
 
 ## Documentation, privacy and next work
 
-The root [README](../README.md) uses the original fox geometry exported to SVG and three actual inspected emulator captures (Create/map, pending Reminders, light Settings), with compact display widths. No private phone image, personal coordinates, vault originals or fabricated screenshot/badge is introduced. Release/image links must be checked from master after the docs merge. Required OSM/OpenMapTiles/style/catalogue notices remain. No application-wide licence is invented; production licensing/signing require deliberate future decisions.
+The root [README](../../README.md) uses the original fox geometry exported to SVG and three actual inspected emulator captures (Create/map, pending Reminders, light Settings), with compact display widths. No private phone image, personal coordinates, vault originals or fabricated screenshot/badge is introduced. Release/image links must be checked from master after the docs merge. Required OSM/OpenMapTiles/style/catalogue notices remain. No application-wide licence is invented; production licensing/signing require deliberate future decisions.
 
 Repository handoff/status/release instructions and the optional tracked knowledge base record the release. The portable collection requires no personal vault or synchronization workflow. No APK, key, private log or database snapshot is committed.
 
-Remaining phone checks: [Urgent swipe/retry/Done/Next time and legacy Alarm](URGENT_RE_ALERTS.md#physical-phone-retest), real ENTER/EXIT crossings, overnight/Doze/Samsung lock/Clear all, sound/vibration, notification settings, TalkBack and older runtimes. WorkManager/geofence delays, OEM restrictions, DND/access and the 100-area limit remain; do not promise exact or safety-critical alerts. Offline map/search coverage remains bounded.
+Remaining phone checks: [Urgent swipe/retry/Done/Next time and legacy Alarm](../URGENT_RE_ALERTS.md#physical-phone-retest), real ENTER/EXIT crossings, overnight/Doze/Samsung lock/Clear all, sound/vibration, notification settings, TalkBack and older runtimes. WorkManager/geofence delays, OEM restrictions, DND/access and the 100-area limit remain; do not promise exact or safety-critical alerts. Offline map/search coverage remains bounded.
 
 Future work: stabilize actual reported failures, reconsider genuine Alarm support separately, and plan production signing plus a data-preserving transition and project licensing before production distribution. No unrelated feature development is included here.
 
 ## Subsequent licensing; unchanged historical release
 
-The owner later approved Apache-2.0 for Ariciu-owned material. [Current scope](LICENSING.md), root LICENSE/NOTICE and [companion third-party notices](third-party/README.md) are post-tag repository documentation. The tag remains at c8c47ce with its original tree; no root licence files were retroactively inserted. The release page, APK, checksum, debug certificate and package/version are unchanged. Full MapLibre BSD texts and version-matched Google OSS bundles are provided separately with installation documentation, addressing the identified companion-notice gaps without rebuilding the APK. No comprehensive native/transitive binary certification is claimed.
+The owner later approved Apache-2.0 for Ariciu-owned material. [Current scope](../LICENSING.md), root LICENSE/NOTICE and [companion third-party notices](../third-party/README.md) are post-tag repository documentation. The tag remains at c8c47ce with its original tree; no root licence files were retroactively inserted. The release page, APK, checksum, debug certificate and package/version are unchanged. Full MapLibre BSD texts and version-matched Google OSS bundles are provided separately with installation documentation, addressing the identified companion-notice gaps without rebuilding the APK. No comprehensive native/transitive binary certification is claimed.

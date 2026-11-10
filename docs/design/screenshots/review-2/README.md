@@ -11,4 +11,4 @@ Captured and visually inspected on 17 October 2026, Android 17/API37.2 emulator 
 - `create-compact-map`, `create-compact-expanded`: installed MainActivity, emulator display 840×1470 at density420 (320dp wide) and system font scale2.0. Header scrolled to the map; radius/options and primary action remain reachable. System size/font settings were restored afterward. Narrow navigation labels wrap.
 - `notification-dark`, `notification-light`: real native system shades with a freshly posted Urgent fixture per theme. Android chooses its app badge; independent tests verify the dedicated white/transparent 24dp small-icon resource and actual notification resource identity. Samsung small-icon tinting remains pending.
 
-See [review dispositions, actual checks and limitations](../../../PHONE_REVIEW_2.md). These are review artifacts, not golden tests, physical-phone verification or evidence of real GPS/geofence delivery.
+See [review dispositions, actual checks and limitations](../../../archive/PHONE_REVIEW_2.md). These are review artifacts, not golden tests, physical-phone verification or evidence of real GPS/geofence delivery.

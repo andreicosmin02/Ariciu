@@ -1,6 +1,6 @@
 # First phone review — implementation and retest
 
-> Historical review record. Current implementation is rc4 on master; see [status](PROJECT_STATUS.md), [current Urgent policy](URGENT_RE_ALERTS.md) and [completed release/branch cleanup](GITHUB_RELEASE_RC4.md). Branch/version references below describe the original batch.
+> Historical review record. Current implementation is rc4 on master; see [status](../PROJECT_STATUS.md), [current Urgent policy](../URGENT_RE_ALERTS.md) and [completed release/branch cleanup](GITHUB_RELEASE_RC4.md). Branch/version references below describe the original batch.
 
 Review received 2026-10-17 for **1.1-rc1**. Implementation candidate: **1.1-rc2 / code 3**, branch `fix/phone-review-1`, based on `feat/phone-release-candidate` at `62557c5`. No merge or publication. The original written phone review and eight associated captures informed this batch. Personal originals are not distributed; this report and project emulator captures preserve the findings.
 

@@ -5,7 +5,7 @@ implementation_baseline: fix/phone-review-1
 version: 1.1-rc2
 ---
 
-Related: [[Ariciu - Current Status]], [[Ariciu - Tests and Evidence]], [[Ariciu - Notifications and Alarm]]. Repository mirror: docs/PHONE_REVIEW_1.md. Personal review/screenshots are not included; this note records findings and project emulator evidence.
+Related: [[Ariciu - Current Status]], [[Ariciu - Tests and Evidence]], [[Ariciu - Notifications and Alarm]]. Repository mirror: docs/archive/PHONE_REVIEW_1.md. Personal review/screenshots are not included; this note records findings and project emulator evidence.
 
 # First phone review — implementation and retest
 

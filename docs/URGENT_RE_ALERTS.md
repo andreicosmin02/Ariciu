@@ -1,6 +1,6 @@
 # Urgent re-alerts and temporary Alarm retirement — rc4
 
-> Historical implementation-batch report. Subsequent owner-authorized consolidation made `master` authoritative and published [v1.1-rc4](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4). See [publication evidence and cleanup plan](GITHUB_RELEASE_RC4.md). The implementation and emulator evidence below are unchanged; initial owner phone feedback is positive, with targeted checks still pending.
+> Historical implementation-batch report. Subsequent owner-authorized consolidation made `master` authoritative and published [v1.1-rc4](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4). See [publication evidence and cleanup plan](archive/GITHUB_RELEASE_RC4.md). The implementation and emulator evidence below are unchanged; initial owner phone feedback is positive, with targeted checks still pending.
 
 17 October 2026. Branch `fix/urgent-realerts`, from clean rc3 `fix/phone-review-2` at `8f11976`. Candidate **1.1-rc4 / code 5**, Room **5**. Nothing merged or published. This owner-directed behavior supersedes rc3’s Urgent swipe-to-Next-time policy; historical Samsung rc2 observations remain valid for that old version.
 

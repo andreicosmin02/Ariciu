@@ -1,6 +1,6 @@
 # Public-use repository preparation
 
-> Historical PR #3 report, now merged at cfed6a1. The owner subsequently approved Apache-2.0; [current scope](LICENSING.md) and [final readiness audit](PUBLIC_READINESS_AUDIT.md) supersede the pending-licence/review statements below. Test results retain their original scope.
+> Historical PR #3 report, now merged at cfed6a1. The owner subsequently approved Apache-2.0; [current scope](../LICENSING.md) and [final readiness audit](PUBLIC_READINESS_AUDIT.md) supersede the pending-licence/review statements below. Test results retain their original scope.
 
 Documentation and non-runtime ignore housekeeping from clean master **77ee6c9896ec3f4dffede22d0e01ae2369e704da**, on `docs/public-repository-preparation`. This branch is for review: **do not merge or change visibility without approval**. The existing repository, author history, Samsung evidence, v1.1-rc4 tag/release/APK, application, dependencies, permissions, Room schemas and signing remain unchanged.
 

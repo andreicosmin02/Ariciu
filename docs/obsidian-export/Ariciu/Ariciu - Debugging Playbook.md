@@ -65,7 +65,7 @@ For Alarm, compare channel sound, alarm volume, DND, lock state and panel openin
 
 ## Close a fix with evidence
 
-Record root cause, changed paths, regression case, executed counts, screenshots if relevant and what the phone must retest. Keep [docs/PROJECT_STATUS.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/PROJECT_STATUS.md), [docs/CODEX_HANDOFF.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/CODEX_HANDOFF.md) and [[Ariciu - Current Status]] consistent. Do not mark a user issue resolved solely because compilation succeeds.
+Record root cause, changed paths, regression case, executed counts, screenshots if relevant and what the phone must retest. Keep [docs/PROJECT_STATUS.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/PROJECT_STATUS.md), [docs/archive/CODEX_HANDOFF.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/archive/CODEX_HANDOFF.md) and [[Ariciu - Current Status]] consistent. Do not mark a user issue resolved solely because compilation succeeds.
 
 ## Related reading
 

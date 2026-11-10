@@ -5,9 +5,9 @@
 ## Approved licence and distribution notices
 
 - Root LICENSE is the complete, unmodified official Apache-2.0 text: **11,358 bytes**, SHA256 `cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30`. It was downloaded from the owner-specified Apache URL and compared byte-for-byte.
-- NOTICE is an informational scope/attribution guide, without an invented copyright holder or new CLA. Apache-2.0 covers Ariciu-owned original material where the necessary rights are held; third-party code/data/assets and depicted map content retain their own terms. See [LICENSING.md](LICENSING.md).
+- NOTICE is an informational scope/attribution guide, without an invented copyright holder or new CLA. Apache-2.0 covers Ariciu-owned original material where the necessary rights are held; third-party code/data/assets and depicted map content retain their own terms. See [LICENSING.md](../LICENSING.md).
 - All pre-existing app map/catalogue notices, the TSV, source/build configuration and Room history are unchanged. All 29 portable knowledge notes, 54 screenshots and three Mermaid diagrams remain; screenshot/diagram comparisons pass. The actual personal vault is not accessed.
-- [Companion full notices](third-party/README.md) add exact version-pinned MapLibre BSD texts, Google OSS bundles/indexes and the separately MPL-licensed OkHttp Public Suffix List notice. Provenance records URLs/input artifact hashes/output hashes. Three identical Google input pairs share a copy. Google JSON byte ranges were validated (16 common and 21 location entries).
+- [Companion full notices](../third-party/README.md) add exact version-pinned MapLibre BSD texts, Google OSS bundles/indexes and the separately MPL-licensed OkHttp Public Suffix List notice. Provenance records URLs/input artifact hashes/output hashes. Three identical Google input pairs share a copy. Google JSON byte ranges were validated (16 common and 21 location entries).
 - Git attributes preserve exact licence/bundle bytes across platforms. Whitespace checking is disabled only for the two raw Google text bundles, which contain 76 upstream trailing-whitespace lines and byte-indexed content; hashes still verify their exact contents. No source/docs whitespace rules are weakened elsewhere.
 
 ## Repository security/privacy review
