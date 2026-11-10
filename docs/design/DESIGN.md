@@ -115,3 +115,5 @@ Three choices: Silent, Normal, Urgent. Urgent’s dialog explanation says that a
 ## Compact pass (ui/compact)
 
 Type scale reduced 1–2sp (title/headings/body; no text below 12sp, body ≥14sp, no font-scale override) and shared spacing tightened one step. Reminder card: trigger label + status chip on the top row, title, one meta line (pin, radius · repeat, coloured alert level, announced as “Alert: X”), muted bodySmall status sentence, then one action row (outlined Mark done/Next time left; Edit/Delete text buttons right, 48dp each). Cards use the tonal surfaceContainer with an 8dp gap. Measured on the emulator (420dpi): card height 292dp → 192dp. Verified stacking at 320dp width and 2× text; physical-phone check still pending.
+
+Reminders tabs and the bordered panel share one 20dp outer radius (the panel's bottom corners are now rounded and the border follows them, with 8dp bottom clearance above the navigation bar). Cards sit 8dp inside it with a 12dp radius, following the common rule that an inner radius is the outer radius minus the gap between them.
