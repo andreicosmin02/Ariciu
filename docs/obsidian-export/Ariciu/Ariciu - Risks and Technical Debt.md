@@ -14,7 +14,7 @@ version: 1.1-rc4
 Urgent re-alert deadlines are durable and inexact; Android/Doze/OEM/channel/DND can delay or suppress them. Room/WorkManager/platform commits remain separate. The final Urgent post now revalidates within a transaction; this fixes the controlled completion-between-snapshot-and-post case, not every previously hypothesized race. See [[Ariciu - Urgent Re-alerts]].
 
 
-Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Current Status]]. Essential repository record: [docs/STABILIZATION_AUDIT.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/STABILIZATION_AUDIT.md). Reviewed source on 2026-10-17; two phone reviews have supplied field feedback; their confirmed findings and fixes are recorded separately. The recorded automated suite is green. Items below distinguish established boundaries from hypotheses.
+Related: [[Ariciu - Debugging Playbook]], [[Ariciu - Current Status]]. Essential repository record: [docs/archive/STABILIZATION_AUDIT.md](https://github.com/andreicosmin02/Ariciu/blob/master/docs/archive/STABILIZATION_AUDIT.md). Reviewed source on 2026-10-17; two phone reviews have supplied field feedback; their confirmed findings and fixes are recorded separately. The recorded automated suite is green. Items below distinguish established boundaries from hypotheses.
 
 ## Established limitations
 

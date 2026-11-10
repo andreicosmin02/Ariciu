@@ -1,14 +1,15 @@
 ---
 name: android-verification
-description: Verify an Ariciu Android code, test, manifest, resources, or Gradle change before declaring it complete. Use after implementation or when asked to review a build or test failure.
+description: Verify an Ariciu code, test, manifest, resource or Gradle change before declaring it done, or diagnose a failing build/test.
 ---
 
-# Verify an Ariciu change
-
-1. Inspect `git diff --check`, `git status --short`, and the change's actual diff. Look for accidental broad edits, renamed paths, unrelated dependency upgrades, and secrets.
-2. Run the smallest relevant tests first. For production source changes with unit tests, run `./gradlew :app:testDebugUnitTest`. For changed instrumented Compose tests, run `./gradlew :app:connectedDebugAndroidTest` only when an appropriate emulator/device is attached.
-3. For production code, resources, manifest, or Gradle changes, run `./gradlew :app:assembleDebug` after focused tests. A successful build does not prove geofencing or notification delivery works.
-4. When an Android SDK, Gradle setup, network, device, or system permission blocks a check, attempt diagnosis and repair within authorization; use the normal escalation mechanism for sandbox restrictions. Describe any remaining blocker and show what *was* verified. Never report a check as passed if it was not run.
-5. For geofencing and notification work, state focused manual verification steps on a physical device, including UI closed, location/background permissions, location services disabled, duplicate broadcasts, reminder Done/Next time, repeat after leaving, and restart where applicable.
-6. If a Room schema changed, inspect the migration and its tests. If the manifest or runtime permissions changed, check staged request flow and platform-specific limitations.
-7. Finish with a compact report: changed-file summary; commands and pass/fail/not-run results; notable risks; exact next manual check. Commit/push when authorized by the session; existing authorization persists. Do not request repeated confirmation. Verification is a checkpoint within the feature batch, not a requirement to stop development.
+1. `git diff --check`, `git status --short`, review the diff for broad edits, renames, dependency bumps, secrets.
+2. Run narrow first, compact output (full log only on failure):
+   - `./gradlew --console=plain -q :app:testDebugUnitTest --tests '<Class>' 2>&1 | tail -n 40`
+   - then `:app:testDebugUnitTest` without `--tests`.
+   - `:app:connectedDebugAndroidTest` only with an attached device/emulator.
+3. Production code, resources, manifest or Gradle: finish with `:app:assembleDebug` (same flags). A green build does not prove geofence or notification delivery.
+4. If blocked (SDK, network, device), diagnose and repair within authorization; report the blocker and what *was* verified. Never report an unrun check as passed.
+5. Geofence/notification work: list manual physical-device steps (UI closed, permissions, location off, duplicate broadcasts, Done/Next time, repeat after leaving, restart).
+6. Room change: inspect migration and tests. Permission change: check staged request flow.
+7. Report: changed files; commands with pass/fail/not-run; risks; next manual check.

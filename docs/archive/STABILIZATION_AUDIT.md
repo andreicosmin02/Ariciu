@@ -30,7 +30,7 @@ Source audit **2026-10-17**, baseline app commit `011746c` / Ariciu 1.1-rc1. Doc
 | `DeliveryWork.kt`, engine/platform | Stop silence precedes action persistence; platform post/cancel/add/remove can finish around edit/delete/crash. Room conditional writes protect data, but cannot make separate OS/WorkManager commits atomic. Fault-inject recovery on disposable data. |
 | Snooze recovery | Clock changes, old-generation wakes and multiple queued deadlines need device scenarios beyond model tests. Test forward/backward time, edit/delete/reboot while snoozed. |
 
-Prioritize the owner's reproducible problem. Confirm a hypothesis before changing behavior, add a focused regression/device case and update this audit when evidence changes. See [stabilization workflow](STABILIZATION.md), [delivery architecture](DELIVERY_ARCHITECTURE.md) and [evidence](PROJECT_STATUS.md).
+Prioritize the owner's reproducible problem. Confirm a hypothesis before changing behavior, add a focused regression/device case and update this audit when evidence changes. See [stabilization workflow](../STABILIZATION.md), [delivery architecture](../DELIVERY_ARCHITECTURE.md) and [evidence](../PROJECT_STATUS.md).
 
 
 ## Review 1 stabilization batch
@@ -43,4 +43,4 @@ The ambiguous pending/empty search state and stale produceState list were confir
 
 ## Urgent re-alert stabilization — rc4
 
-A focused failing test reproduced Every visit rearming an unanswered Urgent on the opposite crossing. Urgent now holds the unresolved occurrence while preserving crossing/position ordering. DISMISS is separate from explicit Next time, with persisted deadline/attempt and unique delayed work. Stale attempts/generations, resolution-versus-due-post, outbox access failures, reopen/migration and Alarm compatibility are covered in [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md). This is an explicit new product policy, not a workaround to prohibit Android swipes. No unrelated offline/concurrency hypotheses above are claimed fixed.
+A focused failing test reproduced Every visit rearming an unanswered Urgent on the opposite crossing. Urgent now holds the unresolved occurrence while preserving crossing/position ordering. DISMISS is separate from explicit Next time, with persisted deadline/attempt and unique delayed work. Stale attempts/generations, resolution-versus-due-post, outbox access failures, reopen/migration and Alarm compatibility are covered in [URGENT_RE_ALERTS.md](../URGENT_RE_ALERTS.md). This is an explicit new product policy, not a workaround to prohibit Android swipes. No unrelated offline/concurrency hypotheses above are claimed fixed.

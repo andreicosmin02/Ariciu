@@ -66,7 +66,7 @@ Screenshots below are actual Android emulator captures. Delivery permissions wer
 
 At the redesign milestone, feedback focused on the slate-blue accent, map-to-sheet balance and the path from choosing a place to saving. Current design priorities follow actual phone friction/accessibility reports; preserve the established visual direction.
 
-Historical redesign implementation baseline: `3a2f5a7`; current application implementation baseline: `011746c`. See [the session handoff](../CODEX_HANDOFF.md) for branch, verification, and continuation guidance.
+Historical redesign implementation baseline: `3a2f5a7`; current application implementation baseline: `011746c`. See [the session handoff](../archive/CODEX_HANDOFF.md) for branch, verification, and continuation guidance.
 
 ## Release candidate (2026-10-16)
 
@@ -90,12 +90,12 @@ Reviewed text/controls remained readable and reachable; native map rendering was
 
 Ariciu 1.1-rc1 now supplies the feature-complete supported candidate baseline described in [PROJECT_STATUS.md](../PROJECT_STATUS.md). The next design work responds to real-phone confusion, accessibility barriers, clipping or frustrating interactions. Preserve the established identity and navigation; do not launch a speculative redesign or add complexity merely to expose advanced mechanics.
 
-The RC screenshots above are dated emulator evidence, not physical-phone accessibility validation. Source review identifies possible Alarm/status wording and notification-setup navigation debt; see [STABILIZATION_AUDIT.md](../STABILIZATION_AUDIT.md). Prioritize actual user reports, compare both themes and enlarged text after relevant fixes, and record device/font/keyboard context with new screenshots. Detailed tokens/components/scaling guidance is in the [design knowledge note](<../obsidian-export/Ariciu/Ariciu - Design and Accessibility.md>).
+The RC screenshots above are dated emulator evidence, not physical-phone accessibility validation. Source review identifies possible Alarm/status wording and notification-setup navigation debt; see [STABILIZATION_AUDIT.md](../archive/STABILIZATION_AUDIT.md). Prioritize actual user reports, compare both themes and enlarged text after relevant fixes, and record device/font/keyboard context with new screenshots. Detailed tokens/components/scaling guidance is in the [design knowledge note](<../obsidian-export/Ariciu/Ariciu - Design and Accessibility.md>).
 
 
 ## First phone review — 1.1-rc2 (17 October)
 
-[Item dispositions and retest](../PHONE_REVIEW_1.md) supersede the static panel and place-first chain flow above. Create now uses padded bounded search with an adjacent labeled location icon, early Single place/Chain choice, a draggable compact sheet with an accessible toggle and fixed primary action. Expanded content scrolls; coordinates are secondary. Store areas render on a real map with a List alternative. New/refreshed selection is limited to 25 km, maximum 40, while saved snapshots remain until explicit refresh.
+[Item dispositions and retest](../archive/PHONE_REVIEW_1.md) supersede the static panel and place-first chain flow above. Create now uses padded bounded search with an adjacent labeled location icon, early Single place/Chain choice, a draggable compact sheet with an accessible toggle and fixed primary action. Expanded content scrolls; coordinates are secondary. Store areas render on a real map with a List alternative. New/refreshed selection is limited to 25 km, maximum 40, while saved snapshots remain until explicit refresh.
 
 Shared screen headings are 24sp; editor input uses bodyLarge and groups/cards have tighter spacing. No font-scale override. Active/Completed has strong selected styling, a text caption and sticky selection; large text stacks it. Alert type is separate and Done is visible on active cards. Settings uses consistent section surfaces and contained expandable help. The native vector app icon is an original restrained fox in graphite/slate blue with a pale muzzle and separate monochrome silhouette.
 

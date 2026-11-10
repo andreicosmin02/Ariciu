@@ -72,7 +72,7 @@ Schema 2→3 and 3→4 use additive migrations with exported schemas. Completed/
 
 ## Stabilization reading notes (2026-10-17)
 
-The current priority is [real-phone debugging](STABILIZATION.md), with [known limitations and source hypotheses](STABILIZATION_AUDIT.md) kept distinct. Normal and Urgent share default/user-controlled alert behavior; Urgent adds an ongoing presentation request, not a custom stronger sound/vibration. Timed Snooze is Alarm-only.
+The current priority is [real-phone debugging](STABILIZATION.md), with [known limitations and source hypotheses](archive/STABILIZATION_AUDIT.md) kept distinct. Normal and Urgent share default/user-controlled alert behavior; Urgent adds an ongoing presentation request, not a custom stronger sound/vibration. Timed Snooze is Alarm-only.
 
 Chain request IDs are `reminderId:generation:areaId`; actions address `reminderId:generation` plus occurrence. A changed area's crossing updates the parent union using an adjusted monotonic timestamp so valid same-time events from different stores are not rejected by the parent's ordering guard. UNKNOWN store positions do not count as INSIDE. Partial monitoring/missed exits can conservatively hold known INSIDE state; diagnose before changing this invariant.
 
@@ -83,7 +83,7 @@ Worker queues are unique `delivery-events` and `delivery-reconcile` chains with 
 
 Active cards now support explicit Done before any crossing, after triggering or while snoozed. `ReminderDao.complete` transaction checks the displayed occurrence against the current row, retains task data, marks completion/inactive and clears visible/pending/snooze state through `DeliveryState.completed()`. It assigns a new generation, so an interrupted older worker cannot overwrite completion. Repository schedules the existing reconciliation callback; notification cancellation and removal of all obsolete single/chain registrations follow the normal ledger/retry path. A stale card occurrence cannot complete a newer occurrence. Notification actions retain their generation/token/visible guards. No schema change.
 
-New/explicitly refreshed chain snapshots are limited to 40 listed stores within 25 km of the chosen anchor. This is selection coverage, not the per-store geofence radius. Existing snapshots survive an upgrade until explicitly refreshed. The 100-area allocator and conservative parent union behavior are unchanged. Urgent ongoing/delete-intent behavior is preserved; official Android 14+ dismissibility and runtime evidence are in [the review record](PHONE_REVIEW_1.md).
+New/explicitly refreshed chain snapshots are limited to 40 listed stores within 25 km of the chosen anchor. This is selection coverage, not the per-store geofence radius. Existing snapshots survive an upgrade until explicitly refreshed. The 100-area allocator and conservative parent union behavior are unchanged. Urgent ongoing/delete-intent behavior is preserved; official Android 14+ dismissibility and runtime evidence are in [the review record](archive/PHONE_REVIEW_1.md).
 
 ## Second phone review (rc3)
 

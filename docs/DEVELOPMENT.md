@@ -67,7 +67,7 @@ Emulator tests cover model/Room/platform adapters and UI interactions; simulated
 
 The [verified rc4 release](RELEASE_CANDIDATE.md) uses the existing published **debug certificate**. A fresh local build normally uses your own debug key and may be unable to update that installation. Do not uninstall or clear reminder storage to work around a signature mismatch. Use a disposable emulator for an independently signed build; preserve the existing app and investigate compatibility before updating a phone.
 
-Do not commit debug/production keystores, passwords or generated APKs. No production signing key or Play publication is configured by this guide. See [release/signing evidence](GITHUB_RELEASE_RC4.md) and [licensing review](LICENSING.md).
+Do not commit debug/production keystores, passwords or generated APKs. No production signing key or Play publication is configured by this guide. See [release/signing evidence](archive/GITHUB_RELEASE_RC4.md) and [licensing review](LICENSING.md).
 
 ## Contribute
 

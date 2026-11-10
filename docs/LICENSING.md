@@ -32,4 +32,4 @@ The owner’s licence decision is implemented in the current licensing branch an
 
 Companion notices linked beside installation instructions supply the identified missing full BSD texts and Google OSS bundle documentation separately from the APK. Full transitive/native distribution certification is not claimed. Future production packaging should provide a complete version-specific notice inventory and user-accessible presentation.
 
-Repository visibility remains a separate owner decision. No licence approval authorizes a merge, a Private→Public change, a new signing key or release publication. See the [final readiness audit/checklist](PUBLIC_READINESS_AUDIT.md).
+Repository visibility remains a separate owner decision. No licence approval authorizes a merge, a Private→Public change, a new signing key or release publication. See the [final readiness audit/checklist](archive/PUBLIC_READINESS_AUDIT.md).
