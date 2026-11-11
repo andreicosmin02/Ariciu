@@ -183,14 +183,17 @@ fun LocationPickerScreen(
             try {
                 val t0 = System.nanoTime()
                 val near = index.near(ref.latitude, ref.longitude, SEARCH_RADIUS_METERS)
-                val towns = if (text.isNotBlank()) index.towns() else emptyList()
+                val towns = if (text.isNotBlank() && (categories.isEmpty() || PlaceCategory.TOWN in categories)) index.townMatches(text, ref.latitude, ref.longitude) else emptyList()
                 val t1 = System.nanoTime()
                 val found = withContext(Dispatchers.Default) { searchCatalog(near, text, categories, ref.latitude, ref.longitude, towns = towns) }
                 android.util.Log.i("AriciuMap", "search '$text' ${categories.size} chips: ${near.size} candidates, ${found.size} results; load ${(t1 - t0) / 1_000_000} ms, rank ${(System.nanoTime() - t1) / 1_000_000} ms")
                 searchRef = doubleArrayOf(ref.latitude, ref.longitude)
                 if (found.isEmpty()) {
                     results = emptyList(); selectedId = null
-                    searchMessage = "No places found within 25 km. Try another word, or move the map and search this area."
+                    val packs = ro.andrei.ariciu.feature.places.PlacePackManager.get(context)
+                    val missing = ro.andrei.ariciu.feature.places.missingPackFor(packs.catalog.value, packs.installed.value.keys, ref.latitude, ref.longitude)
+                    searchMessage = if (missing != null) "No search data for ${missing.name} yet. Download it in Settings, under Search data."
+                        else "No places found within 25 km. Try another word, or move the map and search this area."
                 } else {
                     results = found
                     if (snap) { selectedId = nearestResult(found, ref.latitude, ref.longitude)?.id; fitTo(found, ref) }
@@ -249,7 +252,7 @@ fun LocationPickerScreen(
         downloadUi = DownloadUi.Plan(plan)
         // Zoom in or out so the whole box to be saved is visible; Cancel returns to the previous view.
         if (plan is DownloadPlan.Ready) {
-            cameraBeforePlan = cameraState.position
+            if (cameraBeforePlan == null) cameraBeforePlan = cameraState.position
             val b = plan.bounds
             scope.launch {
                 animating = true
@@ -264,7 +267,8 @@ fun LocationPickerScreen(
             AreaGate.ALLOWED -> { downloadUi = DownloadUi.Starting; offlineMaps.startDownload(plan, dark) }
             AreaGate.BUSY -> offlineMaps.error.value = "Finish or pause the current download first."
         } },
-        close = { val before = cameraBeforePlan; val saved = downloadUi is DownloadUi.Tracking; downloadUi = DownloadUi.Idle; cameraBeforePlan = null; if (before != null && !saved) fly(before) }, cancel = { offlineMaps.cancel(it) }, resume = { offlineMaps.resume(it) }, remove = { offlineMaps.delete(it) })
+        close = { val before = cameraBeforePlan; val saved = downloadUi is DownloadUi.Tracking; downloadUi = DownloadUi.Idle; cameraBeforePlan = null; if (before != null && !saved) fly(before) }, cancel = { offlineMaps.cancel(it) }, resume = { offlineMaps.resume(it) }, remove = { offlineMaps.delete(it) },
+        replan = { id -> downloadUi = DownloadUi.Idle; openDownload(); offlineMaps.delete(id) })
     LaunchedEffect(offlineRegions, dark) { recomputeCovered() }
     LaunchedEffect(currentPackId) { val id = currentPackId; if (id != null && downloadUi is DownloadUi.Starting) downloadUi = DownloadUi.Tracking(id) }
     LaunchedEffect(offlineError) { if (offlineError != null && downloadUi is DownloadUi.Starting) downloadUi = DownloadUi.Idle }

@@ -45,6 +45,15 @@ class OfflineCoverageTest {
         assertNull(measuredOverheadBytes(listOf(PackStats(false, 100, 1_000_000, 30_000_000))))
         assertEquals(19_000_000L, measuredOverheadBytes(listOf(PackStats(true, 8, 700_000, 18_700_000), PackStats(true, 100, 2_000_000, 21_000_000), PackStats(false, 5, 1, 99_000_000))))
     }
+    @Test fun aPackThatStoppedAtTheSafetyLimitTeachesTheEstimateTooButAPausedOneDoesNot() {
+        // Real case: a rural pack (7 KB per tile) made a Paris plan of 1,171 tiles; Paris then stopped at the limit after 448 tiles, about 51 KB each.
+        val rural = PackStats(true, 66, 489_218, 18_517_247)
+        val paris = PackStats(false, 448, 23_123_812, 40_000_000, stoppedAtLimit = true)
+        // The partial average is dragged down by light low-zoom tiles, so after a stop the cautious dense-city default applies.
+        assertEquals(OfflineLimits.DEFAULT_BYTES_PER_TILE, averageBytesPerTile(listOf(rural, paris)))
+        assertEquals(16_876_188L, measuredOverheadBytes(listOf(paris)))
+        assertNull(averageBytesPerTile(listOf(PackStats(false, 448, 23_123_812, 30_000_000))))
+    }
     @Test fun averageIsNeverBelowAFloorSoTheEstimateStaysConservative() {
         assertEquals(OfflineLimits.MIN_BYTES_PER_TILE, averageBytesPerTile(listOf(PackStats(true, 1000, 1_000_000, 22_000_000))))
     }
@@ -60,5 +69,12 @@ class OfflineCoverageTest {
         assertEquals(1, Regex("\"type\":\"Polygon\"").findAll(json).count())
         assertEquals("""{"type":"FeatureCollection","features":[]}""", boundsGeoJson(emptyList()))
         assertEquals(2, Regex("\"type\":\"Polygon\"").findAll(boundsGeoJson(listOf(GeoBounds(0.0, 0.0, 1.0, 1.0), GeoBounds(5.0, 5.0, 6.0, 6.0)))).count())
+    }
+
+    @Test fun aDownloadNeedsItsEstimatedSizePlusHeadroomInFreeStorage() {
+        assertTrue(hasRoomFor(freeBytes = 200_000_000, planBytes = 38_000_000))
+        assertFalse(hasRoomFor(freeBytes = 60_000_000, planBytes = 38_000_000))
+        assertFalse(hasRoomFor(freeBytes = 0, planBytes = 38_000_000))
+        assertTrue(storageIsLow(10_000_000)); assertFalse(storageIsLow(500_000_000))
     }
 }

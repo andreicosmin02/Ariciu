@@ -35,7 +35,7 @@ sealed interface DownloadUi {
 
 class DownloadActions(
     val start: (DownloadPlan.Ready) -> Unit, val close: () -> Unit,
-    val cancel: (Long) -> Unit, val resume: (Long) -> Unit, val remove: (Long) -> Unit,
+    val cancel: (Long) -> Unit, val resume: (Long) -> Unit, val remove: (Long) -> Unit, val replan: (Long) -> Unit,
 )
 
 private fun mb(bytes: Long) = String.format(java.util.Locale.ROOT, "%.1f MB", bytes / 1_000_000.0)
@@ -88,6 +88,14 @@ fun DownloadPanel(state: DownloadUi, areas: List<OfflineArea>, dark: Boolean, ac
                     when {
                         area == null -> Notice("This download was removed.", actions.close, "Done")
                         area.complete -> Notice("Saved offline (${mb(area.bytes)}). Manage or delete areas in Settings.", actions.close, "Done")
+                        area.limitReached -> {
+                            Text(area.error ?: "", style = MaterialTheme.typography.bodyMedium, color = colors.error, modifier = Modifier.testTag("download_error"))
+                            Text("Dense city areas have much bigger map tiles than the estimate assumed. The next plan uses what was just measured.", style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                                Button(onClick = { actions.replan(area.id) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("download_replan")) { Text("Plan a smaller area") }
+                                OutlinedButton(onClick = { actions.remove(area.id); actions.close() }, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) { Text("Remove") }
+                            }
+                        }
                         area.error != null -> {
                             Text(area.error, style = MaterialTheme.typography.bodyMedium, color = colors.error, modifier = Modifier.testTag("download_error"))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {

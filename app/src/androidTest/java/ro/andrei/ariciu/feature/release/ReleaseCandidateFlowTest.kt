@@ -40,7 +40,7 @@ class ReleaseCandidateFlowTest {
         assertTrue(near.filter { it.kind == "mall" }.all { it.chain.isEmpty() })
         val matches = ro.andrei.ariciu.feature.places.searchCatalog(near, "afi", emptySet(), 45.6579, 25.6012)
         assertEquals("AFI Brașov", matches.first().name)
-        assertTrue(index.towns().any { it.name == "Brașov" })
+        assertTrue(index.townMatches("Brașov", 45.65, 25.6).any { it.name == "Brașov" })
         assertTrue(ro.andrei.ariciu.feature.places.PlaceCategory.entries.all { c -> c == ro.andrei.ariciu.feature.places.PlaceCategory.TOWN || near.any { ro.andrei.ariciu.feature.places.PlaceCategory.of(it) == c } })
     }
 

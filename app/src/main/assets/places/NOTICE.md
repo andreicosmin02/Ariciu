@@ -12,4 +12,6 @@ Includes named nodes and closed ways for 11 categories: supermarkets and conveni
 
 52,533 catalogue entries: supermarkets 11,903; pharmacies 3,545; fuel 2,625; banks and ATMs 3,840; post offices 962; malls 231; food and cafes 11,051; hospitals and clinics 2,029; hardware 964; bakeries 1,412; towns 13,971.
 
-Search operates locally. The app does not call Nominatim, Overpass, Google Places, Geocoder or a search server. Catalogue updates ship with an app update.
+Search operates locally. The app does not call Nominatim, Overpass, Google Places, Geocoder or a search server. The bundled Romania catalogue updates with an app update; downloaded packs update from Settings.
+
+Other European countries are available as optional downloads (Settings > Search data), built from Geofabrik country extracts by tools/build_place_packs.py and published as files of the GitHub release `places-data` under the same ODbL 1.0 terms. Downloading a pack is the only time the app contacts that server for places; searching stays local.

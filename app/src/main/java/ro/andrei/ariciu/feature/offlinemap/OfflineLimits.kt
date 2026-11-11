@@ -26,6 +26,12 @@ object OfflineLimits {
     const val SAFETY = 1.2
 }
 
+/** Free storage kept for the phone itself on top of a download; a full disk made the real test download stall silently. */
+const val STORAGE_HEADROOM_BYTES = 50_000_000L
+const val STORAGE_LOW_BYTES = 25_000_000L
+fun hasRoomFor(freeBytes: Long, planBytes: Long) = freeBytes >= planBytes + STORAGE_HEADROOM_BYTES
+fun storageIsLow(freeBytes: Long) = freeBytes < STORAGE_LOW_BYTES
+
 enum class AreaGate { ALLOWED, BUSY }
 
 /** One download at a time; the number of saved areas is not limited (each download keeps to the per-download limits). */
