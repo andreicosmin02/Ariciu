@@ -183,7 +183,7 @@ fun LocationPickerScreen(
             try {
                 val t0 = System.nanoTime()
                 val near = index.near(ref.latitude, ref.longitude, SEARCH_RADIUS_METERS)
-                val towns = if (text.isNotBlank()) index.towns() else emptyList()
+                val towns = if (text.isNotBlank() && (categories.isEmpty() || PlaceCategory.TOWN in categories)) index.townMatches(text, ref.latitude, ref.longitude) else emptyList()
                 val t1 = System.nanoTime()
                 val found = withContext(Dispatchers.Default) { searchCatalog(near, text, categories, ref.latitude, ref.longitude, towns = towns) }
                 android.util.Log.i("AriciuMap", "search '$text' ${categories.size} chips: ${near.size} candidates, ${found.size} results; load ${(t1 - t0) / 1_000_000} ms, rank ${(System.nanoTime() - t1) / 1_000_000} ms")

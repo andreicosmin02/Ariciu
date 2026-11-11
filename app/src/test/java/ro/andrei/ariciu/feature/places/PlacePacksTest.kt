@@ -102,4 +102,37 @@ class PlacePacksTest {
         assertNull(missingPackFor(packs, emptySet(), 10.0, -60.0))
         assertNull(missingPackFor(emptyList(), emptySet(), 48.85, 2.35))
     }
+
+    private fun townLine(id: String, name: String, lat: Double, lon: Double, folded: String? = null) =
+        "$id\t$name\ttown\t\t$lat\t$lon\t\ttown" + (folded?.let { "\t$it" } ?: "") + "\n"
+
+    @Test fun townMatchesStreamsBothRowFormatsAndKeepsOnlyPrefixMatches() = runBlocking {
+        val towns = "# header\n" + townLine("n1", "Brașov", 45.65, 25.6) + townLine("n2", "Wien", 48.2, 16.37, "wien") +
+            townLine("n3", "Wiener Neustadt", 47.8, 16.24, "wiener neustadt") + townLine("n4", "Newien", 1.0, 1.0, "newien")
+        val index = PlaceIndex { path -> if (path == "towns.tsv") towns.byteInputStream() else null }
+        assertEquals(listOf("n1"), index.townMatches("brasov", 0.0, 0.0).map { it.id })
+        assertEquals(listOf("n2", "n3"), index.townMatches("wien", 48.0, 16.0).map { it.id })
+        assertTrue(index.townMatches("zzz", 0.0, 0.0).isEmpty())
+        assertTrue(index.townMatches("  ", 0.0, 0.0).isEmpty())
+    }
+
+    @Test fun townMatchesPrefersExactNamesThenNearestAndIsBounded() = runBlocking {
+        val towns = (1..50).joinToString("") { townLine("n$it", "Parisel $it", 10.0 + it / 100.0, 0.0, "parisel $it") } +
+            townLine("far", "Paris", 48.85, 2.35, "paris")
+        val index = PlaceIndex { path -> if (path == "towns.tsv") towns.byteInputStream() else null }
+        val found = index.townMatches("paris", 10.0, 0.0, limit = 5)
+        assertEquals(5, found.size)
+        assertEquals("far", found.first().id)
+        assertEquals(listOf("n1", "n2", "n3", "n4"), found.drop(1).map { it.id })
+    }
+
+    @Test fun cellCacheIsBounded() = runBlocking {
+        val files = (0 until 100).associate { "grid/c$it" + "_0.tsv" to "n$it\tA\tstore\t\t0.1\t${it * 0.25 + 0.1}\t\tfuel\n" } +
+            ("grid/index.txt" to (0 until 100).joinToString("\n") { "${it}_0" } + "\n")
+        var opened = 0
+        val index = PlaceIndex(maxCachedCells = 10) { path -> if (path.startsWith("grid/c")) opened++; files[path]?.byteInputStream() }
+        for (i in 0 until 100) index.near(0.1, i * 0.25 + 0.1, 100.0)
+        for (i in 0 until 100) index.near(0.1, i * 0.25 + 0.1, 100.0)
+        assertTrue("cells are reread once the cache is full: $opened", opened > 100)
+    }
 }

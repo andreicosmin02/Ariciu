@@ -5,10 +5,10 @@ Usage: python tools/build_place_catalog.py INPUT.osm.pbf OUTPUT_DIR [SOURCE_LABE
 (tools/build_place_packs.py runs this for every European country and zips the results for the app's "Search data".)
 Writes OUTPUT_DIR/towns.tsv (all towns/villages), OUTPUT_DIR/grid/c<ix>_<iy>.tsv (everything else, one file per
 0.25 degree cell) and OUTPUT_DIR/grid/index.txt (list of cells that exist).
-Row: id <TAB> name <TAB> kind(town|mall|store) <TAB> address <TAB> lat <TAB> lon <TAB> brand <TAB> category
+Row: id <TAB> name <TAB> kind(town|mall|store) <TAB> address <TAB> lat <TAB> lon <TAB> brand <TAB> category [<TAB> folded name, towns.tsv only]
 Includes nodes and closed ways, not relations. The brand tag is kept as searchable text ("Lidl" works for any brand).
 """
-import os, sys, math, hashlib
+import os, sys, math, hashlib, unicodedata
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,6 +22,11 @@ SHOP = {'supermarket': 'supermarket', 'convenience': 'supermarket', 'mall': 'mal
 AMENITY = {'pharmacy': 'pharmacy', 'fuel': 'fuel', 'bank': 'bank', 'atm': 'bank', 'post_office': 'post',
            'restaurant': 'food', 'cafe': 'food', 'fast_food': 'food', 'hospital': 'health', 'clinic': 'health'}
 PLACES = {'city', 'town', 'village', 'hamlet'}
+
+
+def fold(text):
+    """Accent-free lowercase, like the app's foldForSearch; towns.tsv carries it as a 9th column so the app can scan millions of towns without parsing them."""
+    return ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn').lower()
 
 
 def classify(t):
@@ -92,7 +97,7 @@ for r in sorted(out, key=lambda r: r[0]):
         towns.append(r)
     else:
         cells[(int(math.floor(float(r[5]) / CELL)), int(math.floor(float(r[4]) / CELL)))].append(r)
-(out_dir / 'towns.tsv').write_text(fmt(towns))
+(out_dir / 'towns.tsv').write_text(fmt([r + [fold(r[1])] for r in towns]))
 for (ix, iy), rs in cells.items():
     (out_dir / 'grid' / f'c{ix}_{iy}.tsv').write_text(fmt(rs))
 (out_dir / 'grid' / 'index.txt').write_text('\n'.join(f'{ix}_{iy}' for ix, iy in sorted(cells)) + '\n')
