@@ -10,11 +10,12 @@ Most reminders ask *when*. Ariciu lets you choose *where*: pick up a parcel when
 **Current build: 1.2-rc1 — early phone testing, not production-stable.**
 
 <p align="center">
-  <img src="docs/design/screenshots/review-2/create-dark.png" width="220" alt="Create: dark map with radius selection and collapsible place options">
-  <img src="docs/design/screenshots/urgent-realerts/urgent-pending-dark.png" width="220" alt="Reminders: Active and Completed tabs, pending Urgent retry, Mark done and Next time">
-  <img src="docs/design/screenshots/review-2/settings-light.png" width="220" alt="Settings: light appearance and staged reminder delivery setup">
+  <img src="docs/design/screenshots/rc1/create-search-light.png" width="200" alt="Create: pharmacies found offline around Vienna, shown on the map with a reminder for one place or all 40">
+  <img src="docs/design/screenshots/rc1/download-area-dark.png" width="200" alt="Create: Download area outlines the largest saveable map area with its estimated size, on the dark map">
+  <img src="docs/design/screenshots/urgent-realerts/urgent-pending-dark.png" width="200" alt="Reminders: Active and Completed tabs, pending Urgent retry, Mark done and Next time">
+  <img src="docs/design/screenshots/rc1/search-data-light.png" width="200" alt="Settings, Search data: European countries downloaded for offline search, with size and Download or Remove buttons">
 </p>
-<p align="center"><sub>Real emulator captures with demonstration reminders. These screenshots predate 1.2-rc1: Create and Settings show the rc3 UI and Reminders shows rc4, so the newer map controls and Search data screens are not pictured. Map © OpenStreetMap contributors · © OpenMapTiles, served by OpenFreeMap.</sub></p>
+<p align="center"><sub>Real emulator captures with demonstration data (Vienna, mocked location) of 1.2-rc1; the Reminders capture is from 1.1-rc4, and that screen is unchanged. Map © OpenStreetMap contributors · © OpenMapTiles, served by OpenFreeMap.</sub></p>
 
 ## What you can do
 
