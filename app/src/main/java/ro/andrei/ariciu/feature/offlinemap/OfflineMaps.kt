@@ -125,8 +125,9 @@ class OfflineMaps private constructor(context: Context) {
     fun startDownload(plan: DownloadPlan.Ready, dark: Boolean) {
         if (!loaded) { error.value = "Offline map storage is still opening. Please try again."; return }
         if (creating || mutableAreas.value.any { it.active }) { error.value = "Finish or pause the current download first."; return }
-        if (!hasRoomFor(freeBytes(), plan.estimatedBytes)) {
-            error.value = "Not enough free storage: this area needs about ${plan.estimatedBytes / 1_000_000} MB plus some room for the phone. Free some space or delete an offline area."; return
+        val needed = storageNeededFor(plan)
+        if (!hasRoomFor(freeBytes(), needed)) {
+            error.value = "Not enough free storage: this area needs up to ${needed / 1_000_000} MB plus some room for the phone. Free some space or delete an offline area."; return
         }
         creating = true
         mutableCurrent.value = null

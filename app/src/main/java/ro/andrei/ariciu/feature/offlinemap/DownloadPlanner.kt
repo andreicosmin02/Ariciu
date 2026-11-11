@@ -4,7 +4,9 @@ import ro.andrei.ariciu.feature.places.GeoBounds
 
 sealed interface DownloadPlan {
     /** [bounds] is what will be downloaded; [estimatedBytes] is an estimate, the hard stop is DownloadBudget. */
-    data class Ready(val bounds: GeoBounds, val minZoom: Int, val maxZoom: Int, val tiles: Long, val estimatedBytes: Long) : DownloadPlan
+    data class Ready(val bounds: GeoBounds, val minZoom: Int, val maxZoom: Int, val tiles: Long, val estimatedBytes: Long,
+        /** False while the size per tile is the built-in default; true once a measured value from a stored pack was used. */
+        val basedOnMeasurement: Boolean = false) : DownloadPlan
     /** Even a tiny area exceeds the limits (fonts and styling alone use up the byte budget). */
     data object NothingFits : DownloadPlan
     /** Invalid box, polar regions or the date line. */
@@ -32,7 +34,7 @@ fun planDownload(viewport: GeoBounds, bytesPerTile: Long?, overheadBytes: Long? 
         val tiles = TileMath.pyramidTileCount(b, OfflineLimits.MIN_ZOOM, OfflineLimits.MAX_ZOOM)
         val bytes = tiles * bpt + overhead
         return if (tiles <= OfflineLimits.SOFT_TILES && bytes <= OfflineLimits.SOFT_BYTES)
-            DownloadPlan.Ready(b, OfflineLimits.MIN_ZOOM, OfflineLimits.MAX_ZOOM, tiles, bytes) else null
+            DownloadPlan.Ready(b, OfflineLimits.MIN_ZOOM, OfflineLimits.MAX_ZOOM, tiles, bytes, basedOnMeasurement = bytesPerTile != null) else null
     }
     var lo = 0.001; var hi = 64.0
     var best = plan(lo) ?: return DownloadPlan.NothingFits
@@ -43,6 +45,9 @@ fun planDownload(viewport: GeoBounds, bytesPerTile: Long?, overheadBytes: Long? 
     }
     return best
 }
+
+/** Free storage a download should be checked against: the estimate if it rests on a measurement, otherwise the hard cap, because a guessed size can be far off. */
+fun storageNeededFor(plan: DownloadPlan.Ready): Long = if (plan.basedOnMeasurement) plan.estimatedBytes else OfflineLimits.HARD_BYTES
 
 /** A downloaded (or downloading) pack, as far as coverage and estimates need to know. */
 data class DownloadedRegion(val bounds: GeoBounds, val dark: Boolean, val minZoom: Int, val maxZoom: Int, val complete: Boolean)

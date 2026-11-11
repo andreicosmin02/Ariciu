@@ -66,4 +66,14 @@ class DownloadPlannerTest {
     @Test fun invertedBoxIsUnsupported() {
         assertEquals(DownloadPlan.Unsupported, planDownload(GeoBounds(46.0, 25.0, 45.0, 26.0), null))
     }
+
+    @Test fun storageNeededIsTheHardCapUntilTheEstimateRestsOnAMeasurement() {
+        val guessed = ready(planDownload(box(brasov, 0.05), null))
+        assertFalse(guessed.basedOnMeasurement)
+        assertEquals(OfflineLimits.HARD_BYTES, storageNeededFor(guessed))
+        val measured = ready(planDownload(box(brasov, 0.05), 85_000, overheadBytes = 18_000_000))
+        assertTrue(measured.basedOnMeasurement)
+        assertEquals(measured.estimatedBytes, storageNeededFor(measured))
+        assertTrue(storageNeededFor(measured) < OfflineLimits.HARD_BYTES)
+    }
 }
