@@ -158,7 +158,7 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
         }
         SettingsPanel {
             SectionLabel("Offline maps")
-            Text("Saved from Create with Download area: the largest area around the visible map that fits one download, for one theme (light or dark) only. You can keep as many areas as you like; delete the ones you no longer need. It does not download extra searchable places or change reminder coverage; search already works offline. Each area includes about 18 MB of fonts and map styling. Resume partial downloads here. Leaving Settings or Create pauses downloads.", style = MaterialTheme.typography.bodyMedium)
+            Text("Saved from Create with Download area: the largest area around the visible map that fits one download, for one theme (light or dark) only. You can keep as many areas as you like; delete the ones you no longer need. It does not change reminder coverage; for searchable places see Search data below. Each area includes about 18 MB of fonts and map styling. Resume partial downloads here. Leaving Settings or Create pauses downloads.", style = MaterialTheme.typography.bodyMedium)
             if (offlineAreas.isEmpty()) Text("No downloaded areas yet.", color = colors.onSurfaceVariant)
             offlineError?.let { Text(it, color = colors.error) }
             offlineAreas.forEach { area ->
@@ -176,8 +176,8 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
             }
             Text("Sizes show map resources; shared cache and database overhead are additional. Android app storage shows the total.", style = MaterialTheme.typography.bodySmall)
             TextButton(onClick = { appSettings() }) { Text("Phone storage settings") }
-            Text("Place search: Romania catalogue © OpenStreetMap contributors, ODbL 1.0. Geofabrik source: 15 Oct 2026; catalogue rebuilt 17 Oct 2026. Shops and addresses may be missing or outdated. Searches stay on this phone.", style = MaterialTheme.typography.bodySmall)
         }
+        SettingsPanel { SearchDataSection() }
         SettingsPanel {
             ExpandableSection("How reminders work", showExplanation, { showExplanation = !showExplanation }) {
                 Text("Your reminders stay on this phone. Android uses Google Play services to notice when you enter or leave an area. Alerts can take a few minutes, and battery restrictions or weak location signals can delay or prevent them. Location may need a network connection. Sound and pop-ups follow your phone’s notification settings.",

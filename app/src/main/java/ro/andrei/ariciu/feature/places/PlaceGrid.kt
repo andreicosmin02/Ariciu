@@ -48,6 +48,9 @@ class PlaceIndex(private val open: (String) -> InputStream?) {
     @Volatile private var existing: Set<String>? = null
     @Volatile private var towns: List<CatalogPlace>? = null
 
+    /** Forget everything read so far (a pack was installed or removed); the next query reads the sources again. */
+    fun reset() { cells.clear(); existing = null; towns = null }
+
     private fun read(path: String): List<CatalogPlace> =
         open(path)?.bufferedReader()?.useLines { lines -> lines.mapNotNull(::parsePlaceLine).toList() } ?: emptyList()
 

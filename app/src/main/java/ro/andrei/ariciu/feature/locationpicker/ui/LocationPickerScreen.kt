@@ -190,7 +190,10 @@ fun LocationPickerScreen(
                 searchRef = doubleArrayOf(ref.latitude, ref.longitude)
                 if (found.isEmpty()) {
                     results = emptyList(); selectedId = null
-                    searchMessage = "No places found within 25 km. Try another word, or move the map and search this area."
+                    val packs = ro.andrei.ariciu.feature.places.PlacePackManager.get(context)
+                    val missing = ro.andrei.ariciu.feature.places.missingPackFor(packs.catalog.value, packs.installed.value.keys, ref.latitude, ref.longitude)
+                    searchMessage = if (missing != null) "No search data for ${missing.name} yet. Download it in Settings, under Search data."
+                        else "No places found within 25 km. Try another word, or move the map and search this area."
                 } else {
                     results = found
                     if (snap) { selectedId = nearestResult(found, ref.latitude, ref.longitude)?.id; fitTo(found, ref) }
