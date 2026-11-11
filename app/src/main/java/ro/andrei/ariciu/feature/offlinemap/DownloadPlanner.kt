@@ -3,11 +3,10 @@ package ro.andrei.ariciu.feature.offlinemap
 import ro.andrei.ariciu.feature.places.GeoBounds
 
 sealed interface DownloadPlan {
-    enum class Detail { FULL, REDUCED, SHRUNK }
     /** [bounds] is what will be downloaded; [estimatedBytes] is an estimate, the hard stop is DownloadBudget. */
-    data class Ready(val bounds: GeoBounds, val minZoom: Int, val maxZoom: Int, val tiles: Long, val estimatedBytes: Long, val detail: Detail) : DownloadPlan
-    /** The visible area is too large for a pack within the limits: zoom in. */
-    data object TooFarOut : DownloadPlan
+    data class Ready(val bounds: GeoBounds, val minZoom: Int, val maxZoom: Int, val tiles: Long, val estimatedBytes: Long) : DownloadPlan
+    /** Even a tiny area exceeds the limits (fonts and styling alone use up the byte budget). */
+    data object NothingFits : DownloadPlan
     /** Invalid box, polar regions or the date line. */
     data object Unsupported : DownloadPlan
 }
@@ -16,35 +15,33 @@ private fun GeoBounds.valid() = south.isFinite() && west.isFinite() && north.isF
     south <= north && west <= east && south >= -80.0 && north <= 80.0 && west >= -179.0 && east <= 179.0
 
 /**
- * Chooses what to download for the visible [viewport]: the viewport plus a margin at zoom 10-14; if that exceeds the
- * limits, a lower maximum zoom (13, then 12); if still too large, a box around the centre at zoom 14. When nothing fits
- * the user must zoom in. Plans stay within the soft limits (2,000 tiles / 40 MB), below the hard stops.
+ * Chooses the largest area that fits the soft limits (2,000 tiles / 40 MB) at full detail (zoom 10-14): a box around the
+ * centre of the visible [viewport] with the viewport's shape, grown or shrunk to the limit. The caller then fits the camera
+ * to that box, so the user never has to zoom by hand. Plans stay below the hard stops.
  */
-fun planDownload(viewport: GeoBounds, cameraZoom: Double, bytesPerTile: Long?, overheadBytes: Long? = null): DownloadPlan {
+fun planDownload(viewport: GeoBounds, bytesPerTile: Long?, overheadBytes: Long? = null): DownloadPlan {
     if (!viewport.valid()) return DownloadPlan.Unsupported
-    if (cameraZoom < OfflineLimits.MIN_CAMERA_ZOOM) return DownloadPlan.TooFarOut
     val bpt = (bytesPerTile ?: OfflineLimits.DEFAULT_BYTES_PER_TILE).coerceAtLeast(OfflineLimits.MIN_BYTES_PER_TILE)
     val overhead = overheadBytes?.coerceAtLeast(OfflineLimits.MIN_OVERHEAD_BYTES) ?: OfflineLimits.DEFAULT_OVERHEAD_BYTES
-    val padLat = (viewport.north - viewport.south) * OfflineLimits.MARGIN
-    val padLon = (viewport.east - viewport.west) * OfflineLimits.MARGIN
-    val padded = GeoBounds((viewport.south - padLat).coerceAtLeast(-80.0), (viewport.west - padLon).coerceAtLeast(-179.0),
-        (viewport.north + padLat).coerceAtMost(80.0), (viewport.east + padLon).coerceAtMost(179.0))
-    fun plan(b: GeoBounds, maxZoom: Int, detail: DownloadPlan.Detail): DownloadPlan.Ready? {
-        val tiles = TileMath.pyramidTileCount(b, OfflineLimits.MIN_ZOOM, maxZoom)
+    val cLat = (viewport.north + viewport.south) / 2; val cLon = (viewport.east + viewport.west) / 2
+    val hLat = ((viewport.north - viewport.south) / 2).coerceAtLeast(1e-4); val hLon = ((viewport.east - viewport.west) / 2).coerceAtLeast(1e-4)
+    fun at(scale: Double) = GeoBounds((cLat - hLat * scale).coerceAtLeast(-80.0), (cLon - hLon * scale).coerceAtLeast(-179.0),
+        (cLat + hLat * scale).coerceAtMost(80.0), (cLon + hLon * scale).coerceAtMost(179.0))
+    fun plan(scale: Double): DownloadPlan.Ready? {
+        val b = at(scale)
+        val tiles = TileMath.pyramidTileCount(b, OfflineLimits.MIN_ZOOM, OfflineLimits.MAX_ZOOM)
         val bytes = tiles * bpt + overhead
         return if (tiles <= OfflineLimits.SOFT_TILES && bytes <= OfflineLimits.SOFT_BYTES)
-            DownloadPlan.Ready(b, OfflineLimits.MIN_ZOOM, maxZoom, tiles, bytes, detail) else null
+            DownloadPlan.Ready(b, OfflineLimits.MIN_ZOOM, OfflineLimits.MAX_ZOOM, tiles, bytes) else null
     }
-    plan(padded, OfflineLimits.MAX_ZOOM, DownloadPlan.Detail.FULL)?.let { return it }
-    for (maxZoom in OfflineLimits.MAX_ZOOM - 1 downTo 12) plan(padded, maxZoom, DownloadPlan.Detail.REDUCED)?.let { return it }
-    val cLat = (padded.north + padded.south) / 2; val cLon = (padded.east + padded.west) / 2
-    var factor = 0.9
-    while (factor >= 0.3) {
-        val hLat = (padded.north - padded.south) / 2 * factor; val hLon = (padded.east - padded.west) / 2 * factor
-        plan(GeoBounds(cLat - hLat, cLon - hLon, cLat + hLat, cLon + hLon), OfflineLimits.MAX_ZOOM, DownloadPlan.Detail.SHRUNK)?.let { return it }
-        factor *= 0.85
+    var lo = 0.001; var hi = 64.0
+    var best = plan(lo) ?: return DownloadPlan.NothingFits
+    repeat(48) {
+        val mid = (lo + hi) / 2
+        val p = plan(mid)
+        if (p != null) { lo = mid; best = p } else hi = mid
     }
-    return DownloadPlan.TooFarOut
+    return best
 }
 
 /** A downloaded (or downloading) pack, as far as coverage and estimates need to know. */

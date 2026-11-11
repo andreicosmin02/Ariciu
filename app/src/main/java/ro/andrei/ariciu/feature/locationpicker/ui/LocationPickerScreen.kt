@@ -140,7 +140,7 @@ fun LocationPickerScreen(
     var message by remember { mutableStateOf<String?>(null) }
     var downloadUi by remember { mutableStateOf<DownloadUi>(DownloadUi.Idle) }
     var covered by remember { mutableStateOf(false) }
-    var steppedBack by remember { mutableStateOf(false) }
+    var cameraBeforePlan by remember { mutableStateOf<CameraPosition?>(null) }
     val currentPackId by offlineMaps.currentId.collectAsState()
     var locationExplanation by remember { mutableStateOf(false) }
     var permissionAsked by rememberSaveable { mutableStateOf(false) }
@@ -245,10 +245,19 @@ fun LocationPickerScreen(
         val v = viewportBounds() ?: return
         if (covered) { downloadUi = DownloadUi.Covered; return }
         val stats = downloadedAreas.map { it.toStats() }
-        val plan = planDownload(v, cameraState.position.zoom, averageBytesPerTile(stats), measuredOverheadBytes(stats))
+        val plan = planDownload(v, averageBytesPerTile(stats), measuredOverheadBytes(stats))
         downloadUi = DownloadUi.Plan(plan)
-        // The box is the view plus a margin, so step back a little to show its outline on the map.
-        if (plan is DownloadPlan.Ready) { steppedBack = true; fly(cameraState.position.copy(zoom = cameraState.position.zoom - 0.4)) }
+        // Zoom in or out so the whole box to be saved is visible; Cancel returns to the previous view.
+        if (plan is DownloadPlan.Ready) {
+            cameraBeforePlan = cameraState.position
+            val b = plan.bounds
+            scope.launch {
+                animating = true
+                kotlinx.coroutines.delay(350) // let the panel take its place so the box is fitted to the map that is left
+                try { withContext(Dispatchers.Main) { cameraState.animateTo(BoundingBox(b.west, b.south, b.east, b.north),
+                    padding = PaddingValues(start = 24.dp, end = 96.dp, top = 72.dp, bottom = 24.dp), duration = 600.milliseconds) } } finally { animating = false }
+            }
+        }
     }
     val downloadActions = DownloadActions(
         start = { plan -> when (areaGate(downloadedAreas.size, downloadedAreas.any { it.active })) {
@@ -257,7 +266,7 @@ fun LocationPickerScreen(
             AreaGate.BUSY -> offlineMaps.error.value = "Finish or pause the current download first."
         } },
         replace = { plan, id -> downloadUi = DownloadUi.Starting; offlineMaps.startDownload(plan, dark, replaceId = id) },
-        close = { downloadUi = DownloadUi.Idle; if (steppedBack) { steppedBack = false; fly(cameraState.position.copy(zoom = cameraState.position.zoom + 0.4)) } }, cancel = { offlineMaps.cancel(it) }, resume = { offlineMaps.resume(it) }, remove = { offlineMaps.delete(it) })
+        close = { val before = cameraBeforePlan; val saved = downloadUi is DownloadUi.Tracking; downloadUi = DownloadUi.Idle; cameraBeforePlan = null; if (before != null && !saved) fly(before) }, cancel = { offlineMaps.cancel(it) }, resume = { offlineMaps.resume(it) }, remove = { offlineMaps.delete(it) })
     LaunchedEffect(offlineRegions, dark) { recomputeCovered() }
     LaunchedEffect(currentPackId) { val id = currentPackId; if (id != null && downloadUi is DownloadUi.Starting) downloadUi = DownloadUi.Tracking(id) }
     LaunchedEffect(offlineError) { if (offlineError != null && downloadUi is DownloadUi.Starting) downloadUi = DownloadUi.Idle }

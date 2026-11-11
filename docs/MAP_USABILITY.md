@@ -38,7 +38,7 @@ Screenshots: `docs/design/screenshots/map-1/`.
 Free, no new dependency, permission, host or backend. Uses OfflineMaps, MapNetwork and DownloadBudget.
 - **Limits** (OpenFreeMap: <= 3,000 tiles or 50 MB per download, <= 4 parallel requests, unique User-Agent). App margins unchanged: hard stops 2,500 tiles / 45 MB (`DownloadBudget`), plans sized to 2,000 tiles / 40 MB. Never raise them. Up to three areas; at the limit the user picks one to replace (confirmation by choosing it).
 - **UI:** "Download area" in the map controls (48dp, icon + label) shows the planned box on the map, an estimate and Download/Cancel; progress, cancel (removes the partial pack), failures and retry are inline. Saved areas of the current theme are thin outlines. When the view is inside a complete same-theme pack the control reads "Downloaded". Packs are theme-specific and the panel says so. Settings still manages and deletes.
-- **Sizing** (`TileMath`, `planDownload`): viewport plus 10% margin at zoom 10-14; else max zoom 13 then 12; else a box shrunk around the centre; else "Zoom in a little to download at full detail" (also below camera zoom 11).
+- **Sizing** (`TileMath`, `planDownload`): the largest box that fits 2,000 tiles / 40 MB at zoom 10-14, centred on the visible map and with its shape, found by bisection. The camera then zooms in or out by itself to show the whole box (Cancel returns to the previous view); there is no "zoom in" refusal. Saved areas are drawn as faint dashed outlines, the plan as the only strong outline.
 - **Estimate:** tiles x bytes per tile + fonts/styling overhead. Defaults are conservative (350 KB per tile, 20 MB overhead); once a pack completed, the densest measured value (+20%) and measured overhead are used. Labelled as an estimate.
 
 Measured on real OpenFreeMap downloads (emulator, 8 packs):
@@ -54,4 +54,4 @@ Measured on real OpenFreeMap downloads (emulator, 8 packs):
 | Rome IT (dark) | 9 | 182 KB | 7.7 MB |
 Planned tile counts matched actual counts in every pack. A first estimate was 3.6 MB because the ~18 MB of fonts and styling per pack was missing, and a Vienna-sized average underestimated Paris; both are fixed. Cancel, replace at three areas, offline failure ("paused after 90 seconds", Try again resumed and completed) and the Downloaded state were each exercised on the emulator.
 
-Not verified: a large reduced-detail pack at the hard limits (the viewports tested were small), phone download speed, storage pressure, and layouts at 2x text and 320dp are usable but the map area is small there.
+Not verified: a pack at the hard limits with measured (not default) tile sizes, phone download speed, storage pressure, and layouts at 2x text and 320dp are usable but the map area is small there.

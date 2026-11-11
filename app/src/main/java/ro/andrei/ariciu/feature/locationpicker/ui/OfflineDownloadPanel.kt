@@ -46,9 +46,13 @@ private fun mb(bytes: Long) = String.format(java.util.Locale.ROOT, "%.1f MB", by
 @Composable
 fun OfflineOutlineLayers(saved: List<GeoBounds>, planned: GeoBounds?, colors: ColorScheme) {
     val savedSource = rememberGeoJsonSource(data = GeoJsonData.JsonString(boundsGeoJson(saved)))
-    LineLayer(id = "offline-saved-line", source = savedSource, color = const(colors.tertiary), width = const(1.5.dp))
+    // Saved areas are quiet: a faint tint and a thin dashed edge, so overlapping packs do not turn into a grid of boxes.
+    FillLayer(id = "offline-saved-fill", source = savedSource, color = const(colors.tertiary), opacity = const(0.06f))
+    LineLayer(id = "offline-saved-line", source = savedSource, color = const(colors.onSurfaceVariant), width = const(1.dp),
+        opacity = const(0.55f), dasharray = const(listOf(3f, 3f)))
+    // The plan is the only strong outline.
     val planSource = rememberGeoJsonSource(data = GeoJsonData.JsonString(boundsGeoJson(listOfNotNull(planned))))
-    FillLayer(id = "offline-plan-fill", source = planSource, color = const(colors.tertiary), opacity = const(0.12f))
+    FillLayer(id = "offline-plan-fill", source = planSource, color = const(colors.tertiary), opacity = const(0.10f))
     LineLayer(id = "offline-plan-line", source = planSource, color = const(colors.tertiary), width = const(3.dp))
 }
 
@@ -63,14 +67,9 @@ fun DownloadPanel(state: DownloadUi, areas: List<OfflineArea>, dark: Boolean, ac
                 DownloadUi.Idle -> Unit
                 is DownloadUi.Plan -> when (val plan = state.plan) {
                     is DownloadPlan.Ready -> {
-                        Text("Download this area", style = MaterialTheme.typography.titleSmall)
-                        Text("About ${plan.tiles} map tiles and ${mb(plan.estimatedBytes)} including fonts and map styling. This is an estimate; downloads stop at ${mb(OfflineLimits.SOFT_BYTES)}.",
+                        Text("Download the outlined area", style = MaterialTheme.typography.titleSmall)
+                        Text("The map moved to the largest area that can be saved: about ${plan.tiles} map tiles and ${mb(plan.estimatedBytes)} including fonts and map styling. This is an estimate; downloads stop at ${mb(OfflineLimits.SOFT_BYTES)}.",
                             style = MaterialTheme.typography.bodyMedium, modifier = Modifier.testTag("download_estimate"))
-                        Text(when (plan.detail) {
-                            DownloadPlan.Detail.FULL -> "Full detail, zoom ${plan.minZoom} to ${plan.maxZoom}."
-                            DownloadPlan.Detail.REDUCED -> "Less zoom detail (up to zoom ${plan.maxZoom}) because this view is large. Zoom in a little for full detail."
-                            DownloadPlan.Detail.SHRUNK -> "Only the middle of this view fits. Zoom in a little to cover what you need at full detail."
-                        }, style = MaterialTheme.typography.bodyMedium)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                             Button(onClick = { actions.start(plan) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("download_confirm")) { Text("Download") }
                             OutlinedButton(onClick = actions.close, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("download_cancel")) { Text("Cancel") }
@@ -78,7 +77,7 @@ fun DownloadPanel(state: DownloadUi, areas: List<OfflineArea>, dark: Boolean, ac
                         Text("Saves the $theme map only. If you switch theme, download again for that theme. Uses internet. Up to three areas; keep Create open while downloading. Map requests are sent to OpenFreeMap and its CDN.",
                             style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     }
-                    DownloadPlan.TooFarOut -> Notice("Zoom in a little to download at full detail.", actions.close)
+                    DownloadPlan.NothingFits -> Notice("Map fonts and styling alone use up the download limit, so no area can be saved right now.", actions.close)
                     DownloadPlan.Unsupported -> Notice("Offline downloads are available away from polar regions and the date line.", actions.close)
                 }
                 DownloadUi.Covered -> Notice("This view is already saved offline for the $theme map. Manage or delete areas in Settings.", actions.close, "Done")
