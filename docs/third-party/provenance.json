@@ -107,5 +107,21 @@
     "source_url": "https://www.mozilla.org/media/MPL/2.0/index.txt",
     "bytes": 16726,
     "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04"
+  },
+  {
+    "file": "app/src/main/assets/places/ (towns.tsv, grid/*.tsv, grid/index.txt)",
+    "description": "Romania place catalogue derived from OpenStreetMap (ODbL 1.0), 52,533 rows, 11 categories",
+    "license": "ODbL-1.0",
+    "attribution": "© OpenStreetMap contributors",
+    "source_url": "https://download.geofabrik.de/europe/romania-261108.osm.pbf",
+    "source_date": "2026-11-08 (Geofabrik file name romania-261108)",
+    "downloaded": "2026-11-10",
+    "source_md5_published_by_geofabrik": "7ae157773cb18ca2f20d2400b70b8115",
+    "source_sha256": "82d35a6467e5955792fa7efd8e94d3c6f39337124f72c9346d99ae5ff7923027",
+    "generator": "tools/build_place_catalog.py (pyosmium)",
+    "derived_files": 484,
+    "derived_bytes": 3713971,
+    "derived_bundle_sha256": "111699c45d3a3516d947a62ad319c0f9d0b83f7e202087fee6981e83d5a8054b",
+    "notice": "app/src/main/assets/places/NOTICE.md"
   }
 ]

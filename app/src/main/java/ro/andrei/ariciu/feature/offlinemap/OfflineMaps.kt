@@ -12,6 +12,7 @@ import okhttp3.OkHttpClient
 import okhttp3.ResponseBody.Companion.toResponseBody
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import ro.andrei.ariciu.feature.places.GeoBounds
 import kotlin.math.cos
 
 /** One explicitly requested pack at a time, all native requests share the provider limits. */
@@ -49,7 +50,12 @@ object MapNetwork {
 }
 
 data class OfflineArea(val id: Long, val name: String, val bytes: Long = 0, val complete: Boolean = false,
-    val progress: Float = 0f, val active: Boolean = false, val error: String? = null)
+    val progress: Float = 0f, val active: Boolean = false, val error: String? = null,
+    val bounds: GeoBounds? = null, val dark: Boolean? = null, val minZoom: Int = OfflineLimits.MIN_ZOOM, val maxZoom: Int = OfflineLimits.MAX_ZOOM,
+    val tiles: Long = 0, val tileBytes: Long = 0) {
+    fun toRegion(): DownloadedRegion? = if (bounds != null && dark != null) DownloadedRegion(bounds, dark, minZoom, maxZoom, complete) else null
+    fun toStats() = PackStats(complete, tiles, tileBytes, bytes)
+}
 
 class OfflineMaps private constructor(context: Context) {
     private val manager: OfflineManager
@@ -59,7 +65,11 @@ class OfflineMaps private constructor(context: Context) {
     var error = MutableStateFlow<String?>(null); private set
     private var creating = false
     private var loaded = false
+    private val mutableCurrent = MutableStateFlow<Long?>(null)
+    /** Id of the pack created by the latest [startDownload], once native code has created it. */
+    val currentId = mutableCurrent.asStateFlow()
     private var downloadSession = 0
+    private val predicted = mutableMapOf<Long, DownloadPlan.Ready>()
     init {
         MapLibre.getInstance(context.applicationContext); MapNetwork.install()
         manager = OfflineManager.getInstance(context.applicationContext)
@@ -73,11 +83,20 @@ class OfflineMaps private constructor(context: Context) {
     }
     private fun attach(region: OfflineRegion) {
         regions[region.id] = region
-        mutableAreas.value = mutableAreas.value.filterNot { it.id == region.id } + OfflineArea(region.id, region.metadata.toString(Charsets.UTF_8))
+        val definition = region.definition as? OfflineTilePyramidRegionDefinition
+        val box = definition?.bounds?.let { GeoBounds(it.latitudeSouth, it.longitudeWest, it.latitudeNorth, it.longitudeEast) }
+        mutableAreas.value = mutableAreas.value.filterNot { it.id == region.id } + OfflineArea(region.id, region.metadata.toString(Charsets.UTF_8),
+            bounds = box, dark = definition?.styleURL?.contains("dark"),
+            minZoom = definition?.minZoom?.toInt() ?: OfflineLimits.MIN_ZOOM, maxZoom = definition?.maxZoom?.toInt() ?: OfflineLimits.MAX_ZOOM)
         fun status(status: OfflineRegionStatus) {
             update(region.id) { it.copy(bytes = status.completedResourceSize, complete = status.isComplete,
+                tiles = status.completedTileCount, tileBytes = status.completedTileSize,
                 progress = if (status.requiredResourceCount > 0) (status.completedResourceCount.toFloat() / status.requiredResourceCount).coerceIn(0f, 1f) else 0f) }
-            if (status.isComplete || status.completedResourceSize >= 40_000_000 || status.completedTileCount >= 2000) {
+            if (status.isComplete) predicted[region.id]?.let { p ->
+                android.util.Log.i("AriciuMap", "offline pack ${region.id} complete: tiles ${status.completedTileCount} (planned ${p.tiles}), tile bytes ${status.completedTileSize} (${if (status.completedTileCount > 0) status.completedTileSize / status.completedTileCount else 0} per tile), total ${status.completedResourceSize} bytes (estimated ${p.estimatedBytes})")
+                predicted.remove(region.id)
+            }
+            if (status.isComplete || status.completedResourceSize >= OfflineLimits.SOFT_BYTES || status.completedTileCount >= OfflineLimits.SOFT_TILES) {
                 pause(region.id)
                 if (!status.isComplete) update(region.id) { it.copy(error = "This area reached the safety limit. Delete it and choose a different area.") }
             }
@@ -95,33 +114,39 @@ class OfflineMaps private constructor(context: Context) {
             override fun onError(message: String?) { update(region.id) { it.copy(error = "Could not read map storage.") } }
         })
     }
-    fun download(latitude: Double, longitude: Double, dark: Boolean) {
+    /**
+     * Downloads a planned area for one theme. The number of saved areas is not limited. The caller shows [error] and
+     * follows progress via [areas] and [currentId].
+     */
+    fun startDownload(plan: DownloadPlan.Ready, dark: Boolean) {
         if (!loaded) { error.value = "Offline map storage is still opening. Please try again."; return }
         if (creating || mutableAreas.value.any { it.active }) { error.value = "Finish or pause the current download first."; return }
-        if (mutableAreas.value.size >= 3) { error.value = "Keep up to three small areas. Delete one first."; return }
-        if (!latitude.isFinite() || !longitude.isFinite() || latitude !in -80.0..80.0 || longitude !in -179.0..179.0) {
-            error.value = "Offline downloads are available away from polar regions and the date line."; return
-        }
         creating = true
-        val deltaLat = 2000.0 / 111_320; val deltaLon = deltaLat / cos(Math.toRadians(latitude))
-        val definition = OfflineTilePyramidRegionDefinition(if (dark) "https://tiles.openfreemap.org/styles/dark" else "https://tiles.openfreemap.org/styles/positron", LatLngBounds.from(
-            latitude + deltaLat, longitude + deltaLon, latitude - deltaLat, longitude - deltaLon), 10.0, 14.0, 1f)
-        val name = "%.3f, %.3f · %s".format(java.util.Locale.ROOT, latitude, longitude, if (dark) "Dark" else "Light")
-        manager.createOfflineRegion(definition, name.toByteArray(), object : OfflineManager.CreateOfflineRegionCallback {
-            override fun onCreate(region: OfflineRegion) { creating = false; attach(region); resume(region.id) }
-            override fun onError(message: String) { creating = false; error.value = "Could not create offline area. Check free storage and try again." }
-        })
+        mutableCurrent.value = null
+        fun create() {
+            val b = plan.bounds
+            val definition = OfflineTilePyramidRegionDefinition(if (dark) "https://tiles.openfreemap.org/styles/dark" else "https://tiles.openfreemap.org/styles/positron",
+                LatLngBounds.from(b.north, b.east, b.south, b.west), plan.minZoom.toDouble(), plan.maxZoom.toDouble(), 1f)
+            val name = "%.3f, %.3f · %s".format(java.util.Locale.ROOT, (b.north + b.south) / 2, (b.east + b.west) / 2, if (dark) "Dark" else "Light")
+            manager.createOfflineRegion(definition, name.toByteArray(), object : OfflineManager.CreateOfflineRegionCallback {
+                override fun onCreate(region: OfflineRegion) { creating = false; predicted[region.id] = plan; attach(region); mutableCurrent.value = region.id; resume(region.id) }
+                override fun onError(message: String) { creating = false; error.value = "Could not create offline area. Check free storage and try again." }
+            })
+        }
+        create()
     }
+    /** Stops a download and removes the partial pack so it is not left behind. */
+    fun cancel(id: Long) = delete(id)
     fun resume(id: Long) {
         if (mutableAreas.value.any { it.active }) return
         val region = regions[id] ?: return
-        if ((mutableAreas.value.firstOrNull { it.id == id }?.bytes ?: 0) >= 40_000_000) { error.value = "This pack is too large. Delete it and choose another area."; return }
+        if ((mutableAreas.value.firstOrNull { it.id == id }?.bytes ?: 0) >= OfflineLimits.SOFT_BYTES) { error.value = "This pack is too large. Delete it and choose another area."; return }
         MapNetwork.begin(mutableAreas.value.firstOrNull { it.id == id }?.bytes ?: 0); update(id) { it.copy(active = true, error = null) }
         region.setDownloadState(OfflineRegion.STATE_ACTIVE)
         val session = ++downloadSession
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             if (session == downloadSession && mutableAreas.value.any { it.id == id && it.active }) {
-                pause(id); update(id) { it.copy(error = "Download paused after 90 seconds. Check internet, then Resume to continue.") }
+                pause(id); update(id) { it.copy(error = "Download paused after 90 seconds. Check internet, then continue the download.") }
             }
         }, 90_000)
     }
@@ -131,11 +156,17 @@ class OfflineMaps private constructor(context: Context) {
         if (wasActive) { downloadSession++; MapNetwork.end() }
     }
     fun pauseAll() { regions.keys.toList().forEach(::pause) }
-    fun delete(id: Long) {
+    fun delete(id: Long, onDeleted: (() -> Unit)? = null) {
         pause(id)
-        regions[id]?.delete(object : OfflineRegion.OfflineRegionDeleteCallback {
-            override fun onDelete() { regions.remove(id); mutableAreas.value = mutableAreas.value.filterNot { it.id == id } }
-            override fun onError(message: String) { update(id) { it.copy(error = "Could not delete this area. Please retry.") } }
+        val region = regions[id]
+        if (region == null) { onDeleted?.invoke(); return }
+        region.delete(object : OfflineRegion.OfflineRegionDeleteCallback {
+            override fun onDelete() { regions.remove(id); mutableAreas.value = mutableAreas.value.filterNot { it.id == id }; onDeleted?.invoke() }
+            override fun onError(message: String) {
+                creating = false
+                update(id) { it.copy(error = "Could not delete this area. Please retry.") }
+                if (onDeleted != null) error.value = "Could not replace that area. Please retry."
+            }
         })
     }
     companion object {

@@ -127,7 +127,7 @@ class LocationPickerScreenTest {
             }
         }
         composeTestRule.onNodeWithTag("location_picker_confirm_button").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Supermarket chain").performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag("place_search").performScrollTo().assertIsDisplayed()
         composeTestRule.onNodeWithTag("place_sheet_toggle").performScrollTo().performClick()
         composeTestRule.onNodeWithText("500 m").performScrollTo().assertIsDisplayed().performClick()
         composeTestRule.onNodeWithTag("location_picker_confirm_button").assertIsDisplayed()

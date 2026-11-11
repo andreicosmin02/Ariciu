@@ -18,8 +18,10 @@ import kotlin.coroutines.resumeWithException
 fun Context.hasMapLocationPermission() = listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
     .any { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
 
+data class UserFix(val position: SelectedCoordinates, val accuracyMeters: Float)
+
 @Suppress("MissingPermission")
-suspend fun Context.currentMapPosition(): SelectedCoordinates? {
+suspend fun Context.currentMapFix(): UserFix? {
     check(hasMapLocationPermission()) { "Allow location to find where you are." }
     val manager = getSystemService(LocationManager::class.java)
     val enabled = if (android.os.Build.VERSION.SDK_INT >= 28) manager.isLocationEnabled else
@@ -29,10 +31,10 @@ suspend fun Context.currentMapPosition(): SelectedCoordinates? {
         suspendCancellableCoroutine { continuation ->
             val cancellation = CancellationTokenSource()
             continuation.invokeOnCancellation { cancellation.cancel() }
-            LocationServices.getFusedLocationProviderClient(this@currentMapPosition).getCurrentLocation(
+            LocationServices.getFusedLocationProviderClient(this@currentMapFix).getCurrentLocation(
                 CurrentLocationRequest.Builder().setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                     .setMaxUpdateAgeMillis(30_000).setDurationMillis(18_000).build(), cancellation.token)
-                .addOnSuccessListener { location -> if (continuation.isActive) continuation.resume(location?.let { SelectedCoordinates(it.latitude, it.longitude) }) }
+                .addOnSuccessListener { location -> if (continuation.isActive) continuation.resume(location?.let { UserFix(SelectedCoordinates(it.latitude, it.longitude), if (it.hasAccuracy()) it.accuracy else 30f) }) }
                 .addOnFailureListener { if (continuation.isActive) continuation.resumeWithException(it) }
                 .addOnCanceledListener { continuation.cancel() }
         }

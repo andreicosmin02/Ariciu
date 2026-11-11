@@ -78,8 +78,27 @@ class RemindersViewModel(
         savedState["chainAreas"] = ro.andrei.ariciu.feature.delivery.model.encodeChainAreas(value.chainAreas)
     }
 
+    /**
+     * Manual pin. Picking a different pin turns a multi-place reminder into a single place; confirming the same pin
+     * (for example only changing the radius) keeps its places, so nothing is lost by accident.
+     */
     fun chooseLocation(location: SelectedLocation) {
-        updateDraft(draft.value.copy(location = location, chainAreas = if (draft.value.chainName != null) emptyList() else draft.value.chainAreas))
+        val current = draft.value
+        val samePin = current.location?.let { it.latitude == location.latitude && it.longitude == location.longitude } == true
+        updateDraft(if (samePin && current.chainName != null) current.copy(location = location)
+            else current.copy(location = location, chainName = null, chainAreas = emptyList()))
+        navigate(ReminderRoute.EDITOR)
+    }
+
+    /** One search result. The title is only prefilled when the user has not typed one. */
+    fun choosePlace(location: SelectedLocation, title: String) {
+        updateDraft(draft.value.copy(location = location, title = draft.value.title.ifBlank { title }, chainName = null, chainAreas = emptyList()))
+        navigate(ReminderRoute.EDITOR)
+    }
+
+    /** 1-40 search results as one multi-area reminder; [label] is stored in chainName. */
+    fun choosePlaces(location: SelectedLocation, label: String, areas: List<ro.andrei.ariciu.feature.delivery.model.ChainArea>) {
+        updateDraft(draft.value.copy(location = location, title = draft.value.title.ifBlank { label }, chainName = label, chainAreas = areas))
         navigate(ReminderRoute.EDITOR)
     }
 

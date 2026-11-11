@@ -30,6 +30,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.android.gms.common.GoogleApiAvailability
 import ro.andrei.ariciu.feature.delivery.model.DeliveryCapabilities
+import ro.andrei.ariciu.feature.delivery.model.geofenceBudgetText
 import ro.andrei.ariciu.feature.delivery.platform.*
 import ro.andrei.ariciu.ui.components.*
 import ro.andrei.ariciu.ui.theme.ThemePreference
@@ -65,7 +66,7 @@ fun rememberDeliveryCapabilities(): DeliveryCapabilities {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
-    themePreference: ThemePreference = ThemePreference.SYSTEM, onThemeChange: (ThemePreference) -> Unit = {}) {
+    themePreference: ThemePreference = ThemePreference.SYSTEM, onThemeChange: (ThemePreference) -> Unit = {}, geofenceAreasUsed: Int? = null) {
     val context = LocalContext.current
     val offline = remember(context) { ro.andrei.ariciu.feature.offlinemap.OfflineMaps.get(context) }
     val offlineAreas by offline.areas.collectAsState()
@@ -117,6 +118,15 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
                         style = MaterialTheme.typography.bodyMedium, color = colors.onSurfaceVariant)
                 }
             }
+            if (geofenceAreasUsed != null) Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.Top) {
+                Icon(AriciuIcons.Pin, null, Modifier.size(20.dp), tint = colors.onSurfaceVariant)
+                Column {
+                    Text(geofenceBudgetText(geofenceAreasUsed), Modifier.testTag("geofence_budget_text"), style = MaterialTheme.typography.titleSmall)
+                    Text("Android allows up to 100 areas in total. This is Ariciu’s last recorded count, not a live reading.",
+                        style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
+                }
+            }
             Surface(color = colors.surface, shape = MaterialTheme.shapes.large) {
                 Column {
                     SetupStep("Your location", current.preciseLocation, "Recognize the places you choose.") { explanation = "foreground" }
@@ -148,7 +158,7 @@ fun DeliverySetupScreen(capabilities: DeliveryCapabilities, onBack: () -> Unit,
         }
         SettingsPanel {
             SectionLabel("Offline maps")
-            Text("Keeps roads, labels and map detail available without internet for about 4 × 4 km in the downloaded theme. It does not download extra searchable stores or change reminder coverage; search already works offline. Start in Create → Location details. Resume partial downloads here. Leaving Settings or Create pauses downloads.", style = MaterialTheme.typography.bodyMedium)
+            Text("Saved from Create with Download area: the largest area around the visible map that fits one download, for one theme (light or dark) only. You can keep as many areas as you like; delete the ones you no longer need. It does not download extra searchable places or change reminder coverage; search already works offline. Each area includes about 18 MB of fonts and map styling. Resume partial downloads here. Leaving Settings or Create pauses downloads.", style = MaterialTheme.typography.bodyMedium)
             if (offlineAreas.isEmpty()) Text("No downloaded areas yet.", color = colors.onSurfaceVariant)
             offlineError?.let { Text(it, color = colors.error) }
             offlineAreas.forEach { area ->

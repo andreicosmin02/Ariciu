@@ -10,6 +10,6 @@ class DownloadBudget(initialBytes: Long = 0) {
         require(count >= 0)
         bytes += count
         if (tile) tiles++
-        if (bytes > 45_000_000 || tiles > 2500) throw IOException("Offline download safety limit reached")
+        if (bytes > OfflineLimits.HARD_BYTES || tiles > OfflineLimits.HARD_TILES) throw IOException("Offline download safety limit reached")
     }
 }

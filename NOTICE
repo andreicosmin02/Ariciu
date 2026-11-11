@@ -11,7 +11,7 @@ Third-party material retains its own copyright and licence terms:
 - The Romanian place catalogue derives from OpenStreetMap contributors'
   data and is distributed under ODbL 1.0. Geofabrik extract provenance,
   attribution and the complete derived database are in
-  app/src/main/assets/places/NOTICE.md and romania.tsv.
+  app/src/main/assets/places/NOTICE.md and the towns.tsv and grid/ files.
 - OpenFreeMap upstream material, OpenMapTiles/map styles and map imagery
   retain their MIT/BSD/Creative Commons/data terms and CARTO, Stamen,
   Paul Norman and other upstream attribution. Full notices are in
