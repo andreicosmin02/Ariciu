@@ -52,12 +52,16 @@ object MapNetwork {
 data class OfflineArea(val id: Long, val name: String, val bytes: Long = 0, val complete: Boolean = false,
     val progress: Float = 0f, val active: Boolean = false, val error: String? = null,
     val bounds: GeoBounds? = null, val dark: Boolean? = null, val minZoom: Int = OfflineLimits.MIN_ZOOM, val maxZoom: Int = OfflineLimits.MAX_ZOOM,
-    val tiles: Long = 0, val tileBytes: Long = 0) {
+    val tiles: Long = 0, val tileBytes: Long = 0, val limitReached: Boolean = false) {
     fun toRegion(): DownloadedRegion? = if (bounds != null && dark != null) DownloadedRegion(bounds, dark, minZoom, maxZoom, complete) else null
-    fun toStats() = PackStats(complete, tiles, tileBytes, bytes)
+    fun toStats() = PackStats(complete, tiles, tileBytes, bytes, limitReached)
 }
 
 class OfflineMaps private constructor(context: Context) {
+    private val appContext = context.applicationContext
+    private fun freeBytes(): Long = try { android.os.StatFs(appContext.filesDir.path).availableBytes } catch (_: Exception) { Long.MAX_VALUE }
+    private fun stalledMessage(default: String) =
+        if (storageIsLow(freeBytes())) "The phone is almost out of free storage, so the download stopped. Free some space, then try again." else default
     private val manager: OfflineManager
     private val regions = mutableMapOf<Long, OfflineRegion>()
     private val mutableAreas = MutableStateFlow<List<OfflineArea>>(emptyList())
@@ -98,14 +102,14 @@ class OfflineMaps private constructor(context: Context) {
             }
             if (status.isComplete || status.completedResourceSize >= OfflineLimits.SOFT_BYTES || status.completedTileCount >= OfflineLimits.SOFT_TILES) {
                 pause(region.id)
-                if (!status.isComplete) update(region.id) { it.copy(error = "This area reached the safety limit. Delete it and choose a different area.") }
+                if (!status.isComplete) update(region.id) { it.copy(limitReached = true, error = "This area is bigger than the download limit allows, so it stopped before it was complete.") }
             }
         }
         region.setObserver(object : OfflineRegion.OfflineRegionObserver {
             override fun onStatusChanged(value: OfflineRegionStatus) = status(value)
             override fun onError(value: OfflineRegionError) {
                 pause(region.id)
-                update(region.id) { it.copy(error = "Download paused. Check internet and storage, then Resume. Very busy areas may reach the download limit.") }
+                update(region.id) { it.copy(error = stalledMessage("Download paused. Check internet and storage, then Resume. Very busy areas may reach the download limit."))}
             }
             override fun mapboxTileCountLimitExceeded(limit: Long) { pause(region.id); update(region.id) { it.copy(error = "Download limit reached.") } }
         })
@@ -121,6 +125,9 @@ class OfflineMaps private constructor(context: Context) {
     fun startDownload(plan: DownloadPlan.Ready, dark: Boolean) {
         if (!loaded) { error.value = "Offline map storage is still opening. Please try again."; return }
         if (creating || mutableAreas.value.any { it.active }) { error.value = "Finish or pause the current download first."; return }
+        if (!hasRoomFor(freeBytes(), plan.estimatedBytes)) {
+            error.value = "Not enough free storage: this area needs about ${plan.estimatedBytes / 1_000_000} MB plus some room for the phone. Free some space or delete an offline area."; return
+        }
         creating = true
         mutableCurrent.value = null
         fun create() {
@@ -141,12 +148,12 @@ class OfflineMaps private constructor(context: Context) {
         if (mutableAreas.value.any { it.active }) return
         val region = regions[id] ?: return
         if ((mutableAreas.value.firstOrNull { it.id == id }?.bytes ?: 0) >= OfflineLimits.SOFT_BYTES) { error.value = "This pack is too large. Delete it and choose another area."; return }
-        MapNetwork.begin(mutableAreas.value.firstOrNull { it.id == id }?.bytes ?: 0); update(id) { it.copy(active = true, error = null) }
+        MapNetwork.begin(mutableAreas.value.firstOrNull { it.id == id }?.bytes ?: 0); update(id) { it.copy(active = true, error = null, limitReached = false) }
         region.setDownloadState(OfflineRegion.STATE_ACTIVE)
         val session = ++downloadSession
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             if (session == downloadSession && mutableAreas.value.any { it.id == id && it.active }) {
-                pause(id); update(id) { it.copy(error = "Download paused after 90 seconds. Check internet, then continue the download.") }
+                pause(id); update(id) { it.copy(error = stalledMessage("Download paused after 90 seconds. Check internet, then continue the download.")) }
             }
         }, 90_000)
     }

@@ -249,7 +249,7 @@ fun LocationPickerScreen(
         downloadUi = DownloadUi.Plan(plan)
         // Zoom in or out so the whole box to be saved is visible; Cancel returns to the previous view.
         if (plan is DownloadPlan.Ready) {
-            cameraBeforePlan = cameraState.position
+            if (cameraBeforePlan == null) cameraBeforePlan = cameraState.position
             val b = plan.bounds
             scope.launch {
                 animating = true
@@ -264,7 +264,8 @@ fun LocationPickerScreen(
             AreaGate.ALLOWED -> { downloadUi = DownloadUi.Starting; offlineMaps.startDownload(plan, dark) }
             AreaGate.BUSY -> offlineMaps.error.value = "Finish or pause the current download first."
         } },
-        close = { val before = cameraBeforePlan; val saved = downloadUi is DownloadUi.Tracking; downloadUi = DownloadUi.Idle; cameraBeforePlan = null; if (before != null && !saved) fly(before) }, cancel = { offlineMaps.cancel(it) }, resume = { offlineMaps.resume(it) }, remove = { offlineMaps.delete(it) })
+        close = { val before = cameraBeforePlan; val saved = downloadUi is DownloadUi.Tracking; downloadUi = DownloadUi.Idle; cameraBeforePlan = null; if (before != null && !saved) fly(before) }, cancel = { offlineMaps.cancel(it) }, resume = { offlineMaps.resume(it) }, remove = { offlineMaps.delete(it) },
+        replan = { id -> downloadUi = DownloadUi.Idle; openDownload(); offlineMaps.delete(id) })
     LaunchedEffect(offlineRegions, dark) { recomputeCovered() }
     LaunchedEffect(currentPackId) { val id = currentPackId; if (id != null && downloadUi is DownloadUi.Starting) downloadUi = DownloadUi.Tracking(id) }
     LaunchedEffect(offlineError) { if (offlineError != null && downloadUi is DownloadUi.Starting) downloadUi = DownloadUi.Idle }
