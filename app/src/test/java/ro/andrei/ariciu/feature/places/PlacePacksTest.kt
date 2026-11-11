@@ -83,7 +83,7 @@ class PlacePacksTest {
         val b = mapOf("grid/index.txt" to "1_2\n", "grid/c1_2.tsv" to "# h\nn2\tB\tstore\t\t0.6\t0.3\t\tfuel\n")
         val index = PlaceIndex { path -> mergedStream(listOf(a[path], b[path]).filterNotNull().map { it.byteInputStream() }) }
         assertEquals(setOf("n1", "n2"), index.near(0.6, 0.3, 1_000.0).map { it.id }.toSet())
-        assertEquals(listOf("n9"), index.towns().map { it.id })
+        assertEquals(listOf("n9"), index.townMatches("town", 0.6, 0.3).map { it.id })
     }
 
     @Test fun resetMakesTheIndexReadTheSourcesAgain() = runBlocking {

@@ -39,11 +39,11 @@ class PlaceGridTest {
         index.near(45.65, 25.60, 2_000.0)
         assertEquals(1, opened.count { it == "grid/c102_182.tsv" })
         assertFalse("grid/c102_183.tsv" in opened)
-        assertEquals(listOf("n9"), index.towns().map { it.id })
+        assertEquals(listOf("n9"), index.townMatches("brasov", 45.65, 25.60).map { it.id })
     }
     @Test fun missingCellOrCatalogueDoesNotCrash() = runBlocking {
         val index = PlaceIndex { null }
         assertTrue(index.near(45.0, 25.0, 25_000.0).isEmpty())
-        assertTrue(index.towns().isEmpty())
+        assertTrue(index.townMatches("brasov", 45.0, 25.0).isEmpty())
     }
 }

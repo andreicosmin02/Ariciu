@@ -46,18 +46,15 @@ fun parsePlaceLine(line: String): CatalogPlace? {
 class PlaceIndex(private val maxCachedCells: Int = 48, private val open: (String) -> InputStream?) {
     private val cells = ConcurrentHashMap<String, List<CatalogPlace>>()
     @Volatile private var existing: Set<String>? = null
-    @Volatile private var towns: List<CatalogPlace>? = null
 
     /** Forget everything read so far (a pack was installed or removed); the next query reads the sources again. */
-    fun reset() { cells.clear(); existing = null; towns = null }
+    fun reset() { cells.clear(); existing = null }
 
     private fun read(path: String): List<CatalogPlace> =
         open(path)?.bufferedReader()?.useLines { lines -> lines.mapNotNull(::parsePlaceLine).toList() } ?: emptyList()
 
     private fun cellList(): Set<String> = existing ?: (open("grid/index.txt")?.bufferedReader()?.useLines { l ->
         l.map { it.trim() }.filter { it.isNotEmpty() }.toSet() } ?: emptySet()).also { existing = it }
-
-    suspend fun towns(): List<CatalogPlace> = towns ?: withContext(Dispatchers.IO) { towns ?: read("towns.tsv").onEach { it.nameWords }.also { towns = it } }
 
     /**
      * Towns whose name starts with every word of [query], streamed line by line so that millions of towns from many installed
