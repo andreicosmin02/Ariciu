@@ -97,7 +97,8 @@ class PlacePackManager private constructor(context: Context) {
         job = scope.launch {
             try {
                 for (pack in packs) installOne(pack)
-            } catch (e: CancellationException) { throw e } catch (e: UserFacing) { mutableMessage.value = e.message } catch (_: Exception) {
+            } catch (e: CancellationException) { throw e } catch (e: UserFacing) { mutableMessage.value = e.message } catch (e: Exception) {
+                android.util.Log.w("AriciuPlaces", "pack install failed", e)
                 mutableMessage.value = "The download did not finish. Check your internet connection and try again."
             } finally { mutableWork.value = null }
         }
