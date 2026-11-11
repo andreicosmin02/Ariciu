@@ -49,12 +49,9 @@ class OfflineCoverageTest {
         assertEquals(OfflineLimits.MIN_BYTES_PER_TILE, averageBytesPerTile(listOf(PackStats(true, 1000, 1_000_000, 22_000_000))))
     }
 
-    @Test fun threeAreasIsTheLimit() {
-        assertEquals(AreaGate.ALLOWED, areaGate(areaCount = 2, downloading = false))
-        assertEquals(AreaGate.AT_LIMIT, areaGate(areaCount = 3, downloading = false))
-        assertEquals(AreaGate.AT_LIMIT, areaGate(areaCount = 5, downloading = false))
-        assertEquals(AreaGate.BUSY, areaGate(areaCount = 1, downloading = true))
-        assertEquals(AreaGate.BUSY, areaGate(areaCount = 3, downloading = true))
+    @Test fun anyNumberOfAreasIsAllowedButOnlyOneDownloadAtATime() {
+        assertEquals(AreaGate.ALLOWED, areaGate(downloading = false))
+        assertEquals(AreaGate.BUSY, areaGate(downloading = true))
     }
 
     @Test fun outlinesAreClosedPolygonsWithLongitudeFirst() {

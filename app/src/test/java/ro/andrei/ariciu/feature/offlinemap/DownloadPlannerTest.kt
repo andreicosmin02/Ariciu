@@ -14,7 +14,6 @@ class DownloadPlannerTest {
         assertEquals(2500, OfflineLimits.HARD_TILES); assertEquals(45_000_000L, OfflineLimits.HARD_BYTES)
         assertTrue(OfflineLimits.SOFT_TILES < OfflineLimits.HARD_TILES && OfflineLimits.SOFT_BYTES < OfflineLimits.HARD_BYTES)
         assertTrue(OfflineLimits.HARD_TILES <= 3_000 && OfflineLimits.HARD_BYTES <= 50_000_000L) // OpenFreeMap terms
-        assertEquals(3, OfflineLimits.MAX_AREAS)
     }
     @Test fun thePlanIsTheLargestBoxThatFitsAndAlwaysFullDetail() {
         listOf(brasov, vienna).forEach { city -> listOf(0.01, 0.05, 0.3, 3.0).forEach { d ->

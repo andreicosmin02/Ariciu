@@ -29,13 +29,12 @@ sealed interface DownloadUi {
     data object Idle : DownloadUi
     data class Plan(val plan: DownloadPlan) : DownloadUi
     data object Covered : DownloadUi
-    data class Replace(val plan: DownloadPlan.Ready) : DownloadUi
     data object Starting : DownloadUi
     data class Tracking(val id: Long) : DownloadUi
 }
 
 class DownloadActions(
-    val start: (DownloadPlan.Ready) -> Unit, val replace: (DownloadPlan.Ready, Long) -> Unit, val close: () -> Unit,
+    val start: (DownloadPlan.Ready) -> Unit, val close: () -> Unit,
     val cancel: (Long) -> Unit, val resume: (Long) -> Unit, val remove: (Long) -> Unit,
 )
 
@@ -74,23 +73,13 @@ fun DownloadPanel(state: DownloadUi, areas: List<OfflineArea>, dark: Boolean, ac
                             Button(onClick = { actions.start(plan) }, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("download_confirm")) { Text("Download") }
                             OutlinedButton(onClick = actions.close, modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("download_cancel")) { Text("Cancel") }
                         }
-                        Text("Saves the $theme map only. If you switch theme, download again for that theme. Uses internet. Up to three areas; keep Create open while downloading. Map requests are sent to OpenFreeMap and its CDN.",
+                        Text("Saves the $theme map only. If you switch theme, download again for that theme. Uses internet. Keep Create open while downloading. Map requests are sent to OpenFreeMap and its CDN.",
                             style = MaterialTheme.typography.bodySmall, color = colors.onSurfaceVariant)
                     }
                     DownloadPlan.NothingFits -> Notice("Map fonts and styling alone use up the download limit, so no area can be saved right now.", actions.close)
                     DownloadPlan.Unsupported -> Notice("Offline downloads are available away from polar regions and the date line.", actions.close)
                 }
                 DownloadUi.Covered -> Notice("This view is already saved offline for the $theme map. Manage or delete areas in Settings.", actions.close, "Done")
-                is DownloadUi.Replace -> {
-                    Text("Replace an offline area?", style = MaterialTheme.typography.titleSmall)
-                    Text("You already have ${OfflineLimits.MAX_AREAS} offline areas. Choose one to delete and replace with this view.", style = MaterialTheme.typography.bodyMedium)
-                    areas.forEach { area ->
-                        OutlinedButton(onClick = { actions.replace(state.plan, area.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("replace_${area.id}")) {
-                            Text("Replace ${area.name} · ${mb(area.bytes)}", modifier = Modifier.weight(1f))
-                        }
-                    }
-                    OutlinedButton(onClick = actions.close, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Cancel") }
-                }
                 DownloadUi.Starting -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp); Text("Starting download…", style = MaterialTheme.typography.bodyMedium)
                 }

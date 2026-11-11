@@ -260,12 +260,10 @@ fun LocationPickerScreen(
         }
     }
     val downloadActions = DownloadActions(
-        start = { plan -> when (areaGate(downloadedAreas.size, downloadedAreas.any { it.active })) {
+        start = { plan -> when (areaGate(downloadedAreas.any { it.active })) {
             AreaGate.ALLOWED -> { downloadUi = DownloadUi.Starting; offlineMaps.startDownload(plan, dark) }
-            AreaGate.AT_LIMIT -> downloadUi = DownloadUi.Replace(plan)
             AreaGate.BUSY -> offlineMaps.error.value = "Finish or pause the current download first."
         } },
-        replace = { plan, id -> downloadUi = DownloadUi.Starting; offlineMaps.startDownload(plan, dark, replaceId = id) },
         close = { val before = cameraBeforePlan; val saved = downloadUi is DownloadUi.Tracking; downloadUi = DownloadUi.Idle; cameraBeforePlan = null; if (before != null && !saved) fly(before) }, cancel = { offlineMaps.cancel(it) }, resume = { offlineMaps.resume(it) }, remove = { offlineMaps.delete(it) })
     LaunchedEffect(offlineRegions, dark) { recomputeCovered() }
     LaunchedEffect(currentPackId) { val id = currentPackId; if (id != null && downloadUi is DownloadUi.Starting) downloadUi = DownloadUi.Tracking(id) }
@@ -441,7 +439,7 @@ fun LocationPickerScreen(
                     FillLayer(id = "reminder-radius-fill", source = source, color = const(colors.primary), opacity = const(0.14f))
                     LineLayer(id = "reminder-radius-outline", source = source, color = const(colors.primary), width = const(2.dp))
                     OfflineOutlineLayers(offlineRegions.filter { it.dark == dark }.map { it.bounds },
-                        ((downloadUi as? DownloadUi.Plan)?.plan as? DownloadPlan.Ready)?.bounds ?: (downloadUi as? DownloadUi.Replace)?.plan?.bounds, colors)
+                        ((downloadUi as? DownloadUi.Plan)?.plan as? DownloadPlan.Ready)?.bounds, colors)
                     userFix?.let { UserLocationLayers(it.position, it.accuracyMeters, colors) }
                     ResultPinLayers(pinsJson, selectedPlace, cameraState, colors, onPlace = { id -> results.firstOrNull { it.id == id }?.let { select(it, fly = false) } })
                 }

@@ -115,14 +115,12 @@ class OfflineMaps private constructor(context: Context) {
         })
     }
     /**
-     * Downloads a planned area for one theme. At the area limit the caller passes [replaceId] after the user confirmed
-     * replacing that area; it is deleted first. The caller shows [error] and follows progress via [areas] and [currentId].
+     * Downloads a planned area for one theme. The number of saved areas is not limited. The caller shows [error] and
+     * follows progress via [areas] and [currentId].
      */
-    fun startDownload(plan: DownloadPlan.Ready, dark: Boolean, replaceId: Long? = null) {
+    fun startDownload(plan: DownloadPlan.Ready, dark: Boolean) {
         if (!loaded) { error.value = "Offline map storage is still opening. Please try again."; return }
         if (creating || mutableAreas.value.any { it.active }) { error.value = "Finish or pause the current download first."; return }
-        val remaining = mutableAreas.value.size - (if (replaceId != null && mutableAreas.value.any { it.id == replaceId }) 1 else 0)
-        if (areaGate(remaining, downloading = false) == AreaGate.AT_LIMIT) { error.value = "Keep up to three offline areas. Replace or delete one first."; return }
         creating = true
         mutableCurrent.value = null
         fun create() {
@@ -135,9 +133,9 @@ class OfflineMaps private constructor(context: Context) {
                 override fun onError(message: String) { creating = false; error.value = "Could not create offline area. Check free storage and try again." }
             })
         }
-        if (replaceId != null && regions.containsKey(replaceId)) delete(replaceId) { create() } else create()
+        create()
     }
-    /** Stops a download and removes the partial pack so it does not count towards the three areas. */
+    /** Stops a download and removes the partial pack so it is not left behind. */
     fun cancel(id: Long) = delete(id)
     fun resume(id: Long) {
         if (mutableAreas.value.any { it.active }) return
