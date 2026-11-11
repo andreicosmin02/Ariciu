@@ -253,9 +253,9 @@ fun LocationPickerScreen(
             val b = plan.bounds
             scope.launch {
                 animating = true
-                kotlinx.coroutines.delay(350) // let the panel take its place so the box is fitted to the map that is left
+                kotlinx.coroutines.delay(350) // let the panel take its place so the box is fitted to the map that is left; padding is symmetric so the point being looked at stays at the centre
                 try { withContext(Dispatchers.Main) { cameraState.animateTo(BoundingBox(b.west, b.south, b.east, b.north),
-                    padding = PaddingValues(start = 24.dp, end = 96.dp, top = 72.dp, bottom = 24.dp), duration = 600.milliseconds) } } finally { animating = false }
+                    padding = PaddingValues(horizontal = 96.dp, vertical = 72.dp), duration = 600.milliseconds) } } finally { animating = false }
             }
         }
     }
