@@ -5,7 +5,7 @@ Constraints unchanged: free only, no backend/paid API, no new permissions, offli
 No permission, geofencing, alarm or notification behaviour was changed, so no platform-limit review was needed.
 
 ## What exists
-- `AriciuIcons`: Store, Mall, Town, Pin, Arrive, Depart, BellSilent/Normal/Urgent, Clock, ZoomIn/Out, Compass, Layers. Hand-drawn 24dp strokes in the existing style, so no third-party asset and no provenance entry. `material-icons-extended` not added. Icons not yet used in screens: Arrive, Depart, BellSilent, BellNormal (available for later).
+- `ArichuIcons`: Store, Mall, Town, Pin, Arrive, Depart, BellSilent/Normal/Urgent, Clock, ZoomIn/Out, Compass, Layers. Hand-drawn 24dp strokes in the existing style, so no third-party asset and no provenance entry. `material-icons-extended` not added. Icons not yet used in screens: Arrive, Depart, BellSilent, BellNormal (available for later).
 - Create: superseded by map search, see "Map search (2026-11-10)" below. Item 2 (always-on catalogue markers) no longer exists.
 - Reminders: List/Map toggle. Pins and radius circles for active reminders; status shown by colour, glyph and a text legend; tap a pin, then Open.
 - Settings: `N/100 areas used`. This is the last recorded registration state, not a live read of Play services. PARTIAL / LIMIT_REACHED are treated as full.

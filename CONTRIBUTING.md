@@ -1,6 +1,6 @@
-# Contributing to Ariciu
+# Contributing to Arichu
 
-Ariciu is in physical-phone testing and stabilization. Focus on reproducible bugs, reminder reliability, accessibility and clear UX before expanding scope. Codex and Obsidian are not required.
+Arichu is in physical-phone testing and stabilization. Focus on reproducible bugs, reminder reliability, accessibility and clear UX before expanding scope. Codex and Obsidian are not required.
 
 ## Set up and propose a change
 
@@ -16,7 +16,7 @@ git switch -c fix/short-description
 
 Discuss substantial product changes, dependencies, service costs and privacy implications first. Submit a pull request targeting `master` with the problem, resulting behavior, relevant screenshots, tests actually run and remaining device checks. Preserve unrelated changes and commit history; do not force-push shared branches. Maintainers review and merge; a PR is not authorization to publish an APK.
 
-Ariciu-owned material is under [Apache-2.0](LICENSE), with the [scope and third-party exclusions](docs/LICENSING.md) explained separately. Submit work you have the rights to contribute; identify third-party sources and preserve their notices. Apache-2.0 section 5 addresses intentional contributions unless explicitly stated otherwise. No separate contributor agreement is introduced.
+Arichu-owned material is under [Apache-2.0](LICENSE), with the [scope and third-party exclusions](docs/LICENSING.md) explained separately. Submit work you have the rights to contribute; identify third-party sources and preserve their notices. Apache-2.0 section 5 addresses intentional contributions unless explicitly stated otherwise. No separate contributor agreement is introduced.
 
 ## Engineering principles
 
@@ -41,7 +41,7 @@ For documentation, validate Markdown links, wikilinks, attachments and reference
 
 ## Report a bug
 
-Include app version, Android/device model, expected versus observed behavior, reproducible steps and frequency. For delivery issues add arrival/departure, repeat/intensity/radius, card status, foreground/background/lock state and relevant permission/channel/location/battery settings. For UI issues add theme, font/display size and a redacted screenshot if useful. See the [issue template](docs/obsidian-export/Ariciu/Ariciu%20-%20Phone%20Issue%20Template.md).
+Include app version, Android/device model, expected versus observed behavior, reproducible steps and frequency. For delivery issues add arrival/departure, repeat/intensity/radius, card status, foreground/background/lock state and relevant permission/channel/location/battery settings. For UI issues add theme, font/display size and a redacted screenshot if useful. See the [issue template](docs/obsidian-export/Arichu/Arichu%20-%20Phone%20Issue%20Template.md).
 
 Share only necessary redacted diagnostics. Do not post exact personal locations, reminder text, raw databases, unrelated notification content, ADB pairing credentials, signing keys or tokens. Check `git diff --check`, the full diff and `git status` before committing; keep `local.properties`, private `.obsidian/` settings, credentials and generated outputs out of Git.
 

@@ -15,7 +15,7 @@ Documentation and non-runtime ignore housekeeping from clean master **77ee6c9896
 
 ## Portable knowledge base
 
-All **29 notes and 54 PNG attachments** remain; no technical note, diagram or screenshot was deleted. Screenshot bytes and Mermaid diagrams are unchanged. Open `docs/obsidian-export/Ariciu` directly as an optional vault, or copy the whole Ariciu folder with its Attachments. No plugin, account, personal path or synchronization is required.
+All **29 notes and 54 PNG attachments** remain; no technical note, diagram or screenshot was deleted. Screenshot bytes and Mermaid diagrams are unchanged. Open `docs/obsidian-export/Arichu` directly as an optional vault, or copy the whole Arichu folder with its Attachments. No plugin, account, personal path or synchronization is required.
 
 Four missing private-note links were replaced by included review/technical chronology. Internal wikilinks remain; a standard Markdown index, related-reading links and ordinary image embeds support GitHub readers. Online source/document links use repository-relative path labels and survive copying notes; internal notes/images remain local. No actual personal vault was accessed or modified.
 

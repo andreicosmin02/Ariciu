@@ -1,6 +1,6 @@
 # Urgent re-alerts and temporary Alarm retirement — rc4
 
-> Historical implementation-batch report. Subsequent owner-authorized consolidation made `master` authoritative and published [v1.1-rc4](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4). See [publication evidence and cleanup plan](archive/GITHUB_RELEASE_RC4.md). The implementation and emulator evidence below are unchanged; initial owner phone feedback is positive, with targeted checks still pending.
+> Historical implementation-batch report. Subsequent owner-authorized consolidation made `master` authoritative and published [v1.1-rc4](https://github.com/andreicosmin02/Arichu/releases/tag/v1.1-rc4). See [publication evidence and cleanup plan](archive/GITHUB_RELEASE_RC4.md). The implementation and emulator evidence below are unchanged; initial owner phone feedback is positive, with targeted checks still pending.
 
 17 October 2026. Branch `fix/urgent-realerts`, from clean rc3 `fix/phone-review-2` at `8f11976`. Candidate **1.1-rc4 / code 5**, Room **5**. Nothing merged or published. This owner-directed behavior supersedes rc3’s Urgent swipe-to-Next-time policy; historical Samsung rc2 observations remain valid for that old version.
 
@@ -44,7 +44,7 @@ Outside instrumentation, actual notification permission revocation killed the ap
 
 A second actual swipe scheduled another deadline/job for attempt 1. Disabling only Urgent through stock Android Settings produced channel importance NONE while Normal remained HIGH, and the focused card showed Re-alert waiting. Card Next time cleared the deadline, cancelled the unfinished timer and persisted WAITING_NEXT_VISIT; subsequent card Mark done completed only the harmless fixture. The original effective notification grant, enabled/HIGH Urgent channel and font scale 1.0 were restored. No pending fixture timer/alert remained. The notification-navigation flags/extra were also exercised; a bare shell launch without the content-intent flags merely brought the existing Create task forward and was corrected in the diagnostic driver.
 
-Emulator testing note: an AppOps-only toggle was not a runtime-permission denial. A bare pm revoke without user-set was not retained through this emulator reboot/update path; the documented user-set denial recipe was used for the final check. These are test-setup observations, not evidence that Ariciu can grant permissions or override user denial. Runtime permission and original effective enabled state were restored; no such operations occurred on the Samsung.
+Emulator testing note: an AppOps-only toggle was not a runtime-permission denial. A bare pm revoke without user-set was not retained through this emulator reboot/update path; the documented user-set denial recipe was used for the final check. These are test-setup observations, not evidence that Arichu can grant permissions or override user denial. Runtime permission and original effective enabled state were restored; no such operations occurred on the Samsung.
 
 ## Android limitations and sources
 
@@ -63,7 +63,7 @@ Samsung S26 Ultra / Android 16 / One UI 8.5 is not connected for this batch. His
 ## Physical-phone retest
 
 1. Install rc4 over the current app with the same signing key. Never uninstall/clear storage. Confirm existing reminders, including any Alarm, remain.
-2. At a safe stationary location, create a new single Arrive reminder, radius 200–500m, Every visit, Urgent; explicitly enable Notify me now while keeping Ariciu open. Or trigger it by a real crossing. Expect one standard alert with Done/Next time.
+2. At a safe stationary location, create a new single Arrive reminder, radius 200–500m, Every visit, Urgent; explicitly enable Notify me now while keeping Arichu open. Or trigger it by a real crossing. Expect one standard alert with Done/Next time.
 3. Swipe it unlocked. Confirm Re-alert scheduled plus Mark done/Next time on the card. Leave/reenter if convenient: the unresolved occurrence must remain one. Around five minutes or later, expect one fresh alert; leave it visible and check that it does not keep alerting. Swipe again and repeat.
 4. During a wait, use card Next time; confirm the deadline disappears and no delayed retry returns. Leave/return for a new visit, then test Mark done during another pending wait. Old notification actions must not revive completed/newer occurrences.
 5. With explicit owner cooperation, test an ordinary app close, reboot/unlock and upgrade during a wait. Test disabled Urgent channel/app notification permission: no alert while blocked, truthful waiting status, then one pending alert after restoring access and reopening. Never change the owner's settings/process/clock without permission during assisted diagnostics.

@@ -1,6 +1,6 @@
-# Ariciu design direction
+# Arichu design direction
 
-Real-phone debugging and stabilization of Ariciu 1.1-rc1 are the current priorities (2026-10-17); preserve the established redesign. The earlier redesign record below is retained as history, followed by the current release-candidate and stabilization notes. The aim is a calm, readable app that tells people what to do next, without looking like a component catalogue.
+Real-phone debugging and stabilization of Arichu 1.1-rc1 are the current priorities (2026-10-17); preserve the established redesign. The earlier redesign record below is retained as history, followed by the current release-candidate and stabilization notes. The aim is a calm, readable app that tells people what to do next, without looking like a component catalogue.
 
 ## Design principles
 
@@ -38,13 +38,13 @@ The dark map is a bundled adaptation of the existing provider’s Dark style. It
 
 The official OpenFreeMap site and terms were checked on 2026-10-15: the public instance is free without registration/API keys or view/request billing. Offline-download limits are 3,000 tiles or 50MB, four parallel requests, and a unique User-Agent; the initial redesign did not add offline downloads. The subsequent 1.1-rc1 candidate adds bounded explicit packs; see [feature evidence](../FEATURE_COMPLETION.md). Terms were rechecked on 2026-10-17 with the same allowance. Availability and future terms are not guaranteed.
 
-The original style is derived from CartoDB Basemaps / Dark Matter by Stamen, Paul Norman, CartoDB, MapTiler and OpenMapTiles contributors. Code is BSD 3-Clause; design is CC BY 4.0 with upstream CC BY 3.0 attribution. OpenFreeMap’s MIT notice and the style’s complete license are bundled beside the JSON in `app/src/main/assets/map/`. Ariciu changes the palette/label contrast and credits the sources. Visible OpenMapTiles/OpenStreetMap map credits and the native attribution control are retained. The decorative SDK logo/imperial scale bar are replaced by the simpler map presentation; the radius is expressed in metres.
+The original style is derived from CartoDB Basemaps / Dark Matter by Stamen, Paul Norman, CartoDB, MapTiler and OpenMapTiles contributors. Code is BSD 3-Clause; design is CC BY 4.0 with upstream CC BY 3.0 attribution. OpenFreeMap’s MIT notice and the style’s complete license are bundled beside the JSON in `app/src/main/assets/map/`. Arichu changes the palette/label contrast and credits the sources. Visible OpenMapTiles/OpenStreetMap map credits and the native attribution control are retained. The decorative SDK logo/imperial scale bar are replaced by the simpler map presentation; the radius is expressed in metres.
 
 ## Research translated into decisions
 
 - [Android accessibility guidance](https://developer.android.com/guide/topics/ui/accessibility/apps) and [Compose defaults](https://developer.android.com/develop/ui/compose/accessibility/api-defaults): visibly large targets, meaningful semantics, readable text contrast, and explicit selection. Buttons have at least 48dp targets; the primary action starts at 52dp. Radio-card parents own the action so TalkBack gets one choice rather than duplicate controls.
 - [NN/G: usability for older adults](https://www.nngroup.com/articles/usability-for-senior-citizens/): predictable navigation, legible text, and clear affordances. The redesign uses persistent labeled destinations and explicit choices rather than hidden gestures or unexplained switches. This is research-informed design, not a claim of usability testing with older adults.
-- [Android navigation bars](https://developer.android.com/develop/ui/compose/components/navigation-bar) and [bottom sheets](https://developer.android.com/develop/ui/compose/components/bottom-sheets): use stable primary destinations and keep contextual map controls together. Ariciu’s place sheet is a persistent surface, not a modal that blocks map interaction or requires discovering a drag gesture.
+- [Android navigation bars](https://developer.android.com/develop/ui/compose/components/navigation-bar) and [bottom sheets](https://developer.android.com/develop/ui/compose/components/bottom-sheets): use stable primary destinations and keep contextual map controls together. Arichu’s place sheet is a persistent surface, not a modal that blocks map interaction or requires discovering a drag gesture.
 - [Android dark theme](https://developer.android.com/develop/ui/views/theming/darktheme): designed semantic colors, legible foregrounds, correct system-bar icons, and a matching map. Appearance respects the user’s explicit choice.
 - [OpenFreeMap quick start](https://openfreemap.org/quick_start/), [terms](https://openfreemap.org/tos/), [style sources](https://github.com/hyperknot/openfreemap-styles/tree/main/styles/dark), and [licenses](https://github.com/hyperknot/openfreemap-styles/blob/main/styles/dark/LICENSE.md): reuse the existing free provider with the required credits and notices.
 
@@ -88,9 +88,9 @@ Reviewed text/controls remained readable and reachable; native map rendering was
 
 ## Phone stabilization phase (2026-10-17)
 
-Ariciu 1.1-rc1 now supplies the feature-complete supported candidate baseline described in [PROJECT_STATUS.md](../PROJECT_STATUS.md). The next design work responds to real-phone confusion, accessibility barriers, clipping or frustrating interactions. Preserve the established identity and navigation; do not launch a speculative redesign or add complexity merely to expose advanced mechanics.
+Arichu 1.1-rc1 now supplies the feature-complete supported candidate baseline described in [PROJECT_STATUS.md](../PROJECT_STATUS.md). The next design work responds to real-phone confusion, accessibility barriers, clipping or frustrating interactions. Preserve the established identity and navigation; do not launch a speculative redesign or add complexity merely to expose advanced mechanics.
 
-The RC screenshots above are dated emulator evidence, not physical-phone accessibility validation. Source review identifies possible Alarm/status wording and notification-setup navigation debt; see [STABILIZATION_AUDIT.md](../archive/STABILIZATION_AUDIT.md). Prioritize actual user reports, compare both themes and enlarged text after relevant fixes, and record device/font/keyboard context with new screenshots. Detailed tokens/components/scaling guidance is in the [design knowledge note](<../obsidian-export/Ariciu/Ariciu - Design and Accessibility.md>).
+The RC screenshots above are dated emulator evidence, not physical-phone accessibility validation. Source review identifies possible Alarm/status wording and notification-setup navigation debt; see [STABILIZATION_AUDIT.md](../archive/STABILIZATION_AUDIT.md). Prioritize actual user reports, compare both themes and enlarged text after relevant fixes, and record device/font/keyboard context with new screenshots. Detailed tokens/components/scaling guidance is in the [design knowledge note](<../obsidian-export/Arichu/Arichu - Design and Accessibility.md>).
 
 
 ## First phone review — 1.1-rc2 (17 October)

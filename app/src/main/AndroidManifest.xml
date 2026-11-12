@@ -19,7 +19,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Ariciu">
+        android:theme="@style/Theme.Arichu">
         <receiver android:name=".feature.delivery.platform.GeofenceReceiver" android:exported="false" />
         <receiver android:name=".feature.delivery.platform.NotificationActionReceiver" android:exported="false" />
         <receiver android:name=".feature.delivery.platform.DeliveryRecoveryReceiver" android:exported="false">
@@ -32,7 +32,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Ariciu"
+            android:theme="@style/Theme.Arichu"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

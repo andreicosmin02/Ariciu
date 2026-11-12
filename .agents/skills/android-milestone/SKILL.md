@@ -1,6 +1,6 @@
 ---
 name: android-milestone
-description: Implement an Ariciu feature batch or behavior change in Kotlin/Compose. Not for planning-only requests or trivial doc edits.
+description: Implement an Arichu feature batch or behavior change in Kotlin/Compose. Not for planning-only requests or trivial doc edits.
 ---
 
 1. Read AGENTS.md constraints, the relevant source/tests, and docs/PROJECT_STATUS.md only if status matters. Trust verified source over docs; report discrepancies.

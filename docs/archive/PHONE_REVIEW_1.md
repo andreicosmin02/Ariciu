@@ -60,7 +60,7 @@ The rc2 batch updated repository handoff/status/stabilization/design records and
 
 ## Phone retest
 
-1. Install `Ariciu-1.1-rc2-debug.apk` over the existing app with the same signing key. Keep all reminders; do not uninstall or clear storage. Confirm version and the new fox icon.
+1. Install `Arichu-1.1-rc2-debug.apk` over the existing app with the same signing key. Keep all reminders; do not uninstall or clear storage. Confirm version and the new fox icon.
 2. Create: search `afi` near Brașov; AFI Brașov should lead relevant results. Test My location, map pan, sheet drag and labeled expand/collapse. Confirm the primary action stays reachable. Repeat Light/Dark, larger font/display size and keyboard open.
 3. Choose Supermarket chain before selecting the place. Review Map and List; check stores within 25 km. Try an area with no listed stores. Open an existing 40-store reminder: it must keep its old selection until you explicitly refresh. Refresh should remove distant stores from the draft, then Save changes monitoring identity.
 4. Mark a waiting reminder Done on its card, then a triggered and a snoozed Alarm reminder. Each should move to Completed, stop alerting and lose monitoring after synchronization. Other reminders must remain. Editing a completed reminder must keep it completed; stale notification buttons must not revive it.

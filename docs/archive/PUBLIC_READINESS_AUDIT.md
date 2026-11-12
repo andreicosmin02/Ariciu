@@ -5,7 +5,7 @@
 ## Approved licence and distribution notices
 
 - Root LICENSE is the complete, unmodified official Apache-2.0 text: **11,358 bytes**, SHA256 `cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30`. It was downloaded from the owner-specified Apache URL and compared byte-for-byte.
-- NOTICE is an informational scope/attribution guide, without an invented copyright holder or new CLA. Apache-2.0 covers Ariciu-owned original material where the necessary rights are held; third-party code/data/assets and depicted map content retain their own terms. See [LICENSING.md](../LICENSING.md).
+- NOTICE is an informational scope/attribution guide, without an invented copyright holder or new CLA. Apache-2.0 covers Arichu-owned original material where the necessary rights are held; third-party code/data/assets and depicted map content retain their own terms. See [LICENSING.md](../LICENSING.md).
 - All pre-existing app map/catalogue notices, the TSV, source/build configuration and Room history are unchanged. All 29 portable knowledge notes, 54 screenshots and three Mermaid diagrams remain; screenshot/diagram comparisons pass. The actual personal vault is not accessed.
 - [Companion full notices](../third-party/README.md) add exact version-pinned MapLibre BSD texts, Google OSS bundles/indexes and the separately MPL-licensed OkHttp Public Suffix List notice. Provenance records URLs/input artifact hashes/output hashes. Three identical Google input pairs share a copy. Google JSON byte ranges were validated (16 common and 21 location entries).
 - Git attributes preserve exact licence/bundle bytes across platforms. Whitespace checking is disabled only for the two raw Google text bundles, which contain 76 upstream trailing-whitespace lines and byte-indexed content; hashes still verify their exact contents. No source/docs whitespace rules are weakened elsewhere.
@@ -29,9 +29,9 @@ The identified missing obvious full MapLibre notice entries and Google bundle na
 Reverified unchanged:
 
 - Tag **v1.1-rc4** still resolves to **c8c47ce4642ba7f70ee0d61355bb5175e2334cc0**; its historical tree has no new root LICENSE/NOTICE. No tag/history rewrite.
-- [Existing pre-release](https://github.com/andreicosmin02/Ariciu/releases/tag/v1.1-rc4), release ID **416031806**, asset ID **651470045**, uploaded/non-draft/pre-release state.
-- [Ariciu-1.1-rc4-debug.apk](https://github.com/andreicosmin02/Ariciu/releases/download/v1.1-rc4/Ariciu-1.1-rc4-debug.apk), **74,677,975 bytes**, SHA256 **`f6bfa834034599addd680768d39e1e86caac96c32a9cd79052723be1f5863d78`**.
-- Valid APK signature and original Android Debug certificate SHA256 **`3064d0124e266f0d7cf26c742b7ab50a01afd118bf03e40cf731a3b2d765ad2c`**; package **ro.andrei.ariciu**, version **1.1-rc4/code 5**, min SDK 26/target 37.
+- [Existing pre-release](https://github.com/andreicosmin02/Arichu/releases/tag/v1.1-rc4), release ID **416031806**, asset ID **651470045**, uploaded/non-draft/pre-release state.
+- [Arichu-1.1-rc4-debug.apk](https://github.com/andreicosmin02/Arichu/releases/download/v1.1-rc4/Arichu-1.1-rc4-debug.apk), **74,677,975 bytes**, SHA256 **`f6bfa834034599addd680768d39e1e86caac96c32a9cd79052723be1f5863d78`**.
+- Valid APK signature and original Android Debug certificate SHA256 **`3064d0124e266f0d7cf26c742b7ab50a01afd118bf03e40cf731a3b2d765ad2c`**; package **ro.andrei.arichu**, version **1.1-rc4/code 5**, min SDK 26/target 37.
 
 Licence approval does not turn the existing debug testing APK into a production-certified build or retroactively insert files into a historical snapshot. Existing app data/signing compatibility and install-over-existing guidance remain unchanged.
 

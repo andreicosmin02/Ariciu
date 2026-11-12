@@ -1,6 +1,6 @@
-Ariciu
+Arichu
 
-Ariciu-owned application source, tests, scripts, documentation and original
+Arichu-owned application source, tests, scripts, documentation and original
 project assets are distributed under the Apache License, Version 2.0, in
 LICENSE, to the extent the owner has the necessary rights. Existing author
 and copyright information is retained. This informational NOTICE does not
@@ -17,7 +17,7 @@ Third-party material retains its own copyright and licence terms:
   Paul Norman and other upstream attribution. Full notices are in
   app/src/main/assets/map/LICENSE-openfreemap.md,
   LICENSE-light-style.md and LICENSE-dark-style.md.
-- Screenshots combine original Ariciu UI with separately licensed map
+- Screenshots combine original Arichu UI with separately licensed map
   content. The original UI does not relicense the depicted data/styles.
 - MapLibre Compose and Native retain their BSD-3-Clause and BSD-2-Clause
   notices. Companion full texts are in docs/third-party/.

@@ -1,4 +1,4 @@
-# Ariciu documentation index
+# Arichu documentation index
 
 Baseline **1.1-rc4 / code 5 / Room 5** on `master`; debug-signed pre-release, not production. Project intro: [../README.md](../README.md).
 

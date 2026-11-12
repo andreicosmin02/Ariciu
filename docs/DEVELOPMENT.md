@@ -1,4 +1,4 @@
-# Build and test Ariciu
+# Build and test Arichu
 
 Current application baseline: **1.1-rc4 / code 5 / Room 5**, on `master`. No API key, backend configuration or application account is needed. Obsidian and Codex are optional.
 
@@ -19,8 +19,8 @@ MapLibre’s native libraries are dependencies, not source built here; no projec
 ## Clone and configure
 
 ```bash
-git clone https://github.com/andreicosmin02/Ariciu.git
-cd Ariciu
+git clone https://github.com/andreicosmin02/Arichu.git
+cd Arichu
 ```
 
 Repository access follows its visibility. Open the project root in Android Studio, install the required SDK packages through SDK Manager, select JDK 25 for Gradle where needed, and run **Sync Project with Gradle Files**. Initial Gradle/JDK/Maven dependency downloads need internet.
@@ -54,9 +54,9 @@ Instrumentation fixtures write application data. Disconnect daily-use devices be
 
 ```bash
 adb devices -l
-export ARICIU_TEST_SERIAL="YOUR_TEST_DEVICE_SERIAL"
-adb -s "$ARICIU_TEST_SERIAL" get-state
-ANDROID_SERIAL="$ARICIU_TEST_SERIAL" ./gradlew :app:connectedDebugAndroidTest
+export ARICHU_TEST_SERIAL="YOUR_TEST_DEVICE_SERIAL"
+adb -s "$ARICHU_TEST_SERIAL" get-state
+ANDROID_SERIAL="$ARICHU_TEST_SERIAL" ./gradlew :app:connectedDebugAndroidTest
 ```
 
 Connected XML reports are under `app/build/outputs/androidTest-results/connected/`. Record the selected device/Android version and actual results. If no suitable test device is available, state that instrumentation was not run.

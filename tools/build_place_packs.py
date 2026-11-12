@@ -33,7 +33,7 @@ BASE = 'https://download.geofabrik.de/europe/'
 
 
 def fetch(url, dest):
-    req = urllib.request.Request(url, headers={'User-Agent': 'ariciu-place-packs/1 (+https://github.com/andreicosmin02/Ariciu)'})
+    req = urllib.request.Request(url, headers={'User-Agent': 'arichu-place-packs/1 (+https://github.com/andreicosmin02/Arichu)'})
     with urllib.request.urlopen(req, timeout=120) as r, open(dest, 'wb') as f:
         shutil.copyfileobj(r, f, 1 << 20)
         return r.geturl()
@@ -62,7 +62,7 @@ def bbox_of(d):
 def build(code, gid, name, out, work, py):
     pbf = work / f'{gid}.osm.pbf'
     final = fetch(f'{BASE}{gid}-latest.osm.pbf', pbf)
-    want = urllib.request.urlopen(urllib.request.Request(final + '.md5', headers={'User-Agent': 'ariciu-place-packs/1'}), timeout=60).read().split()[0].decode()
+    want = urllib.request.urlopen(urllib.request.Request(final + '.md5', headers={'User-Agent': 'arichu-place-packs/1'}), timeout=60).read().split()[0].decode()
     got = file_hash(pbf, 'md5')
     if want != got:
         raise RuntimeError(f'md5 mismatch for {gid}: {got} != {want}')
@@ -92,7 +92,7 @@ def build(code, gid, name, out, work, py):
 
 def write_tsv(index, path):
     """The app reads this flat file (no JSON library needed): code, name, file, bytes, sha256, rows, west, south, east, north, generated."""
-    lines = [f"# ariciu place packs v1 {index.get('generated', '')}"]
+    lines = [f"# arichu place packs v1 {index.get('generated', '')}"]
     for p in index['packs']:
         w, s, e, n = p['bbox']
         lines.append('\t'.join(map(str, [p['code'], p['name'], p['file'], p['bytes'], p['sha256'], p['rows'], w, s, e, n, p['generated']])))

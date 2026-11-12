@@ -1,19 +1,19 @@
-# Ariciu agent guide (on-demand)
+# Arichu agent guide (on-demand)
 
 > Moved out of AGENTS.md to cut always-loaded context. Read when product direction, workflow or communication rules matter. AGENTS.md holds the short authoritative constraints.
 
 ## Purpose
 
-Ariciu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Ariciu 1.1-rc4 adds owner-requested delayed Urgent re-alerts and temporarily retires Alarm from new choices, retaining legacy Alarm compatibility. The current priority is debugging and stabilization from real physical-phone use: reproduce reported problems, fix root causes, improve confusing UX, and prevent regressions while preserving working functionality.
+Arichu is an offline-first Android app for location-based reminders. Reminders contain a geographic point, radius, ENTER or EXIT transition, notification intensity, and repeat behavior. Arichu 1.1-rc4 adds owner-requested delayed Urgent re-alerts and temporarily retires Alarm from new choices, retaining legacy Alarm compatibility. The current priority is debugging and stabilization from real physical-phone use: reproduce reported problems, fix root causes, improve confusing UX, and prevent regressions while preserving working functionality.
 
 ## Authoritative baseline and distribution
 
-`master` is the authoritative baseline for **1.1-rc4 / code 5 / Room 5**. The owner-authorized consolidation and first GitHub **pre-release** are recorded in [docs/archive/GITHUB_RELEASE_RC4.md](archive/GITHUB_RELEASE_RC4.md). The downloadable APK retains debug signing; no Google Play publication or production key. Repository visibility is a separate owner decision and must not be changed as routine development. The eight original merged development branches were safely deleted after approval; create new work from master. Future merge/publication actions require session authorization. Apache-2.0 is owner-approved for Ariciu-owned material only; preserve the exclusions and upstream notices in LICENSE/NOTICE and docs/LICENSING.md. The historical v1.1-rc4 tag/APK is not rewritten by licensing.
+`master` is the authoritative baseline for **1.1-rc4 / code 5 / Room 5**. The owner-authorized consolidation and first GitHub **pre-release** are recorded in [docs/archive/GITHUB_RELEASE_RC4.md](archive/GITHUB_RELEASE_RC4.md). The downloadable APK retains debug signing; no Google Play publication or production key. Repository visibility is a separate owner decision and must not be changed as routine development. The eight original merged development branches were safely deleted after approval; create new work from master. Future merge/publication actions require session authorization. Apache-2.0 is owner-approved for Arichu-owned material only; preserve the exclusions and upstream notices in LICENSE/NOTICE and docs/LICENSING.md. The historical v1.1-rc4 tag/APK is not rewritten by licensing.
 
 ## Current product priority and visual direction
 
-- Current priority (2026-10-17): stabilize Ariciu 1.1-rc4 from physical-phone feedback; see docs/URGENT_RE_ALERTS.md and the historical docs/archive/PHONE_REVIEW_2.md. Feature completion was authorized on 2026-10-16 and produced the candidate; do not resume broad feature expansion by default. Prioritize reported bugs, notification/geofence reliability, confusing UX and focused regressions while preserving accessibility, offline-first operation and zero recurring cost.
-- Ariciu uses a dark-first charcoal/graphite identity with a restrained slate-blue accent; do not use green as the identity color, wallpaper-driven colors, playful decoration, gradients, or generic demo styling.
+- Current priority (2026-10-17): stabilize Arichu 1.1-rc4 from physical-phone feedback; see docs/URGENT_RE_ALERTS.md and the historical docs/archive/PHONE_REVIEW_2.md. Feature completion was authorized on 2026-10-16 and produced the candidate; do not resume broad feature expansion by default. Prioritize reported bugs, notification/geofence reliability, confusing UX and focused regressions while preserving accessibility, offline-first operation and zero recurring cost.
+- Arichu uses a dark-first charcoal/graphite identity with a restrained slate-blue accent; do not use green as the identity color, wallpaper-driven colors, playful decoration, gradients, or generic demo styling.
 - Support locally persisted System / Light / Dark appearance. Keep light mode equally usable and dark mode carefully designed.
 - Primary navigation is Create / Reminders / Settings. Keep the map central to creation, choices explicit, and delivery diagnostics in Settings or contextual help.
 - Prioritize clear language, readable contrast, large labeled controls, scalable text, and predictable interactions for older or less technical users. Validate real screenshots and larger text, not only previews.

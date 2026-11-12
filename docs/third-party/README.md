@@ -1,6 +1,6 @@
 # Third-party companion notices
 
-These are distribution documents for the versions used by the existing **1.1-rc4 debug testing APK**. They supplement the preserved [bundled map notices](../../app/src/main/assets/map/LICENSE-openfreemap.md), [style licences](../../app/src/main/assets/map/LICENSE-light-style.md) and [catalogue notice](../../app/src/main/assets/places/NOTICE.md). They do not relicense third-party material under Ariciu’s project licence.
+These are distribution documents for the versions used by the existing **1.1-rc4 debug testing APK**. They supplement the preserved [bundled map notices](../../app/src/main/assets/map/LICENSE-openfreemap.md), [style licences](../../app/src/main/assets/map/LICENSE-light-style.md) and [catalogue notice](../../app/src/main/assets/places/NOTICE.md). They do not relicense third-party material under Arichu’s project licence.
 
 ## Full texts
 

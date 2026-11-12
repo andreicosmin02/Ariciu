@@ -1,6 +1,6 @@
 # Stabilization audit and known boundaries
 
-Source audit **2026-10-17**, baseline app commit `011746c` / Ariciu 1.1-rc1. Documentation only; no production fixes made. This section records the pre-review rc1 audit. The subsequent real-phone review and rc2 dispositions are in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md); post-fix phone verification is pending. Stored automated results are green; a source-derived risk below is **not** a reproduced critical defect.
+Source audit **2026-10-17**, baseline app commit `011746c` / Arichu 1.1-rc1. Documentation only; no production fixes made. This section records the pre-review rc1 audit. The subsequent real-phone review and rc2 dispositions are in [PHONE_REVIEW_1.md](PHONE_REVIEW_1.md); post-fix phone verification is pending. Stored automated results are green; a source-derived risk below is **not** a reproduced critical defect.
 
 ## Established implementation/platform limits
 

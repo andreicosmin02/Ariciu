@@ -1,6 +1,6 @@
 # Real-phone debugging and stabilization
 
-Updated 2026-10-17 for Ariciu 1.1-rc4. Current owner-directed Urgent re-alert policy and Alarm retirement: [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md). Start with [handoff](archive/CODEX_HANDOFF.md), [status](PROJECT_STATUS.md) and [audit/limits](archive/STABILIZATION_AUDIT.md). The first owner phone review and its implemented rc2 fixes are recorded in [PHONE_REVIEW_1.md](archive/PHONE_REVIEW_1.md). The second review and limited actual rc2 Samsung swipe verification are in [PHONE_REVIEW_2.md](archive/PHONE_REVIEW_2.md); rc3 phone retest is pending. Do not manufacture a bug list from hypotheses.
+Updated 2026-10-17 for Arichu 1.1-rc4. Current owner-directed Urgent re-alert policy and Alarm retirement: [URGENT_RE_ALERTS.md](URGENT_RE_ALERTS.md). Start with [handoff](archive/CODEX_HANDOFF.md), [status](PROJECT_STATUS.md) and [audit/limits](archive/STABILIZATION_AUDIT.md). The first owner phone review and its implemented rc2 fixes are recorded in [PHONE_REVIEW_1.md](archive/PHONE_REVIEW_1.md). The second review and limited actual rc2 Samsung swipe verification are in [PHONE_REVIEW_2.md](archive/PHONE_REVIEW_2.md); rc3 phone retest is pending. Do not manufacture a bug list from hypotheses.
 
 ## Workflow
 
@@ -33,15 +33,15 @@ Use SDK adb on PATH and explicitly select the authorized test device. Replace th
 git status --short --branch
 git log -8 --oneline
 adb devices -l
-export ARICIU_TEST_SERIAL="YOUR_TEST_DEVICE_SERIAL"
-adb -s "$ARICIU_TEST_SERIAL" shell dumpsys package ro.andrei.ariciu
-adb -s "$ARICIU_TEST_SERIAL" shell cmd appops get ro.andrei.ariciu
-adb -s "$ARICIU_TEST_SERIAL" logcat -d -s AriciuDelivery:V AndroidRuntime:E
-adb -s "$ARICIU_TEST_SERIAL" shell dumpsys notification
-adb -s "$ARICIU_TEST_SERIAL" shell dumpsys jobscheduler
+export ARICHU_TEST_SERIAL="YOUR_TEST_DEVICE_SERIAL"
+adb -s "$ARICHU_TEST_SERIAL" shell dumpsys package ro.andrei.arichu
+adb -s "$ARICHU_TEST_SERIAL" shell cmd appops get ro.andrei.arichu
+adb -s "$ARICHU_TEST_SERIAL" logcat -d -s ArichuDelivery:V AndroidRuntime:E
+adb -s "$ARICHU_TEST_SERIAL" shell dumpsys notification
+adb -s "$ARICHU_TEST_SERIAL" shell dumpsys jobscheduler
 ```
 
-`AriciuDelivery` logs enqueue/worker failures, not every event. There is no dedicated debug export/event timeline. Dumps/logs can contain unrelated/private data: inspect locally and retain only a redacted relevant excerpt, never raw databases/signing keys/private coordinates in Git. Android Studio Database Inspector can inspect a debug process; raw `.db` copies can miss WAL transactions. Do not mutate the user's Room data for debugging.
+`ArichuDelivery` logs enqueue/worker failures, not every event. There is no dedicated debug export/event timeline. Dumps/logs can contain unrelated/private data: inspect locally and retain only a redacted relevant excerpt, never raw databases/signing keys/private coordinates in Git. Android Studio Database Inspector can inspect a debug process; raw `.db` copies can miss WAL transactions. Do not mutate the user's Room data for debugging.
 
 Inspect reminder generation/phase/position/occurrence, notificationVisible/Pending, quiet/snoozeUntilMs, registration/error, chain per-store state and `registered_geofences`. The ledger describes intended/cleanup identity, not proof of live GMS registration. WorkManager/Room/platform side effects are separate commits.
 
@@ -51,7 +51,7 @@ Inspect reminder generation/phase/position/occurrence, notificationVisible/Pendi
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:lintDebug :app:assembleDebug
 # With a deliberately chosen emulator/test device:
-ANDROID_SERIAL="$ARICIU_TEST_SERIAL" ./gradlew :app:connectedDebugAndroidTest
+ANDROID_SERIAL="$ARICHU_TEST_SERIAL" ./gradlew :app:connectedDebugAndroidTest
 ```
 
 Do not run app-data-writing instrumentation on the owner's daily-use phone without evaluating the fixtures. Use disposable data for kill/reboot/force-stop, clock changes and migrations. Force stop differs from ordinary process death and can suppress work until reopening.
@@ -60,6 +60,6 @@ Real geofence tests must cross well beyond a sensible 200–500m starting radius
 
 ## Issue record
 
-Record: title/date/timezone; expected/actual; steps/frequency; device/build/settings; reminder scenario/status; reproduction evidence; confirmed root cause; fix/test commit; executed checks; phone retest result and remaining uncertainty. A fuller copyable template is in the [knowledge base](<obsidian-export/Ariciu/Ariciu - Phone Issue Template.md>).
+Record: title/date/timezone; expected/actual; steps/frequency; device/build/settings; reminder scenario/status; reproduction evidence; confirmed root cause; fix/test commit; executed checks; phone retest result and remaining uncertainty. A fuller copyable template is in the [knowledge base](<obsidian-export/Arichu/Arichu - Phone Issue Template.md>).
 
 No new external service, dependency cost, broad redesign or coverage expansion is implied by a bug report. Recheck current official platform/provider rules before changing sensitive behavior.

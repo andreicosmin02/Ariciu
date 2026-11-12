@@ -1,6 +1,6 @@
 ---
 name: android-verification
-description: Verify an Ariciu code, test, manifest, resource or Gradle change before declaring it done, or diagnose a failing build/test.
+description: Verify an Arichu code, test, manifest, resource or Gradle change before declaring it done, or diagnose a failing build/test.
 ---
 
 1. `git diff --check`, `git status --short`, review the diff for broad edits, renames, dependency bumps, secrets.

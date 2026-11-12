@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    namespace = "ro.andrei.ariciu"
+    namespace = "ro.andrei.arichu"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "ro.andrei.ariciu"
+        applicationId = "ro.andrei.arichu"
         minSdk = 26
         targetSdk = 37
         versionCode = 6
